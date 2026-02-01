@@ -21,7 +21,12 @@ export function Header() {
           </div>
           <div>
             <h1 className="text-white font-bold text-lg glow-text">Solar System</h1>
-            <p className="text-white/50 text-xs">Interactive 3D Explorer</p>
+            <p className="text-white/50 text-xs flex items-center gap-2">
+              Interactive 3D Explorer
+              {import.meta.env.VITE_APP_VERSION && (
+                <span className="text-white/30">v{import.meta.env.VITE_APP_VERSION}</span>
+              )}
+            </p>
           </div>
         </div>
 
@@ -83,7 +88,8 @@ export function Header() {
                     Follow Mode
                   </h4>
                   <p className="pl-8 text-white/60">
-                    Enable "Follow Object" to keep the camera focused on the selected planet, satellite, or moon as it orbits.
+                    Enable "Follow Object" to keep the camera focused on the selected planet,
+                    satellite, or moon as it orbits.
                   </p>
                 </div>
               </div>

@@ -1,0 +1,299 @@
+name: Deploy Solar System to Vultr
+
+on:
+  release:
+    types: [published] # Auto-deploy on release
+  workflow_dispatch: # Manual trigger from GitHub UI
+
+env:
+  NODE_VERSION: "20"
+  APP_NAME: "solar-system"
+  APP_DIR: "/var/www/ronggur.com/solar-system/html"
+  RELEASES_DIR: "/var/www/ronggur.com/solar-system/html/releases"
+  LOGS_DIR: "/var/www/ronggur.com/solar-system/html/logs"
+
+jobs:
+  # Job 1: Lint
+  lint:
+    name: 🔍 Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run ESLint
+        run: npm run lint
+
+  # Job 2: Build
+  build:
+    name: 🏗️ Build Solar System
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags for version detection
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📌 Extract version from release tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ] && [ -n "${{ github.event.release.tag_name }}" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+          fi
+          VERSION=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📌 Extracted version: $VERSION"
+
+      - name: 🏗️ Build Vite
+        run: npm run build
+        env:
+          NODE_ENV: production
+          VITE_APP_VERSION: ${{ steps.version.outputs.version }}
+
+      - name: 📦 Create deployment archive
+        run: |
+          echo "📂 Files to archive:"
+          ls -la dist/
+
+          tar -czf deploy.tar.gz dist/
+
+          echo "📦 Archive created:"
+          ls -lh deploy.tar.gz
+          echo "📋 Archive contents:"
+          tar -tzf deploy.tar.gz | head -20
+
+      - name: 💾 Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-archive
+          path: deploy.tar.gz
+          retention-days: 7
+
+  # Job 3: Deploy
+  deploy:
+    name: 🚀 Deploy to Vultr
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+
+    steps:
+      - name: 📥 Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deploy-archive
+
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 📤 Upload to Vultr
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            -P ${{ secrets.SSH_PORT || '22' }} \
+            deploy.tar.gz \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/deploy_solar-system_${{ github.run_number }}.tar.gz
+
+      - name: 🚀 Deploy on server
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -p ${{ secrets.SSH_PORT || '22' }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+            set -e
+
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            RELEASE_DIR="${{ env.RELEASES_DIR }}/$TIMESTAMP"
+            APP_DIR="${{ env.APP_DIR }}"
+            ARCHIVE="/tmp/deploy_solar-system_${{ github.run_number }}.tar.gz"
+
+            echo "📦 Deploying to: $RELEASE_DIR"
+
+            if [ -d "$RELEASE_DIR" ]; then
+              rm -rf "$RELEASE_DIR"
+            fi
+            mkdir -p $RELEASE_DIR
+
+            TEMP_EXTRACT_DIR=$(mktemp -d)
+            echo "📂 Extracting archive..."
+            tar -xzf $ARCHIVE -C $TEMP_EXTRACT_DIR
+
+            if [ ! -d "$TEMP_EXTRACT_DIR/dist" ]; then
+              echo "❌ Error: Archive extraction failed - dist directory not found"
+              rm -rf $TEMP_EXTRACT_DIR
+              exit 1
+            fi
+
+            echo "📦 Moving files to release directory..."
+            mv $TEMP_EXTRACT_DIR/dist/* $RELEASE_DIR/
+            rm -rf $TEMP_EXTRACT_DIR
+
+            mkdir -p ${{ env.RELEASES_DIR }}
+            mkdir -p ${{ env.LOGS_DIR }}
+            mkdir -p $APP_DIR
+
+            if [ -L "$APP_DIR/current" ]; then
+              CURRENT_RELEASE=$(readlink -f $APP_DIR/current)
+              if [ -d "$CURRENT_RELEASE" ]; then
+                BACKUP_DIR="$APP_DIR/backup_$(date +%Y%m%d_%H%M%S)"
+                echo "💾 Backing up current release to: $BACKUP_DIR"
+                mkdir -p $BACKUP_DIR
+                cp -al $CURRENT_RELEASE/* $BACKUP_DIR/ 2>/dev/null || true
+              fi
+            fi
+
+            if [ ! "$(ls -A $RELEASE_DIR)" ]; then
+              echo "❌ Error: Release directory is empty"
+              exit 1
+            fi
+
+            echo "🔐 Setting permissions..."
+            chown -R www-data:www-data "$RELEASE_DIR" 2>/dev/null || true
+            chmod -R 755 "$RELEASE_DIR"
+
+            echo "🔗 Updating symlink..."
+            ln -sfn $RELEASE_DIR $APP_DIR/current || {
+              echo "❌ Failed to update symlink"
+              exit 1
+            }
+
+            echo "🧹 Cleaning up..."
+            rm -f $ARCHIVE || true
+
+            set +e
+            if [ -d "${{ env.RELEASES_DIR }}" ]; then
+              cd "${{ env.RELEASES_DIR }}" 2>/dev/null
+              OLD_RELEASES=$(ls -t 2>/dev/null | tail -n +6 2>/dev/null)
+              if [ -n "$OLD_RELEASES" ]; then
+                echo "$OLD_RELEASES" | while read -r dir; do
+                  if [ -n "$dir" ] && [ -d "$dir" ]; then
+                    rm -rf "$dir" 2>/dev/null || true
+                  fi
+                done
+                echo "✅ Kept last 5 releases"
+              fi
+            fi
+
+            if [ -d "$APP_DIR" ]; then
+              cd "$APP_DIR" 2>/dev/null
+              OLD_BACKUPS=$(ls -dt backup_* 2>/dev/null | tail -n +4 2>/dev/null)
+              if [ -n "$OLD_BACKUPS" ]; then
+                echo "$OLD_BACKUPS" | while read -r dir; do
+                  if [ -n "$dir" ] && [ -d "$dir" ]; then
+                    rm -rf "$dir" 2>/dev/null || true
+                  fi
+                done
+                echo "✅ Kept last 3 backups"
+              fi
+            fi
+            set -e
+
+            echo "🎉 Deployment completed successfully!"
+            echo "📍 Release: $RELEASE_DIR"
+            echo "📍 Symlink: $APP_DIR/current -> $RELEASE_DIR"
+          ENDSSH
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f deploy.tar.gz
+
+  # Job 4: Verify
+  verify:
+    name: ✅ Verify Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: ✅ Check deployment
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          sleep 5
+
+          ssh -i ~/.ssh/deploy_key \
+            -p ${{ secrets.SSH_PORT || '22' }} \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+            'ls -la ${{ env.APP_DIR }}/current && echo "✅ Deployment symlink exists"'
+
+      - name: 🏥 Health check
+        if: vars.DEPLOY_URL != ''
+        run: |
+          echo "🔍 Performing health check..."
+          sleep 5
+
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 30 \
+            ${{ vars.DEPLOY_URL }} || echo "000")
+
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "301" ] || [ "$RESPONSE" = "302" ]; then
+            echo "✅ Health check passed! (Status: $RESPONSE)"
+          else
+            echo "⚠️  Health check returned status: $RESPONSE"
+          fi
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  # Job 5: Summary
+  summary:
+    name: 📊 Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [lint, build, deploy, verify]
+    if: always()
+
+    steps:
+      - name: 📊 Generate summary
+        run: |
+          echo "## 🎉 Solar System Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Production (Vultr VPS)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint: \`${{ needs.lint.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: \`${{ needs.build.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy: \`${{ needs.deploy.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify: \`${{ needs.verify.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Quick Commands" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Check deployment directory" >> $GITHUB_STEP_SUMMARY
+          echo "ssh user@server 'ls -la ${{ env.APP_DIR }}'" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# View releases" >> $GITHUB_STEP_SUMMARY
+          echo "ssh user@server 'ls -lt ${{ env.RELEASES_DIR }}'" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
