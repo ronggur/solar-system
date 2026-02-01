@@ -1,0 +1,136 @@
+/* App-specific styles */
+
+/* Canvas styling */
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure full coverage */
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Smooth transitions for UI elements */
+.planet-info-panel,
+.control-panel {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Custom range slider styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: rgba(255, 255, 255, 0.2);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #4A90D9;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  margin-top: -6px;
+  box-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type="range"]::-moz-range-track {
+  background: rgba(255, 255, 255, 0.2);
+  height: 4px;
+  border-radius: 2px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: #4A90D9;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
+}
+
+/* Switch styling override */
+[data-state="checked"] {
+  background-color: #4A90D9 !important;
+}
+
+/* Dialog backdrop */
+[data-state="open"] > [data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Loading animation enhancements */
+@keyframes loading-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.loading-bar {
+  animation: loading-pulse 1.5s ease-in-out infinite;
+}
+
+/* Planet label enhancements */
+.planet-label {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+/* Glow effects */
+.glow-box {
+  box-shadow: 
+    0 0 20px rgba(74, 144, 217, 0.2),
+    0 0 40px rgba(74, 144, 217, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.glow-text {
+  text-shadow: 
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .planet-info-panel {
+    width: calc(100vw - 48px);
+    max-width: 320px;
+  }
+  
+  .control-panel {
+    left: 12px;
+    bottom: 12px;
+  }
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

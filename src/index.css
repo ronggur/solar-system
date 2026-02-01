@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 50% 2%;
+    --foreground: 240 10% 98%;
+    --card: 240 50% 4%;
+    --card-foreground: 240 10% 98%;
+    --popover: 240 50% 4%;
+    --popover-foreground: 240 10% 98%;
+    --primary: 217 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 30% 10%;
+    --secondary-foreground: 240 10% 90%;
+    --muted: 240 20% 15%;
+    --muted-foreground: 240 10% 60%;
+    --accent: 280 70% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 20% 20%;
+    --input: 240 20% 15%;
+    --ring: 217 70% 50%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    overflow: hidden;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 255, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 255, 0.7);
+}
+
+/* Glow effects */
+.glow-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor;
+}
+
+.glow-box {
+  box-shadow: 0 0 20px rgba(100, 100, 255, 0.3), 0 0 40px rgba(100, 100, 255, 0.1);
+}
+
+/* Planet name hover effect */
+.planet-label {
+  transition: all 0.3s ease;
+}
+
+.planet-label:hover {
+  transform: scale(1.1);
+  text-shadow: 0 0 15px currentColor;
+}
+
+/* Loading animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.loading-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Orbit line animation */
+@keyframes orbit-dash {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.orbit-line {
+  stroke-dasharray: 5 5;
+  animation: orbit-dash 20s linear infinite;
+}
+
+/* Star twinkle */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.star-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}

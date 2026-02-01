@@ -1,0 +1,263 @@
+import type { SatelliteData } from '@/types';
+
+export const satellites: SatelliteData[] = [
+  {
+    id: 'iss',
+    name: 'ISS',
+    radius: 0.08,
+    parentPlanet: 'earth',
+    orbitDistance: 1.8,
+    orbitalSpeed: 15,
+    color: '#E0E0E0',
+    emissive: '#FFFFFF',
+    description: 'The International Space Station is the largest modular space station in low Earth orbit.',
+    launchDate: 'November 20, 1998',
+    operator: 'NASA / Roscosmos / ESA / JAXA / CSA',
+    facts: [
+      'Orbits Earth every 90 minutes at 28,000 km/h',
+      'Has been continuously occupied since November 2000',
+      'Travels 5 miles per second',
+      'Can be seen from Earth with the naked eye',
+      'Crew: 7 astronauts typically on board'
+    ],
+    type: 'space-station'
+  },
+  {
+    id: 'hubble',
+    name: 'Hubble Space Telescope',
+    radius: 0.06,
+    parentPlanet: 'earth',
+    orbitDistance: 2.2,
+    orbitalSpeed: 7.5,
+    color: '#C0C0C0',
+    emissive: '#A0A0A0',
+    description: 'Hubble has transformed our understanding of the universe with its stunning images.',
+    launchDate: 'April 24, 1990',
+    operator: 'NASA / ESA',
+    facts: [
+      'Has made over 1.5 million observations',
+      'Orbits at 540 km above Earth',
+      'Has discovered galaxies 13.4 billion light-years away',
+      'Named after astronomer Edwin Hubble',
+      'Has a 2.4-meter primary mirror'
+    ],
+    type: 'telescope'
+  },
+  {
+    id: 'jwst',
+    name: 'James Webb Space Telescope',
+    radius: 0.07,
+    parentPlanet: 'earth',
+    orbitDistance: 8,
+    orbitalSpeed: 0.5,
+    color: '#FFD700',
+    emissive: '#FFA500',
+    description: 'The most powerful space telescope ever built, observing in infrared.',
+    launchDate: 'December 25, 2021',
+    operator: 'NASA / ESA / CSA',
+    facts: [
+      'Operates at L2 Lagrange point, 1.5 million km from Earth',
+      'Primary mirror is 6.5 meters across',
+      'Observes in infrared to see through dust clouds',
+      'Can look back 13.5 billion years in time',
+      'Has a tennis court-sized sunshield'
+    ],
+    type: 'telescope'
+  },
+  {
+    id: 'gps',
+    name: 'GPS Constellation',
+    radius: 0.04,
+    parentPlanet: 'earth',
+    orbitDistance: 4,
+    orbitalSpeed: 2,
+    color: '#4169E1',
+    emissive: '#1E90FF',
+    description: 'The Global Positioning System is a satellite navigation system.',
+    launchDate: 'February 22, 1978 (first)',
+    operator: 'U.S. Space Force',
+    facts: [
+      '31 operational satellites in 6 orbital planes',
+      'Orbit at 20,200 km altitude',
+      'Each satellite circles Earth twice daily',
+      'Provides positioning to billions of devices',
+      'Accuracy within 3-5 meters for civilian use'
+    ],
+    type: 'satellite'
+  },
+  {
+    id: 'starlink',
+    name: 'Starlink Constellation',
+    radius: 0.03,
+    parentPlanet: 'earth',
+    orbitDistance: 2.8,
+    orbitalSpeed: 4,
+    color: '#4A90D9',
+    emissive: '#2E5C8A',
+    description: 'SpaceX\'s satellite internet constellation providing global broadband.',
+    launchDate: 'May 23, 2019 (first batch)',
+    operator: 'SpaceX',
+    facts: [
+      'Over 5,000 satellites in orbit',
+      'Operates at 550 km altitude',
+      'Provides internet to remote areas worldwide',
+      'Plans for up to 42,000 satellites',
+      'Can be seen as "trains" of lights in the night sky'
+    ],
+    type: 'satellite'
+  },
+  {
+    id: 'voyager1',
+    name: 'Voyager 1',
+    radius: 0.05,
+    parentPlanet: 'earth',
+    orbitDistance: 150,
+    orbitalSpeed: 0.001,
+    color: '#C0C0C0',
+    emissive: '#808080',
+    description: 'The most distant human-made object from Earth, now in interstellar space.',
+    launchDate: 'September 5, 1977',
+    operator: 'NASA',
+    facts: [
+      'Over 24 billion km from Earth',
+      'Entered interstellar space in 2012',
+      'Still transmitting data after 46+ years',
+      'Carries the Golden Record with Earth sounds',
+      'Travels at 17 km/s (61,000 km/h)'
+    ],
+    type: 'probe'
+  },
+  {
+    id: 'voyager2',
+    name: 'Voyager 2',
+    radius: 0.05,
+    parentPlanet: 'earth',
+    orbitDistance: 120,
+    orbitalSpeed: 0.001,
+    color: '#C0C0C0',
+    emissive: '#808080',
+    description: 'The only spacecraft to visit all four giant planets: Jupiter, Saturn, Uranus, and Neptune.',
+    launchDate: 'August 20, 1977',
+    operator: 'NASA',
+    facts: [
+      'Over 20 billion km from Earth',
+      'Visited all four gas giants',
+      'Entered interstellar space in 2018',
+      'Still operational and transmitting',
+      'Discovers new phenomena at the edge of our solar system'
+    ],
+    type: 'probe'
+  },
+  {
+    id: 'cassini',
+    name: 'Cassini Probe (Legacy)',
+    radius: 0.04,
+    parentPlanet: 'saturn',
+    orbitDistance: 5,
+    orbitalSpeed: 0.5,
+    color: '#DAA520',
+    emissive: '#B8860B',
+    description: 'The Cassini spacecraft explored Saturn and its moons for 13 years.',
+    launchDate: 'October 15, 1997',
+    operator: 'NASA / ESA / ASI',
+    facts: [
+      'Orbited Saturn from 2004 to 2017',
+      'Discovered water on Enceladus',
+      'Found methane lakes on Titan',
+      'Took over 450,000 images',
+      'Deliberately crashed into Saturn in 2017'
+    ],
+    type: 'probe'
+  },
+  {
+    id: 'juno',
+    name: 'Juno Probe',
+    radius: 0.04,
+    parentPlanet: 'jupiter',
+    orbitDistance: 6,
+    orbitalSpeed: 0.8,
+    color: '#CD853F',
+    emissive: '#8B4513',
+    description: 'Juno is studying Jupiter\'s composition, gravity field, and magnetic field.',
+    launchDate: 'August 5, 2011',
+    operator: 'NASA',
+    facts: [
+      'Entered Jupiter orbit on July 4, 2016',
+      'Orbits Jupiter every 53 days',
+      'Has solar panels spanning 20 meters',
+      'Studies Jupiter\'s deep atmosphere',
+      'First spacecraft to orbit Jupiter\'s poles'
+    ],
+    type: 'probe'
+  },
+  {
+    id: 'mars-reconnaissance',
+    name: 'Mars Reconnaissance Orbiter',
+    radius: 0.03,
+    parentPlanet: 'mars',
+    orbitDistance: 1.5,
+    orbitalSpeed: 3,
+    color: '#CD5C5C',
+    emissive: '#8B0000',
+    description: 'MRO studies Mars\' atmosphere and terrain from orbit.',
+    launchDate: 'August 12, 2005',
+    operator: 'NASA',
+    facts: [
+      'Has sent back more data than all other Mars missions combined',
+      'Operates at 250-316 km altitude',
+      'Has HiRISE camera with 25 cm resolution',
+      'Has been in orbit since 2006',
+      'Acts as a communication relay for surface missions'
+    ],
+    type: 'probe'
+  },
+  {
+    id: 'tianhe',
+    name: 'Tiangong Space Station',
+    radius: 0.07,
+    parentPlanet: 'earth',
+    orbitDistance: 1.9,
+    orbitalSpeed: 14,
+    color: '#FF4500',
+    emissive: '#FF6347',
+    description: 'China\'s modular space station in low Earth orbit.',
+    launchDate: 'April 29, 2021',
+    operator: 'CNSA (China)',
+    facts: [
+      'Consists of Tianhe core module plus two lab modules',
+      'Orbits at 340-450 km altitude',
+      'Can host 3 astronauts for long-term stays',
+      'China\'s first permanent space station',
+      'Represents China\'s ambitious space program'
+    ],
+    type: 'space-station'
+  },
+  {
+    id: 'gaia',
+    name: 'Gaia Observatory',
+    radius: 0.05,
+    parentPlanet: 'earth',
+    orbitDistance: 7,
+    orbitalSpeed: 0.6,
+    color: '#9370DB',
+    emissive: '#8A2BE2',
+    description: 'ESA\'s space observatory creating the most accurate 3D map of the Milky Way.',
+    launchDate: 'December 19, 2013',
+    operator: 'ESA',
+    facts: [
+      'Operates at L2 Lagrange point',
+      'Has cataloged nearly 2 billion stars',
+      'Measures stellar positions to micro-arcsecond precision',
+      'Has discovered thousands of exoplanets',
+      'Will observe for at least 10 years'
+    ],
+    type: 'telescope'
+  }
+];
+
+export const satelliteTypeColors: Record<string, { color: string; glow: string }> = {
+  'space-station': { color: '#FF6B6B', glow: '#FF4757' },
+  'telescope': { color: '#FFD93D', glow: '#FFA502' },
+  'satellite': { color: '#4ECDC4', glow: '#00D2D3' },
+  'probe': { color: '#A8A8A8', glow: '#747D8C' }
+};
