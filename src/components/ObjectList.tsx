@@ -7,9 +7,9 @@ import { moons } from '@/data/moons';
 import type { PlanetData, SatelliteData, MoonData, SunData } from '@/types';
 
 interface ObjectListProps {
-  onPlanetSelect: (planet: PlanetData) => void;
-  onSatelliteSelect: (satellite: SatelliteData) => void;
-  onMoonSelect: (moon: MoonData) => void;
+  onPlanetSelect: (planet: PlanetData | null) => void;
+  onSatelliteSelect: (satellite: SatelliteData | null) => void;
+  onMoonSelect: (moon: MoonData | null) => void;
   selectedPlanet: PlanetData | null;
   selectedSatellite: SatelliteData | null;
   selectedMoon: MoonData | null;

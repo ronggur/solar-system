@@ -425,11 +425,11 @@ export function SolarSystem({
 
     let targetObject: THREE.Object3D | null = null;
     if (selectedPlanet) {
-      targetObject = scene.getObjectByName(selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`);
+      targetObject = scene.getObjectByName(selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`) ?? null;
     } else if (selectedSatellite) {
-      targetObject = scene.getObjectByName(`satellite-${selectedSatellite.id}`);
+      targetObject = scene.getObjectByName(`satellite-${selectedSatellite.id}`) ?? null;
     } else if (selectedMoon) {
-      targetObject = scene.getObjectByName(`moon-${selectedMoon.id}`);
+      targetObject = scene.getObjectByName(`moon-${selectedMoon.id}`) ?? null;
     }
 
     if (targetObject) {
