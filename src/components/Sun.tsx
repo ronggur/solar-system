@@ -23,7 +23,7 @@ export function Sun({ onClick }: SunProps) {
   });
 
   return (
-    <group>
+    <group name="planet-sun">
       {/* Main sun sphere */}
       <mesh
         ref={sunRef}

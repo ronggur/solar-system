@@ -228,6 +228,7 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
       {/* Satellite group */}
       <group
         ref={satelliteRef}
+        name={`satellite-${data.id}`}
         position={[0, 0, 0]}
         onClick={handleClick}
         onPointerOver={() => {

@@ -83,7 +83,7 @@ export function Header() {
                     Follow Mode
                   </h4>
                   <p className="pl-8 text-white/60">
-                    Enable "Follow Planet" to keep the camera focused on a planet as it orbits.
+                    Enable "Follow Object" to keep the camera focused on the selected planet, satellite, or moon as it orbits.
                   </p>
                 </div>
               </div>

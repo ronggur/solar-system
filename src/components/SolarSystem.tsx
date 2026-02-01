@@ -106,10 +106,11 @@ export function SolarSystem({
     onPlanetSelect(null);
     onMoonSelect(null);
 
+    const distance = satellite.radius * 25;
     const targetPosition = new THREE.Vector3(
-      position.x + 3,
-      position.y + 2,
-      position.z + 3
+      position.x + distance,
+      position.y + distance * 0.5,
+      position.z + distance
     );
 
     gsap.to(camera.position, {
@@ -322,10 +323,11 @@ export function SolarSystem({
         const satellitePos = new THREE.Vector3(satelliteX, parentPos.y, satelliteZ);
 
         setIsTransitioning(true);
+        const distance = selectedSatellite.radius * 25;
         const targetPosition = new THREE.Vector3(
-          satellitePos.x + 3,
-          satellitePos.y + 2,
-          satellitePos.z + 3
+          satellitePos.x + distance,
+          satellitePos.y + distance * 0.5,
+          satellitePos.z + distance
         );
 
         gsap.to(camera.position, {
@@ -417,15 +419,23 @@ export function SolarSystem({
     }
   }, [selectedMoon?.id])
 
-  // Follow selected planet
+  // Follow selected object (planet, satellite, or moon)
   useFrame(() => {
-    if (cameraMode === 'follow' && selectedPlanet && selectedPlanet.id !== 'sun' && !isTransitioning) {
-      const planetGroup = scene.getObjectByName(`planet-${selectedPlanet.id}`);
-      if (planetGroup && controlsRef.current) {
-        const worldPos = new THREE.Vector3();
-        planetGroup.getWorldPosition(worldPos);
-        controlsRef.current.target.lerp(worldPos, 0.05);
-      }
+    if (cameraMode !== 'follow' || isTransitioning || !controlsRef.current) return;
+
+    let targetObject: THREE.Object3D | null = null;
+    if (selectedPlanet) {
+      targetObject = scene.getObjectByName(selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`);
+    } else if (selectedSatellite) {
+      targetObject = scene.getObjectByName(`satellite-${selectedSatellite.id}`);
+    } else if (selectedMoon) {
+      targetObject = scene.getObjectByName(`moon-${selectedMoon.id}`);
+    }
+
+    if (targetObject) {
+      const worldPos = new THREE.Vector3();
+      targetObject.getWorldPosition(worldPos);
+      controlsRef.current.target.lerp(worldPos, 0.05);
     }
   });
 

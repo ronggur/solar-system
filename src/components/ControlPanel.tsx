@@ -134,7 +134,7 @@ export function ControlPanel({
               <div className="flex items-center justify-between">
                 <span className="text-xs text-white/70 flex items-center gap-2">
                   <Orbit className="w-3 h-3" />
-                  Follow Planet
+                  Follow Object
                 </span>
                 <Switch
                   checked={cameraMode === 'follow'}

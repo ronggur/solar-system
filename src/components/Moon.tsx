@@ -90,6 +90,7 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
       {/* Moon group */}
       <group
         ref={moonRef}
+        name={`moon-${data.id}`}
         position={[0, 0, 0]}
         onClick={handleClick}
         onPointerOver={() => {
