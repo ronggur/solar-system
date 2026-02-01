@@ -39,6 +39,7 @@ Perfect for astronomy enthusiasts, students, educators, and anyone curious about
 ### How to Help Improve Accuracy
 
 If you find any inaccurate information, please:
+
 1. **Check INACCURACIES.md**: See detailed reporting guide
 2. **Open an Issue**: [Report inaccuracy](https://github.com/ronggur/solar-system/issues)
 3. **Provide Sources**: Include reliable references (NASA, IAU, ESA, etc.)
@@ -48,19 +49,10 @@ For detailed accuracy reporting guide, see [INACCURACIES.md](docs/INACCURACIES.m
 
 We welcome corrections from astronomy enthusiasts, scientists, and educators to help make this project more accurate!
 
-## 📸 Screenshots
-
-<!-- Add screenshots of your application here -->
-<div align="center">
-  <img src="https://via.placeholder.com/800x450?text=Solar+System+Overview" alt="Solar System Overview" width="800" />
-  <br>
-  <img src="https://via.placeholder.com/400x450?text=Planet+Info+Panel" alt="Planet Info Panel" width="400" />
-  <img src="https://via.placeholder.com/400x450?text=Moon+Info+Panel" alt="Moon Info Panel" width="400" />
-</div>
-
 ## Features
 
 ### 3D Visualization
+
 - **Realistic Solar System**: All 8 planets plus Pluto with accurate relative sizes and orbital distances
 - **Interactive Camera**: Freely rotate, zoom, and pan around the solar system
 - **Smooth Animations**: GSAP-powered camera transitions when selecting celestial objects
@@ -69,6 +61,7 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 - **Kuiper Belt**: Icy objects beyond Neptune with 400+ objects
 
 ### Celestial Bodies
+
 - **Planets**: All 8 planets from Mercury to Neptune with accurate orbital characteristics
 - **Dwarf Planets**: Pluto with its unique elliptical orbit and 17-degree inclination
 - **The Sun**: Central star with realistic glow effects
@@ -87,6 +80,7 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
   - Probes: Voyager 1 & 2, Cassini, Juno, Mars Reconnaissance Orbiter
 
 ### Interactive Controls
+
 - **Speed Control**: Adjust orbital speed from 0.1x to 10x
 - **Pause/Play**: Freeze or animate the solar system
 - **Orbit Visibility**: Toggle orbital paths on/off
@@ -97,7 +91,9 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 - **Search**: Search and filter objects by name, description, or parent planet
 
 ### Information Panels
+
 Each celestial body displays:
+
 - Detailed descriptions and overviews
 - Scientific facts and key characteristics
 - Physical properties (temperature, day length, year length, diameter)
@@ -120,6 +116,7 @@ For detailed technical information, see [TECHNICAL.md](docs/TECHNICAL.md)
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ (recommended: 20.x or later)
 - npm, yarn, or pnpm
 
@@ -170,13 +167,16 @@ For complete project structure and architecture, see [TECHNICAL.md](docs/TECHNIC
 ## Usage Guide
 
 ### Navigation
+
 - **Left Mouse + Drag**: Rotate camera around solar system
 - **Right Mouse + Drag**: Pan the camera
 - **Scroll Wheel**: Zoom in/out
 - **Click on Planet/Satellite**: View detailed information and zoom to object
 
 ### Control Panel
+
 Located in the bottom-left corner:
+
 - **Speed Slider**: Adjust orbital animation speed (0.1x - 10x)
 - **Pause/Play Button**: Freeze or resume orbital motion
 - **Show Orbits**: Toggle orbital path visibility
@@ -186,7 +186,9 @@ Located in the bottom-left corner:
 - **Reset View**: Return camera to default overview position
 
 ### Object List
+
 Located in the bottom-left above the control panel:
+
 - **Search**: Search all objects by name, description, or parent planet
 - **Filter by Type**: Toggle visibility of object types in the list:
   - Planets (blue): Sun and all planets
@@ -195,7 +197,9 @@ Located in the bottom-left above the control panel:
 - **Quick Navigation**: Click any object to zoom and view details
 
 ### Information Panels
+
 Click any celestial body to open its information panel showing:
+
 - Name and description
 - Key facts and scientific data
 - Physical characteristics (temperature, day length, year length, diameter)
@@ -227,6 +231,7 @@ Requires WebGL support. Mobile browsers are supported but may have reduced perfo
 ## ⚡ Performance
 
 The application is optimized for smooth 60fps performance:
+
 - Instanced rendering for 600+ belt objects
 - Efficient starfield with 5000+ stars
 - Hardware-accelerated camera animations
@@ -241,6 +246,7 @@ Contributions are welcome! We'd love your help improving this project.
 For complete contributing guidelines, see [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 Quick ways to contribute:
+
 - ⭐ [Star this repository](https://github.com/ronggur/solar-system)
 - 🐛 [Report bugs or suggest features](https://github.com/ronggur/solar-system/issues)
 - 📢 [Share it with others](https://github.com/ronggur/solar-system)
@@ -251,6 +257,7 @@ Quick ways to contribute:
 For detailed technical roadmap, see [TECHNICAL.md](docs/TECHNICAL.md).
 
 Planned features:
+
 - [ ] Planet surface textures and realistic terrain
 - [ ] Day/night cycle with proper lighting
 - [ ] Comet and asteroid tracking
@@ -266,11 +273,13 @@ Planned features:
 
 Both sizes and distances are scaled for visualization purposes:
 
-**Sizes**: 
+**Sizes**:
+
 - Terrestrial planets (Mercury, Venus, Earth, Mars) use relatively accurate size ratios
 - Gas giants (Jupiter, Saturn, Uranus, Neptune) are significantly compressed - shown at 2.5-4x their actual relative size to prevent them from dominating the view
 
 **Distances**:
+
 - Heavily compressed using a non-linear scale to fit all planets in one view
 - Example: In reality, Neptune is 30x farther from the Sun than Earth, but in this visualization it's only ~5.6x
 - This allows you to see the entire solar system at once
