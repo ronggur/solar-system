@@ -6,7 +6,7 @@
 
 An interactive 3D visualization of our solar system built with React, Three.js, and TypeScript. Explore planets, their natural moons, artificial satellites, and space probes in real-time 3D. Navigate through the cosmos, zoom into celestial bodies, and learn fascinating facts about our solar system.
 
-[![Demo](https://img.shields.io/badge/demo-online-brightgreen)](YOUR_DEMO_URL)
+[![Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://www.ronggur.com/solar-system/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ![Solar System Explorer](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react)
