@@ -27,6 +27,7 @@ interface SolarSystemProps {
   cameraMode: 'free' | 'follow';
   showSatellites: boolean;
   showMoons: boolean;
+  onCameraInteractionChange?: (interacting: boolean) => void;
 }
 
 export function SolarSystem({
@@ -42,11 +43,18 @@ export function SolarSystem({
   cameraMode,
   showSatellites,
   showMoons,
+  onCameraInteractionChange,
 }: SolarSystemProps) {
   const { camera, scene } = useThree();
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const controlsRef = useRef<OrbitControls>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isCameraInteracting, setIsCameraInteracting] = useState(false);
+
+  // Notify parent of camera interaction changes
+  useEffect(() => {
+    onCameraInteractionChange?.(isCameraInteracting);
+  }, [isCameraInteracting, onCameraInteractionChange]);
 
   // Initial camera position
   useEffect(() => {
@@ -62,112 +70,121 @@ export function SolarSystem({
   }, []);
 
   // Handle planet selection with camera animation
-  const handlePlanetClick = useCallback((planet: PlanetData, position: THREE.Vector3) => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    onPlanetSelect(planet);
-    onSatelliteSelect(null);
-    onMoonSelect(null);
+  const handlePlanetClick = useCallback(
+    (planet: PlanetData, position: THREE.Vector3) => {
+      if (isTransitioning) return;
 
-    const distance = planet.id === 'sun' ? 30 : planet.radius * 8;
-    const targetPosition = new THREE.Vector3(
-      position.x + distance,
-      position.y + distance * 0.5,
-      position.z + distance
-    );
+      setIsTransitioning(true);
+      onPlanetSelect(planet);
+      onSatelliteSelect(null);
+      onMoonSelect(null);
 
-    gsap.to(camera.position, {
-      x: targetPosition.x,
-      y: targetPosition.y,
-      z: targetPosition.z,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      onComplete: () => setIsTransitioning(false),
-    });
+      const distance = planet.id === 'sun' ? 30 : planet.radius * 8;
+      const targetPosition = new THREE.Vector3(
+        position.x + distance,
+        position.y + distance * 0.5,
+        position.z + distance
+      );
 
-    if (controlsRef.current) {
-      gsap.to(controlsRef.current.target, {
-        x: position.x,
-        y: position.y,
-        z: position.z,
+      gsap.to(camera.position, {
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
         duration: 1.5,
         ease: 'power2.inOut',
+        onComplete: () => setIsTransitioning(false),
       });
-    }
-  }, [camera, isTransitioning, onPlanetSelect, onSatelliteSelect, onMoonSelect]);
+
+      if (controlsRef.current) {
+        gsap.to(controlsRef.current.target, {
+          x: position.x,
+          y: position.y,
+          z: position.z,
+          duration: 1.5,
+          ease: 'power2.inOut',
+        });
+      }
+    },
+    [camera, isTransitioning, onPlanetSelect, onSatelliteSelect, onMoonSelect]
+  );
 
   // Handle satellite selection
-  const handleSatelliteClick = useCallback((satellite: SatelliteData, position: THREE.Vector3) => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    onSatelliteSelect(satellite);
-    onPlanetSelect(null);
-    onMoonSelect(null);
+  const handleSatelliteClick = useCallback(
+    (satellite: SatelliteData, position: THREE.Vector3) => {
+      if (isTransitioning) return;
 
-    const distance = satellite.radius * 25;
-    const targetPosition = new THREE.Vector3(
-      position.x + distance,
-      position.y + distance * 0.5,
-      position.z + distance
-    );
+      setIsTransitioning(true);
+      onSatelliteSelect(satellite);
+      onPlanetSelect(null);
+      onMoonSelect(null);
 
-    gsap.to(camera.position, {
-      x: targetPosition.x,
-      y: targetPosition.y,
-      z: targetPosition.z,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      onComplete: () => setIsTransitioning(false),
-    });
+      const distance = satellite.radius * 25;
+      const targetPosition = new THREE.Vector3(
+        position.x + distance,
+        position.y + distance * 0.5,
+        position.z + distance
+      );
 
-    if (controlsRef.current) {
-      gsap.to(controlsRef.current.target, {
-        x: position.x,
-        y: position.y,
-        z: position.z,
+      gsap.to(camera.position, {
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
         duration: 1.5,
         ease: 'power2.inOut',
+        onComplete: () => setIsTransitioning(false),
       });
-    }
-  }, [camera, isTransitioning, onSatelliteSelect, onPlanetSelect, onMoonSelect]);
+
+      if (controlsRef.current) {
+        gsap.to(controlsRef.current.target, {
+          x: position.x,
+          y: position.y,
+          z: position.z,
+          duration: 1.5,
+          ease: 'power2.inOut',
+        });
+      }
+    },
+    [camera, isTransitioning, onSatelliteSelect, onPlanetSelect, onMoonSelect]
+  );
 
   // Handle moon selection
-  const handleMoonClick = useCallback((moon: MoonData, position: THREE.Vector3) => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    onMoonSelect(moon);
-    onPlanetSelect(null);
-    onSatelliteSelect(null);
+  const handleMoonClick = useCallback(
+    (moon: MoonData, position: THREE.Vector3) => {
+      if (isTransitioning) return;
 
-    const distance = moon.radius * 10;
-    const targetPosition = new THREE.Vector3(
-      position.x + distance,
-      position.y + distance * 0.5,
-      position.z + distance
-    );
+      setIsTransitioning(true);
+      onMoonSelect(moon);
+      onPlanetSelect(null);
+      onSatelliteSelect(null);
 
-    gsap.to(camera.position, {
-      x: targetPosition.x,
-      y: targetPosition.y,
-      z: targetPosition.z,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      onComplete: () => setIsTransitioning(false),
-    });
+      const distance = moon.radius * 10;
+      const targetPosition = new THREE.Vector3(
+        position.x + distance,
+        position.y + distance * 0.5,
+        position.z + distance
+      );
 
-    if (controlsRef.current) {
-      gsap.to(controlsRef.current.target, {
-        x: position.x,
-        y: position.y,
-        z: position.z,
+      gsap.to(camera.position, {
+        x: targetPosition.x,
+        y: targetPosition.y,
+        z: targetPosition.z,
         duration: 1.5,
         ease: 'power2.inOut',
+        onComplete: () => setIsTransitioning(false),
       });
-    }
-  }, [camera, isTransitioning, onMoonSelect, onPlanetSelect, onSatelliteSelect]);
+
+      if (controlsRef.current) {
+        gsap.to(controlsRef.current.target, {
+          x: position.x,
+          y: position.y,
+          z: position.z,
+          duration: 1.5,
+          ease: 'power2.inOut',
+        });
+      }
+    },
+    [camera, isTransitioning, onMoonSelect, onPlanetSelect, onSatelliteSelect]
+  );
 
   // Handle sun click
   const handleSunClick = useCallback(() => {
@@ -201,7 +218,7 @@ export function SolarSystem({
   // Reset camera to overview
   const resetCamera = useCallback(() => {
     if (isTransitioning) return;
-    
+
     setIsTransitioning(true);
     onPlanetSelect(null);
     onSatelliteSelect(null);
@@ -253,49 +270,27 @@ export function SolarSystem({
         // Handle sun selection
         setTimeout(() => {
           handleSunClick();
-          setTimeout(() => { isAnimatingFromListRef.current = false; }, 1600);
+          setTimeout(() => {
+            isAnimatingFromListRef.current = false;
+          }, 1600);
         }, 100);
       } else {
         const planetGroup = scene.getObjectByName(`planet-${planetId}`);
         if (planetGroup && selectedPlanet) {
           const worldPos = new THREE.Vector3();
           planetGroup.getWorldPosition(worldPos);
-
-          const distance = selectedPlanet.radius * 8;
-          const targetPosition = new THREE.Vector3(
-            worldPos.x + distance,
-            worldPos.y + distance * 0.5,
-            worldPos.z + distance
-          );
-
-          gsap.to(camera.position, {
-            x: targetPosition.x,
-            y: targetPosition.y,
-            z: targetPosition.z,
-            duration: 1.5,
-            ease: 'power2.inOut',
-            onComplete: () => {
-              isAnimatingFromListRef.current = false;
-            },
-          });
-
-          if (controlsRef.current) {
-            gsap.to(controlsRef.current.target, {
-              x: worldPos.x,
-              y: worldPos.y,
-              z: worldPos.z,
-              duration: 1.5,
-              ease: 'power2.inOut',
-            });
-          }
+          handlePlanetClick(selectedPlanet, worldPos);
+          setTimeout(() => {
+            isAnimatingFromListRef.current = false;
+          }, 1600);
         } else {
           isAnimatingFromListRef.current = false;
         }
       }
     }
-  }, [selectedPlanet?.id, selectedPlanet?.name])
+  }, [selectedPlanet?.id, selectedPlanet?.name, scene, handlePlanetClick]);
 
-  // Handle satellite selection from ObjectList
+  // Handle satellite selection from ObjectList — same POV as direct click (use actual position from scene)
   const prevSelectedSatelliteIdRef = useRef<string | null>(null);
   const isAnimatingSatelliteFromListRef = useRef(false);
 
@@ -305,59 +300,25 @@ export function SolarSystem({
 
     const currentId = selectedSatellite.id;
 
-    // Only run if selection actually changed
     if (currentId && currentId !== prevSelectedSatelliteIdRef.current) {
       prevSelectedSatelliteIdRef.current = currentId;
       isAnimatingSatelliteFromListRef.current = true;
 
-      // Get parent planet position from scene
-      const planetGroup = scene.getObjectByName(`planet-${selectedSatellite.parentPlanet}`);
-      if (planetGroup) {
-        const parentPos = new THREE.Vector3();
-        planetGroup.getWorldPosition(parentPos);
-
-        // Calculate approximate satellite position
-        const angle = 0; // We'll use angle 0 for initial view
-        const satelliteX = parentPos.x + Math.cos(angle) * selectedSatellite.orbitDistance;
-        const satelliteZ = parentPos.z + Math.sin(angle) * selectedSatellite.orbitDistance;
-        const satellitePos = new THREE.Vector3(satelliteX, parentPos.y, satelliteZ);
-
-        setIsTransitioning(true);
-        const distance = selectedSatellite.radius * 25;
-        const targetPosition = new THREE.Vector3(
-          satellitePos.x + distance,
-          satellitePos.y + distance * 0.5,
-          satellitePos.z + distance
-        );
-
-        gsap.to(camera.position, {
-          x: targetPosition.x,
-          y: targetPosition.y,
-          z: targetPosition.z,
-          duration: 1.5,
-          ease: 'power2.inOut',
-          onComplete: () => {
-            setIsTransitioning(false);
-            isAnimatingSatelliteFromListRef.current = false;
-          },
-        });
-
-        if (controlsRef.current) {
-          gsap.to(controlsRef.current.target, {
-            x: satellitePos.x,
-            y: satellitePos.y,
-            z: satellitePos.z,
-            duration: 1.5,
-            ease: 'power2.inOut',
-          });
-        }
+      const satelliteGroup = scene.getObjectByName(`satellite-${currentId}`);
+      if (satelliteGroup) {
+        const satellitePos = new THREE.Vector3();
+        satelliteGroup.getWorldPosition(satellitePos);
+        handleSatelliteClick(selectedSatellite, satellitePos);
+        setTimeout(() => {
+          isAnimatingSatelliteFromListRef.current = false;
+        }, 1600);
       } else {
         isAnimatingSatelliteFromListRef.current = false;
       }
     }
-  }, [selectedSatellite?.id])
+  }, [selectedSatellite?.id, scene, handleSatelliteClick]);
 
-  // Handle moon selection from ObjectList
+  // Handle moon selection from ObjectList — same POV as direct click (use actual position from scene)
   const prevSelectedMoonIdRef = useRef<string | null>(null);
   const isAnimatingMoonFromListRef = useRef(false);
 
@@ -367,57 +328,23 @@ export function SolarSystem({
 
     const currentId = selectedMoon.id;
 
-    // Only run if selection actually changed
     if (currentId && currentId !== prevSelectedMoonIdRef.current) {
       prevSelectedMoonIdRef.current = currentId;
       isAnimatingMoonFromListRef.current = true;
 
-      // Get parent planet position from scene
-      const planetGroup = scene.getObjectByName(`planet-${selectedMoon.parentPlanet}`);
-      if (planetGroup) {
-        const parentPos = new THREE.Vector3();
-        planetGroup.getWorldPosition(parentPos);
-
-        // Calculate approximate moon position
-        const angle = 0; // We'll use angle 0 for initial view
-        const moonX = parentPos.x + Math.cos(angle) * selectedMoon.orbitDistance;
-        const moonZ = parentPos.z + Math.sin(angle) * selectedMoon.orbitDistance;
-        const moonPos = new THREE.Vector3(moonX, parentPos.y, moonZ);
-
-        setIsTransitioning(true);
-        const distance = selectedMoon.radius * 10;
-        const targetPosition = new THREE.Vector3(
-          moonPos.x + distance,
-          moonPos.y + distance * 0.5,
-          moonPos.z + distance
-        );
-
-        gsap.to(camera.position, {
-          x: targetPosition.x,
-          y: targetPosition.y,
-          z: targetPosition.z,
-          duration: 1.5,
-          ease: 'power2.inOut',
-          onComplete: () => {
-            setIsTransitioning(false);
-            isAnimatingMoonFromListRef.current = false;
-          },
-        });
-
-        if (controlsRef.current) {
-          gsap.to(controlsRef.current.target, {
-            x: moonPos.x,
-            y: moonPos.y,
-            z: moonPos.z,
-            duration: 1.5,
-            ease: 'power2.inOut',
-          });
-        }
+      const moonGroup = scene.getObjectByName(`moon-${currentId}`);
+      if (moonGroup) {
+        const moonPos = new THREE.Vector3();
+        moonGroup.getWorldPosition(moonPos);
+        handleMoonClick(selectedMoon, moonPos);
+        setTimeout(() => {
+          isAnimatingMoonFromListRef.current = false;
+        }, 1600);
       } else {
         isAnimatingMoonFromListRef.current = false;
       }
     }
-  }, [selectedMoon?.id])
+  }, [selectedMoon?.id, scene, handleMoonClick]);
 
   // Follow selected object (planet, satellite, or moon)
   useFrame(() => {
@@ -425,7 +352,10 @@ export function SolarSystem({
 
     let targetObject: THREE.Object3D | null = null;
     if (selectedPlanet) {
-      targetObject = scene.getObjectByName(selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`) ?? null;
+      targetObject =
+        scene.getObjectByName(
+          selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`
+        ) ?? null;
     } else if (selectedSatellite) {
       targetObject = scene.getObjectByName(`satellite-${selectedSatellite.id}`) ?? null;
     } else if (selectedMoon) {
@@ -461,11 +391,12 @@ export function SolarSystem({
         minDistance={1}
         maxDistance={400}
         maxPolarAngle={Math.PI / 1.5}
+        onStart={() => setIsCameraInteracting(true)}
+        onEnd={() => setIsCameraInteracting(false)}
       />
 
-      {/* Lighting */}
-      <ambientLight intensity={0.1} />
-      <pointLight position={[0, 0, 0]} intensity={2} distance={300} decay={1} />
+      {/* Base ambient; minimal = very dark night side */}
+      <ambientLight intensity={0.02} />
 
       {/* Starfield */}
       <Starfield count={5000} radius={600} />
@@ -479,7 +410,7 @@ export function SolarSystem({
           <Planet
             data={planet}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused}
+            isPaused={isPaused || isCameraInteracting}
             onClick={handlePlanetClick}
             showOrbits={showOrbits}
           />
@@ -487,38 +418,40 @@ export function SolarSystem({
       ))}
 
       {/* Satellites */}
-      {showSatellites && satellites.map((satellite) => (
-        <Satellite
-          key={satellite.id}
-          data={satellite}
-          speedMultiplier={speedMultiplier}
-          isPaused={isPaused}
-          onClick={handleSatelliteClick}
-        />
-      ))}
+      {showSatellites &&
+        satellites.map((satellite) => (
+          <Satellite
+            key={satellite.id}
+            data={satellite}
+            speedMultiplier={speedMultiplier}
+            isPaused={isPaused || isCameraInteracting}
+            onClick={handleSatelliteClick}
+          />
+        ))}
 
       {/* Natural Moons */}
-      {showMoons && moons.map((moon) => (
-        <Moon
-          key={moon.id}
-          data={moon}
-          speedMultiplier={speedMultiplier}
-          isPaused={isPaused}
-          onClick={handleMoonClick}
-        />
-      ))}
+      {showMoons &&
+        moons.map((moon) => (
+          <Moon
+            key={moon.id}
+            data={moon}
+            speedMultiplier={speedMultiplier}
+            isPaused={isPaused || isCameraInteracting}
+            onClick={handleMoonClick}
+          />
+        ))}
 
       {/* Asteroid Belt */}
-      <AsteroidBelt />
+      <AsteroidBelt isPaused={isPaused || isCameraInteracting} />
 
       {/* Kuiper Belt */}
-      <KuiperBelt />
+      <KuiperBelt isPaused={isPaused || isCameraInteracting} />
     </>
   );
 }
 
 // Asteroid Belt Component
-function AsteroidBelt() {
+function AsteroidBelt({ isPaused }: { isPaused: boolean }) {
   const asteroidsRef = useRef<THREE.InstancedMesh>(null);
   const count = 200;
   const innerRadius = 42;
@@ -536,20 +469,12 @@ function AsteroidBelt() {
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
       const radius = innerRadius + Math.random() * (outerRadius - innerRadius);
-      
-      position.set(
-        Math.cos(angle) * radius,
-        (Math.random() - 0.5) * 2,
-        Math.sin(angle) * radius
-      );
-      
-      rotation.set(
-        Math.random() * Math.PI,
-        Math.random() * Math.PI,
-        Math.random() * Math.PI
-      );
+
+      position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 2, Math.sin(angle) * radius);
+
+      rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       quaternion.setFromEuler(rotation);
-      
+
       const s = 0.1 + Math.random() * 0.3;
       scale.set(s, s, s);
 
@@ -561,13 +486,13 @@ function AsteroidBelt() {
   }, []);
 
   useFrame((_, delta) => {
-    if (asteroidsRef.current) {
+    if (asteroidsRef.current && !isPaused) {
       asteroidsRef.current.rotation.y += delta * 0.02;
     }
   });
 
   return (
-    <instancedMesh ref={asteroidsRef} args={[undefined, undefined, count]}>
+    <instancedMesh ref={asteroidsRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <dodecahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
         color="#A89B8E"
@@ -581,10 +506,10 @@ function AsteroidBelt() {
 }
 
 // Kuiper Belt Component - icy objects beyond Neptune
-function KuiperBelt() {
+function KuiperBelt({ isPaused }: { isPaused: boolean }) {
   const kuiperRef = useRef<THREE.InstancedMesh>(null);
   const count = 400; // More objects than asteroid belt
-  const innerRadius = 155; // Beyond Neptune (140) 
+  const innerRadius = 155; // Beyond Neptune (140)
   const outerRadius = 220; // Extends well beyond Pluto (170)
 
   useEffect(() => {
@@ -599,21 +524,13 @@ function KuiperBelt() {
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2 + Math.random() * 0.8;
       const radius = innerRadius + Math.random() * (outerRadius - innerRadius);
-      
+
       // Kuiper belt has more vertical spread than asteroid belt
-      position.set(
-        Math.cos(angle) * radius,
-        (Math.random() - 0.5) * 8,
-        Math.sin(angle) * radius
-      );
-      
-      rotation.set(
-        Math.random() * Math.PI,
-        Math.random() * Math.PI,
-        Math.random() * Math.PI
-      );
+      position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 8, Math.sin(angle) * radius);
+
+      rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
       quaternion.setFromEuler(rotation);
-      
+
       // Varied sizes - some larger KBOs
       const s = 0.15 + Math.random() * 0.5;
       scale.set(s, s, s);
@@ -626,14 +543,14 @@ function KuiperBelt() {
   }, []);
 
   useFrame((_, delta) => {
-    if (kuiperRef.current) {
+    if (kuiperRef.current && !isPaused) {
       // Very slow rotation - outer solar system moves slowly
       kuiperRef.current.rotation.y += delta * 0.003;
     }
   });
 
   return (
-    <instancedMesh ref={kuiperRef} args={[undefined, undefined, count]}>
+    <instancedMesh ref={kuiperRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <icosahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
         color="#B8C4D0" // Icy blue-gray color

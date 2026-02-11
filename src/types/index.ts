@@ -8,6 +8,7 @@ export interface SunData {
   color: string;
   emissive: string;
   emissiveIntensity: number;
+  texture?: string;
   description: string;
   facts: string[];
   temperature?: string;
@@ -43,6 +44,7 @@ export interface MoonData {
   color: string;
   emissive: string;
   emissiveIntensity?: number;
+  texture?: string;
   description: string;
   facts: string[];
   diameter?: string;
@@ -64,6 +66,8 @@ export interface SatelliteData {
   operator: string;
   facts: string[];
   type: 'space-station' | 'telescope' | 'satellite' | 'probe';
+  /** URL to a real photo or illustration of the satellite (e.g. NASA, ESA, Wikimedia Commons) */
+  imageUrl?: string;
 }
 
 export interface CameraState {

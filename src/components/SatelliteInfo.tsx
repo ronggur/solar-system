@@ -5,6 +5,48 @@ import { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
 import { satelliteTypeColors } from '@/data/satellites';
 
+function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (!satellite.imageUrl) return null;
+
+  // In dev, Vite serves public at root, so use relative path (/satellites/...).
+  // In prod, base is set (/solar-system/), so prepend BASE_URL.
+  // Data stores paths without the base (e.g. /satellites/iss.jpg), so handle both cases.
+  const baseUrl = import.meta.env.BASE_URL || '';
+  const imageSrc = baseUrl ? `${baseUrl}${satellite.imageUrl}` : `/${satellite.imageUrl}`;
+
+  return (
+    <div className="relative w-full aspect-video bg-white/5 rounded-lg overflow-hidden border border-white/10">
+      {!loaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center text-white/40 text-xs">
+          Image unavailable
+        </div>
+      )}
+      <img
+        src={imageSrc}
+        alt={satellite.name}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded && !error ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={(e) => {
+          console.log('[SatelliteImage] Loaded:', satellite.name, imageSrc, e);
+          setLoaded(true);
+        }}
+        onError={(e) => {
+          console.error('[SatelliteImage] Error loading:', satellite.name, imageSrc, e);
+          setError(true);
+        }}
+        loading="lazy"
+      />
+    </div>
+  );
+}
+
 interface SatelliteInfoProps {
   satellite: SatelliteData | null;
   onClose: () => void;
@@ -21,9 +63,15 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
       gsap.fromTo(
         '.satellite-info-panel',
         { x: 400, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out', onComplete: () => {
-          isAnimatingRef.current = false;
-        }}
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          onComplete: () => {
+            isAnimatingRef.current = false;
+          },
+        }
       );
     } else if (!satellite) {
       gsap.to('.satellite-info-panel', {
@@ -44,13 +92,13 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
   const typeColors = satelliteTypeColors[satellite.type];
   const typeLabels: Record<string, string> = {
     'space-station': 'Space Station',
-    'telescope': 'Space Telescope',
-    'satellite': 'Satellite Constellation',
-    'probe': 'Space Probe'
+    telescope: 'Space Telescope',
+    satellite: 'Satellite Constellation',
+    probe: 'Space Probe',
   };
 
   return (
-    <div className="satellite-info-panel absolute top-6 right-6 z-50 w-80">
+    <div className="satellite-info-panel absolute top-6 right-6 z-[100] w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header */}
         <div
@@ -74,7 +122,9 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-1">
               <Rocket className="w-4 h-4" style={{ color: typeColors.color }} />
-              <span className="text-white/60 text-xs uppercase tracking-wider">{typeLabels[satellite.type]}</span>
+              <span className="text-white/60 text-xs uppercase tracking-wider">
+                {typeLabels[satellite.type]}
+              </span>
             </div>
             <h2
               className="text-xl font-bold text-white glow-text"
@@ -87,31 +137,36 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
 
         {/* Content */}
         <div className="p-4 space-y-4">
+          {/* Real photo / illustration */}
+          <SatelliteImage satellite={satellite} />
+
           {/* Description */}
           <p className="text-white/80 text-sm leading-relaxed">{satellite.description}</p>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-2">
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/5 rounded-lg p-2 border border-white/10">
               <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
                 <Calendar className="w-3 h-3" />
                 Launch Date
               </div>
-              <div className="text-white text-sm font-medium">{satellite.launchDate}</div>
+              <div className="text-white text-xs font-medium">{satellite.launchDate}</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="bg-white/5 rounded-lg p-2 border border-white/10">
               <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
                 <Building2 className="w-3 h-3" />
                 Operator
               </div>
-              <div className="text-white text-sm font-medium">{satellite.operator}</div>
+              <div className="text-white text-xs font-medium">{satellite.operator}</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="bg-white/5 rounded-lg p-2 border border-white/10 col-span-2">
               <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
                 <Orbit className="w-3 h-3" />
                 Orbiting
               </div>
-              <div className="text-white text-sm font-medium capitalize">{satellite.parentPlanet}</div>
+              <div className="text-white text-xs font-medium capitalize">
+                {satellite.parentPlanet}
+              </div>
             </div>
           </div>
 

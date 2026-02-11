@@ -10,7 +10,8 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 15,
     color: '#E0E0E0',
     emissive: '#FFFFFF',
-    description: 'The International Space Station is the largest modular space station in low Earth orbit.',
+    description:
+      'The International Space Station is the largest modular space station in low Earth orbit.',
     launchDate: 'November 20, 1998',
     operator: 'NASA / Roscosmos / ESA / JAXA / CSA',
     facts: [
@@ -18,9 +19,10 @@ export const satellites: SatelliteData[] = [
       'Has been continuously occupied since November 2000',
       'Travels 5 miles per second',
       'Can be seen from Earth with the naked eye',
-      'Crew: 7 astronauts typically on board'
+      'Crew: 7 astronauts typically on board',
     ],
-    type: 'space-station'
+    type: 'space-station',
+    imageUrl: 'satellites/iss.webp',
   },
   {
     id: 'hubble',
@@ -31,7 +33,8 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 7.5,
     color: '#C0C0C0',
     emissive: '#A0A0A0',
-    description: 'Hubble has transformed our understanding of the universe with its stunning images.',
+    description:
+      'Hubble has transformed our understanding of the universe with its stunning images.',
     launchDate: 'April 24, 1990',
     operator: 'NASA / ESA',
     facts: [
@@ -39,9 +42,10 @@ export const satellites: SatelliteData[] = [
       'Orbits at 540 km above Earth',
       'Has discovered galaxies 13.4 billion light-years away',
       'Named after astronomer Edwin Hubble',
-      'Has a 2.4-meter primary mirror'
+      'Has a 2.4-meter primary mirror',
     ],
-    type: 'telescope'
+    type: 'telescope',
+    imageUrl: 'satellites/hubble.webp',
   },
   {
     id: 'jwst',
@@ -60,9 +64,10 @@ export const satellites: SatelliteData[] = [
       'Primary mirror is 6.5 meters across',
       'Observes in infrared to see through dust clouds',
       'Can look back 13.5 billion years in time',
-      'Has a tennis court-sized sunshield'
+      'Has a tennis court-sized sunshield',
     ],
-    type: 'telescope'
+    type: 'telescope',
+    imageUrl: 'satellites/jwst.webp',
   },
   {
     id: 'gps',
@@ -81,9 +86,10 @@ export const satellites: SatelliteData[] = [
       'Orbit at 20,200 km altitude',
       'Each satellite circles Earth twice daily',
       'Provides positioning to billions of devices',
-      'Accuracy within 3-5 meters for civilian use'
+      'Accuracy within 3-5 meters for civilian use',
     ],
-    type: 'satellite'
+    type: 'satellite',
+    imageUrl: 'satellites/gps.jpg',
   },
   {
     id: 'starlink',
@@ -94,7 +100,7 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 4,
     color: '#4A90D9',
     emissive: '#2E5C8A',
-    description: 'SpaceX\'s satellite internet constellation providing global broadband.',
+    description: "SpaceX's satellite internet constellation providing global broadband.",
     launchDate: 'May 23, 2019 (first batch)',
     operator: 'SpaceX',
     facts: [
@@ -102,9 +108,10 @@ export const satellites: SatelliteData[] = [
       'Operates at 550 km altitude',
       'Provides internet to remote areas worldwide',
       'Plans for up to 42,000 satellites',
-      'Can be seen as "trains" of lights in the night sky'
+      'Can be seen as "trains" of lights in the night sky',
     ],
-    type: 'satellite'
+    type: 'satellite',
+    imageUrl: 'satellites/starlink.webp',
   },
   {
     id: 'voyager1',
@@ -123,9 +130,10 @@ export const satellites: SatelliteData[] = [
       'Entered interstellar space in 2012',
       'Still transmitting data after 46+ years',
       'Carries the Golden Record with Earth sounds',
-      'Travels at 17 km/s (61,000 km/h)'
+      'Travels at 17 km/s (61,000 km/h)',
     ],
-    type: 'probe'
+    type: 'probe',
+    imageUrl: 'satellites/voyager.webp',
   },
   {
     id: 'voyager2',
@@ -136,7 +144,8 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 0.001,
     color: '#C0C0C0',
     emissive: '#808080',
-    description: 'The only spacecraft to visit all four giant planets: Jupiter, Saturn, Uranus, and Neptune.',
+    description:
+      'The only spacecraft to visit all four giant planets: Jupiter, Saturn, Uranus, and Neptune.',
     launchDate: 'August 20, 1977',
     operator: 'NASA',
     facts: [
@@ -144,9 +153,10 @@ export const satellites: SatelliteData[] = [
       'Visited all four gas giants',
       'Entered interstellar space in 2018',
       'Still operational and transmitting',
-      'Discovers new phenomena at the edge of our solar system'
+      'Discovers new phenomena at the edge of our solar system',
     ],
-    type: 'probe'
+    type: 'probe',
+    imageUrl: 'satellites/voyager2.webp',
   },
   {
     id: 'cassini',
@@ -165,9 +175,10 @@ export const satellites: SatelliteData[] = [
       'Discovered water on Enceladus',
       'Found methane lakes on Titan',
       'Took over 450,000 images',
-      'Deliberately crashed into Saturn in 2017'
+      'Deliberately crashed into Saturn in 2017',
     ],
-    type: 'probe'
+    type: 'probe',
+    imageUrl: 'satellites/cassini.jpg',
   },
   {
     id: 'juno',
@@ -178,17 +189,18 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 0.8,
     color: '#CD853F',
     emissive: '#8B4513',
-    description: 'Juno is studying Jupiter\'s composition, gravity field, and magnetic field.',
+    description: "Juno is studying Jupiter's composition, gravity field, and magnetic field.",
     launchDate: 'August 5, 2011',
     operator: 'NASA',
     facts: [
       'Entered Jupiter orbit on July 4, 2016',
       'Orbits Jupiter every 53 days',
       'Has solar panels spanning 20 meters',
-      'Studies Jupiter\'s deep atmosphere',
-      'First spacecraft to orbit Jupiter\'s poles'
+      "Studies Jupiter's deep atmosphere",
+      "First spacecraft to orbit Jupiter's poles",
     ],
-    type: 'probe'
+    type: 'probe',
+    imageUrl: 'satellites/juno.jpg',
   },
   {
     id: 'mars-reconnaissance',
@@ -199,7 +211,7 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 3,
     color: '#CD5C5C',
     emissive: '#8B0000',
-    description: 'MRO studies Mars\' atmosphere and terrain from orbit.',
+    description: "MRO studies Mars' atmosphere and terrain from orbit.",
     launchDate: 'August 12, 2005',
     operator: 'NASA',
     facts: [
@@ -207,9 +219,10 @@ export const satellites: SatelliteData[] = [
       'Operates at 250-316 km altitude',
       'Has HiRISE camera with 25 cm resolution',
       'Has been in orbit since 2006',
-      'Acts as a communication relay for surface missions'
+      'Acts as a communication relay for surface missions',
     ],
-    type: 'probe'
+    type: 'probe',
+    imageUrl: 'satellites/mars-reconnaissance.jpg',
   },
   {
     id: 'tianhe',
@@ -220,17 +233,18 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 14,
     color: '#FF4500',
     emissive: '#FF6347',
-    description: 'China\'s modular space station in low Earth orbit.',
+    description: "China's modular space station in low Earth orbit.",
     launchDate: 'April 29, 2021',
     operator: 'CNSA (China)',
     facts: [
       'Consists of Tianhe core module plus two lab modules',
       'Orbits at 340-450 km altitude',
       'Can host 3 astronauts for long-term stays',
-      'China\'s first permanent space station',
-      'Represents China\'s ambitious space program'
+      "China's first permanent space station",
+      "Represents China's ambitious space program",
     ],
-    type: 'space-station'
+    type: 'space-station',
+    imageUrl: 'satellites/tianhe.jpg',
   },
   {
     id: 'gaia',
@@ -241,7 +255,7 @@ export const satellites: SatelliteData[] = [
     orbitalSpeed: 0.6,
     color: '#9370DB',
     emissive: '#8A2BE2',
-    description: 'ESA\'s space observatory creating the most accurate 3D map of the Milky Way.',
+    description: "ESA's space observatory creating the most accurate 3D map of the Milky Way.",
     launchDate: 'December 19, 2013',
     operator: 'ESA',
     facts: [
@@ -249,15 +263,16 @@ export const satellites: SatelliteData[] = [
       'Has cataloged nearly 2 billion stars',
       'Measures stellar positions to micro-arcsecond precision',
       'Has discovered thousands of exoplanets',
-      'Will observe for at least 10 years'
+      'Will observe for at least 10 years',
     ],
-    type: 'telescope'
-  }
+    type: 'telescope',
+    imageUrl: 'satellites/gaia.webp',
+  },
 ];
 
 export const satelliteTypeColors: Record<string, { color: string; glow: string }> = {
   'space-station': { color: '#FF6B6B', glow: '#FF4757' },
-  'telescope': { color: '#FFD93D', glow: '#FFA502' },
-  'satellite': { color: '#4ECDC4', glow: '#00D2D3' },
-  'probe': { color: '#A8A8A8', glow: '#747D8C' }
+  telescope: { color: '#FFD93D', glow: '#FFA502' },
+  satellite: { color: '#4ECDC4', glow: '#00D2D3' },
+  probe: { color: '#A8A8A8', glow: '#747D8C' },
 };

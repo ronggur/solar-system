@@ -20,9 +20,15 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
       gsap.fromTo(
         '.moon-info-panel',
         { x: 400, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out', onComplete: () => {
-          isAnimatingRef.current = false;
-        }}
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          onComplete: () => {
+            isAnimatingRef.current = false;
+          },
+        }
       );
     } else if (!moon) {
       gsap.to('.moon-info-panel', {
@@ -41,7 +47,7 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
   if (!isVisible || !moon) return null;
 
   return (
-    <div className="moon-info-panel absolute top-6 right-6 z-50 w-80">
+    <div className="moon-info-panel absolute top-6 right-6 z-[100] w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header with moon color */}
         <div
@@ -63,10 +69,7 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
             <X className="w-5 h-5" />
           </button>
           <div className="relative z-10">
-            <h2
-              className="text-2xl font-bold text-white glow-text"
-              style={{ color: moon.color }}
-            >
+            <h2 className="text-2xl font-bold text-white glow-text" style={{ color: moon.color }}>
               {moon.name}
             </h2>
             <p className="text-white/70 text-xs mt-1">Natural Satellite</p>

@@ -1,8 +1,49 @@
-import { useRef, useState, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useRef, useState, useMemo, Suspense } from 'react';
+import { useFrame, useThree, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { TextureLoader } from 'three';
 import type { MoonData } from '@/types';
 import { Html } from '@react-three/drei';
+
+// Animated glow mesh component
+function HoverGlowMesh({
+  hovered,
+  radius,
+  color,
+}: {
+  hovered: boolean;
+  radius: number;
+  color: string;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [pulsePhase, setPulsePhase] = useState(0);
+
+  useFrame((_, delta) => {
+    if (hovered) {
+      setPulsePhase((prev) => prev + delta * 3);
+      if (meshRef.current) {
+        const scale = 1.3 + Math.sin(pulsePhase) * 0.05;
+        meshRef.current.scale.setScalar(scale);
+      }
+    }
+  });
+
+  if (!hovered) return null;
+
+  return (
+    <mesh ref={meshRef} scale={1.3}>
+      <sphereGeometry args={[radius, 24, 24]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.25 + Math.sin(pulsePhase) * 0.1}
+        side={THREE.BackSide}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
 
 interface MoonProps {
   data: MoonData;
@@ -11,9 +52,72 @@ interface MoonProps {
   onClick: (moon: MoonData, position: THREE.Vector3) => void;
 }
 
+// Textured moon mesh (e.g., Earth's Moon)
+function TexturedMoonMesh({
+  data,
+  hovered,
+  meshRef,
+}: {
+  data: MoonData;
+  hovered: boolean;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+}) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const texturePath = `${baseUrl}${data.texture}`.replace(/\/\//g, '/');
+
+  const rawTexture = useLoader(TextureLoader, texturePath);
+
+  const processedTexture = useMemo(() => {
+    const t = rawTexture.clone();
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.needsUpdate = true;
+    return t;
+  }, [rawTexture]);
+
+  return (
+    <group>
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[data.radius, 32, 32]} />
+        <meshStandardMaterial map={processedTexture} roughness={0.8} metalness={0.1} />
+      </mesh>
+      {/* Animated hover glow effect */}
+      <HoverGlowMesh hovered={hovered} radius={data.radius} color={data.color} />
+    </group>
+  );
+}
+
+// Fallback colored moon mesh
+function ColoredMoonMesh({
+  data,
+  hovered,
+  meshRef,
+}: {
+  data: MoonData;
+  hovered: boolean;
+  meshRef: React.RefObject<THREE.Mesh | null>;
+}) {
+  return (
+    <group>
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[data.radius, 24, 24]} />
+        <meshStandardMaterial
+          color={data.color}
+          emissive={data.emissive}
+          emissiveIntensity={data.emissiveIntensity || 0.1}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+      {/* Animated hover glow effect */}
+      <HoverGlowMesh hovered={hovered} radius={data.radius} color={data.color} />
+    </group>
+  );
+}
+
 export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
   const { scene } = useThree();
   const moonRef = useRef<THREE.Group>(null);
+  const moonMeshRef = useRef<THREE.Mesh>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
   const [hovered, setHovered] = useState(false);
@@ -65,6 +169,11 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
         parentPosition.y + y,
         parentPosition.z + zInclined
       );
+
+      // Rotate moon on its axis
+      if (moonMeshRef.current && !isPaused) {
+        moonMeshRef.current.rotation.y += delta * 0.15 * speedMultiplier;
+      }
     }
   });
 
@@ -80,11 +189,18 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
     <group>
       {/* Orbit path around parent planet */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive object={new THREE.Line(orbitGeometry, new THREE.LineBasicMaterial({
-          color: data.color,
-          transparent: true,
-          opacity: 0.15,
-        }))} />
+        <primitive
+          object={
+            new THREE.Line(
+              orbitGeometry,
+              new THREE.LineBasicMaterial({
+                color: data.color,
+                transparent: true,
+                opacity: 0.15,
+              })
+            )
+          }
+        />
       </group>
 
       {/* Moon group */}
@@ -102,17 +218,16 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
           document.body.style.cursor = 'auto';
         }}
       >
-        {/* Moon sphere */}
-        <mesh scale={hovered ? 1.3 : 1}>
-          <sphereGeometry args={[data.radius, 24, 24]} />
-          <meshStandardMaterial
-            color={data.color}
-            emissive={data.emissive}
-            emissiveIntensity={data.emissiveIntensity || 0.1}
-            roughness={0.8}
-            metalness={0.1}
-          />
-        </mesh>
+        {/* Moon sphere - textured or colored */}
+        {data.texture ? (
+          <Suspense
+            fallback={<ColoredMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />}
+          >
+            <TexturedMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />
+          </Suspense>
+        ) : (
+          <ColoredMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />
+        )}
 
         {/* Subtle glow */}
         <mesh scale={1.2}>
@@ -128,14 +243,15 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
         </mesh>
 
         {/* Label */}
-        <Html distanceFactor={8}>
+        <Html>
           <div
             className={`text-white text-[9px] font-medium whitespace-nowrap transition-all duration-300 ${
-              hovered ? 'opacity-100 scale-110' : 'opacity-40 scale-100'
+              hovered ? 'opacity-100' : 'opacity-40'
             }`}
             style={{
               textShadow: `0 0 6px ${data.color}`,
               transform: 'translate(-50%, -150%)',
+              pointerEvents: 'none',
             }}
           >
             {data.name}

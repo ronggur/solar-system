@@ -20,9 +20,15 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
       gsap.fromTo(
         '.planet-info-panel',
         { x: 400, opacity: 0 },
-        { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out', onComplete: () => {
-          isAnimatingRef.current = false;
-        }}
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.5,
+          ease: 'power2.out',
+          onComplete: () => {
+            isAnimatingRef.current = false;
+          },
+        }
       );
     } else if (!planet) {
       gsap.to('.planet-info-panel', {
@@ -43,7 +49,7 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
   const isSun = planet.id === 'sun';
 
   return (
-    <div className="planet-info-panel absolute top-6 right-6 z-50 w-80">
+    <div className="planet-info-panel absolute top-6 right-6 z-[100] w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header with planet color */}
         <div
@@ -65,10 +71,7 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
             <X className="w-5 h-5" />
           </button>
           <div className="relative z-10">
-            <h2
-              className="text-2xl font-bold text-white glow-text"
-              style={{ color: planet.color }}
-            >
+            <h2 className="text-2xl font-bold text-white glow-text" style={{ color: planet.color }}>
               {planet.name}
             </h2>
             <p className="text-white/70 text-xs mt-1">{isSun ? 'Star' : 'Planet'}</p>
@@ -124,7 +127,9 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
                   <Thermometer className="w-3 h-3" />
                   Temperature
                 </div>
-                <div className="text-white text-sm font-medium">{(planet as PlanetData & { temperature?: string }).temperature}</div>
+                <div className="text-white text-sm font-medium">
+                  {(planet as PlanetData & { temperature?: string }).temperature}
+                </div>
               </div>
             )}
           </div>

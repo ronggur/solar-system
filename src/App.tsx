@@ -22,6 +22,7 @@ function App() {
   const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
   const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
   const [selectedMoon, setSelectedMoon] = useState<MoonData | null>(null);
+  const [isCameraInteracting, setIsCameraInteracting] = useState(false);
 
   const handleReset = useCallback(() => {
     window.resetSolarSystemCamera?.();
@@ -53,6 +54,10 @@ function App() {
     setSelectedMoon(null);
     handleReset();
   }, [handleReset]);
+
+  const handleCameraInteractionChange = useCallback((interacting: boolean) => {
+    setIsCameraInteracting(interacting);
+  }, []);
 
   return (
     <div className="relative w-screen h-screen bg-black overflow-hidden">
@@ -87,6 +92,7 @@ function App() {
             cameraMode={cameraMode}
             showSatellites={showSatellites}
             showMoons={showMoons}
+            onCameraInteractionChange={handleCameraInteractionChange}
           />
         </Suspense>
       </Canvas>
@@ -124,7 +130,7 @@ function App() {
       <ControlPanel
         speedMultiplier={speedMultiplier}
         setSpeedMultiplier={setSpeedMultiplier}
-        isPaused={isPaused}
+        isPaused={isPaused || isCameraInteracting}
         setIsPaused={setIsPaused}
         showOrbits={showOrbits}
         setShowOrbits={setShowOrbits}
@@ -151,7 +157,8 @@ function App() {
         <div className="absolute bottom-6 right-6 z-40">
           <div className="bg-black/50 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3">
             <p className="text-white/60 text-xs">
-              <span className="text-blue-400 font-medium">Tip:</span> Click on planets or satellites to explore
+              <span className="text-blue-400 font-medium">Tip:</span> Click on planets or satellites
+              to explore
             </p>
           </div>
         </div>

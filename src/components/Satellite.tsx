@@ -5,6 +5,45 @@ import type { SatelliteData } from '@/types';
 import { Html } from '@react-three/drei';
 import { satelliteTypeColors } from '@/data/satellites';
 
+// Animated glow mesh component for satellites
+function HoverGlowMesh({
+  hovered,
+  color,
+  baseScale,
+}: {
+  hovered: boolean;
+  color: string;
+  baseScale: number;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [pulsePhase, setPulsePhase] = useState(0);
+
+  useFrame((_, delta) => {
+    if (hovered) {
+      setPulsePhase((prev) => prev + delta * 4);
+      if (meshRef.current) {
+        const scale = baseScale + Math.sin(pulsePhase) * 0.3;
+        meshRef.current.scale.setScalar(scale);
+      }
+    }
+  });
+
+  if (!hovered) return null;
+
+  return (
+    <mesh ref={meshRef} scale={baseScale}>
+      <sphereGeometry args={[0.05, 16, 16]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.4 + Math.sin(pulsePhase) * 0.15}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
 interface SatelliteProps {
   data: SatelliteData;
   speedMultiplier: number;
@@ -81,135 +120,332 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
     }
   };
 
-  // Different satellite models based on type
+  const mat = (color: string, emissive?: string, metal = 0.6, rough = 0.35) => (
+    <meshStandardMaterial
+      color={color}
+      emissive={emissive ?? color}
+      emissiveIntensity={0.25}
+      metalness={metal}
+      roughness={rough}
+    />
+  );
+  const panelMat = () => mat('#1a237e', '#0d1642', 0.5, 0.3);
+
+  // Shape models closer to real spacecraft (simplified silhouettes)
   const renderSatelliteModel = () => {
-    switch (data.type) {
+    const { id, type, color } = data;
+
+    // ---- Space stations ----
+    if (id === 'iss') {
+      return (
+        <group>
+          {/* Central truss */}
+          <mesh>
+            <boxGeometry args={[0.22, 0.04, 0.04]} />
+            {mat('#8B8B8B', '#555')}
+          </mesh>
+          {/* Node modules */}
+          <mesh position={[-0.06, 0, 0]}>
+            <cylinderGeometry args={[0.035, 0.035, 0.06, 12]} />
+            {mat(color)}
+          </mesh>
+          <mesh position={[0.06, 0, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.05, 12]} />
+            {mat(color)}
+          </mesh>
+          {/* Solar panel wings (port/starboard) */}
+          <mesh position={[0.12, 0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.18, 0.015, 0.06]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[0.12, -0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.18, 0.015, 0.06]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[-0.12, 0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.18, 0.015, 0.06]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[-0.12, -0.08, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.18, 0.015, 0.06]} />
+            {panelMat()}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'tianhe') {
+      return (
+        <group>
+          {/* Core module (cylinder) */}
+          <mesh>
+            <cylinderGeometry args={[0.05, 0.055, 0.14, 12]} />
+            {mat(color)}
+          </mesh>
+          {/* Lab modules (smaller cylinders) */}
+          <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
+            {mat(color)}
+          </mesh>
+          <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
+            {mat(color)}
+          </mesh>
+          {/* Solar panels */}
+          <mesh position={[0, 0.07, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.2, 0.012, 0.06]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[0, -0.07, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.2, 0.012, 0.06]} />
+            {panelMat()}
+          </mesh>
+        </group>
+      );
+    }
+
+    // ---- Telescopes ----
+    if (id === 'hubble') {
+      return (
+        <group>
+          {/* Main tube (aperture forward) */}
+          <mesh>
+            <cylinderGeometry args={[0.055, 0.065, 0.14, 16]} />
+            {mat('#C0C0C0', '#888')}
+          </mesh>
+          {/* Solar panel wings */}
+          <mesh position={[0.1, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.14, 0.012, 0.05]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[-0.1, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.14, 0.012, 0.05]} />
+            {panelMat()}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'jwst') {
+      return (
+        <group>
+          {/* Hexagonal primary mirror (simplified as flat hex) */}
+          <mesh rotation={[0, 0, Math.PI / 6]}>
+            <cylinderGeometry args={[0.07, 0.07, 0.02, 6]} />
+            {mat('#B8B8B8', '#888', 0.85, 0.2)}
+          </mesh>
+          {/* Sunshield (kite / multi-layer look: one main panel) */}
+          <mesh position={[0, -0.1, 0]} rotation={[Math.PI / 2, 0, Math.PI / 6]}>
+            <boxGeometry args={[0.22, 0.28, 0.01]} />
+            <meshStandardMaterial
+              color="#FFE4B5"
+              emissive="#FFD700"
+              emissiveIntensity={0.2}
+              side={THREE.DoubleSide}
+              metalness={0.3}
+              roughness={0.6}
+            />
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'gaia') {
+      return (
+        <group>
+          {/* Disc / sunshield */}
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.015, 8]} />
+            {mat(color)}
+          </mesh>
+          {/* Central payload */}
+          <mesh>
+            <cylinderGeometry args={[0.03, 0.035, 0.08, 8]} />
+            {mat(color)}
+          </mesh>
+        </group>
+      );
+    }
+
+    // ---- Probes ----
+    if (id === 'voyager1' || id === 'voyager2') {
+      return (
+        <group>
+          <mesh>
+            <boxGeometry args={[0.06, 0.05, 0.08]} />
+            {mat(color)}
+          </mesh>
+          <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.055, 0.055, 0.01, 24]} />
+            <meshStandardMaterial color="#C0C0C0" metalness={0.9} roughness={0.15} />
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'cassini') {
+      return (
+        <group>
+          {/* Huygens (small box) */}
+          <mesh position={[0, 0, -0.06]}>
+            <boxGeometry args={[0.04, 0.04, 0.03]} />
+            {mat('#8B4513', '#5D2E0C')}
+          </mesh>
+          {/* Main bus */}
+          <mesh>
+            <cylinderGeometry args={[0.04, 0.045, 0.08, 12]} />
+            {mat(color)}
+          </mesh>
+          {/* High-gain antenna */}
+          <mesh position={[0, 0.065, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 0.012, 24]} />
+            <meshStandardMaterial color="#DAA520" metalness={0.85} roughness={0.2} />
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'juno') {
+      return (
+        <group>
+          {/* Central hex body */}
+          <mesh>
+            <cylinderGeometry args={[0.04, 0.04, 0.06, 6]} />
+            {mat(color)}
+          </mesh>
+          {/* Three solar panel arms at 120° */}
+          {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((angle, i) => (
+            <mesh
+              key={i}
+              position={[Math.cos(angle) * 0.12, Math.sin(angle) * 0.12, 0]}
+              rotation={[0, 0, -angle]}
+            >
+              <boxGeometry args={[0.22, 0.02, 0.04]} />
+              {panelMat()}
+            </mesh>
+          ))}
+        </group>
+      );
+    }
+    if (id === 'mars-reconnaissance') {
+      return (
+        <group>
+          <mesh>
+            <boxGeometry args={[0.06, 0.04, 0.08]} />
+            {mat(color)}
+          </mesh>
+          <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.12, 0.01, 0.05]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.12, 0.01, 0.05]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[0, 0.05, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.01, 16]} />
+            <meshStandardMaterial color="#888" metalness={0.8} roughness={0.2} />
+          </mesh>
+        </group>
+      );
+    }
+
+    // ---- Satellites (navigation / comms) ----
+    if (id === 'gps') {
+      return (
+        <group>
+          <mesh>
+            <boxGeometry args={[0.05, 0.05, 0.06]} />
+            {mat(color)}
+          </mesh>
+          <mesh position={[0.06, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.1, 0.008, 0.05]} />
+            {panelMat()}
+          </mesh>
+          <mesh position={[-0.06, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.1, 0.008, 0.05]} />
+            {panelMat()}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'starlink') {
+      return (
+        <group>
+          {/* Flat body (flat-sat style) */}
+          <mesh rotation={[0, 0, Math.PI / 4]}>
+            <boxGeometry args={[0.08, 0.08, 0.02]} />
+            {mat(color)}
+          </mesh>
+          {/* Single solar array */}
+          <mesh position={[0, 0.06, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <boxGeometry args={[0.12, 0.01, 0.06]} />
+            {panelMat()}
+          </mesh>
+        </group>
+      );
+    }
+
+    // ---- Type fallbacks ----
+    switch (type) {
       case 'space-station':
         return (
-          <>
-            {/* Main body */}
+          <group>
             <mesh>
-              <boxGeometry args={[0.15, 0.08, 0.08]} />
-              <meshStandardMaterial
-                color={data.color}
-                emissive={data.emissive}
-                emissiveIntensity={0.5}
-                metalness={0.8}
-                roughness={0.2}
-              />
+              <boxGeometry args={[0.12, 0.06, 0.06]} />
+              {mat(color)}
             </mesh>
-            {/* Solar panels */}
-            <mesh position={[0, 0, 0.12]}>
-              <boxGeometry args={[0.25, 0.02, 0.08]} />
-              <meshStandardMaterial
-                color="#1a237e"
-                emissive="#0d1642"
-                emissiveIntensity={0.3}
-                metalness={0.5}
-                roughness={0.3}
-              />
+            <mesh position={[0, 0, 0.08]}>
+              <boxGeometry args={[0.2, 0.02, 0.06]} />
+              {panelMat()}
             </mesh>
-            <mesh position={[0, 0, -0.12]}>
-              <boxGeometry args={[0.25, 0.02, 0.08]} />
-              <meshStandardMaterial
-                color="#1a237e"
-                emissive="#0d1642"
-                emissiveIntensity={0.3}
-                metalness={0.5}
-                roughness={0.3}
-              />
+            <mesh position={[0, 0, -0.08]}>
+              <boxGeometry args={[0.2, 0.02, 0.06]} />
+              {panelMat()}
             </mesh>
-          </>
+          </group>
         );
       case 'telescope':
         return (
-          <>
-            {/* Main mirror housing */}
+          <group>
             <mesh>
-              <cylinderGeometry args={[0.06, 0.08, 0.15, 16]} />
-              <meshStandardMaterial
-                color={data.color}
-                emissive={data.emissive}
-                emissiveIntensity={0.4}
-                metalness={0.7}
-                roughness={0.3}
-              />
+              <cylinderGeometry args={[0.05, 0.06, 0.12, 16]} />
+              {mat(color)}
             </mesh>
-            {/* Sunshield (for JWST style) */}
-            {data.id === 'jwst' && (
-              <mesh position={[0, -0.12, 0]} rotation={[0, 0, Math.PI / 6]}>
-                <boxGeometry args={[0.3, 0.02, 0.2]} />
-                <meshStandardMaterial
-                  color="#FFD700"
-                  emissive="#FFA500"
-                  emissiveIntensity={0.3}
-                  side={THREE.DoubleSide}
-                />
-              </mesh>
-            )}
-          </>
+            <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.1, 0.01, 0.05]} />
+              {panelMat()}
+            </mesh>
+            <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.1, 0.01, 0.05]} />
+              {panelMat()}
+            </mesh>
+          </group>
         );
       case 'probe':
         return (
-          <>
-            {/* Main body */}
+          <group>
             <mesh>
-              <octahedronGeometry args={[0.06, 0]} />
-              <meshStandardMaterial
-                color={data.color}
-                emissive={data.emissive}
-                emissiveIntensity={0.4}
-                metalness={0.6}
-                roughness={0.4}
-              />
+              <octahedronGeometry args={[0.05, 0]} />
+              {mat(color)}
             </mesh>
-            {/* Antenna dish */}
-            <mesh position={[0, 0.08, 0]} rotation={[Math.PI, 0, 0]}>
-              <coneGeometry args={[0.04, 0.06, 16]} />
-              <meshStandardMaterial
-                color="#C0C0C0"
-                metalness={0.9}
-                roughness={0.1}
-              />
+            <mesh position={[0, 0.06, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.035, 0.035, 0.01, 20]} />
+              <meshStandardMaterial color="#C0C0C0" metalness={0.9} roughness={0.1} />
             </mesh>
-          </>
+          </group>
         );
-      default: // satellite
+      default:
         return (
-          <>
-            {/* Main body */}
+          <group>
             <mesh>
-              <boxGeometry args={[0.08, 0.06, 0.06]} />
-              <meshStandardMaterial
-                color={data.color}
-                emissive={data.emissive}
-                emissiveIntensity={0.5}
-                metalness={0.7}
-                roughness={0.3}
-              />
+              <boxGeometry args={[0.06, 0.05, 0.05]} />
+              {mat(color)}
             </mesh>
-            {/* Solar panels */}
-            <mesh position={[0.1, 0, 0]}>
-              <boxGeometry args={[0.12, 0.01, 0.06]} />
-              <meshStandardMaterial
-                color="#1a237e"
-                emissive="#0d1642"
-                emissiveIntensity={0.3}
-                metalness={0.5}
-                roughness={0.3}
-              />
+            <mesh position={[0.07, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.1, 0.01, 0.05]} />
+              {panelMat()}
             </mesh>
-            <mesh position={[-0.1, 0, 0]}>
-              <boxGeometry args={[0.12, 0.01, 0.06]} />
-              <meshStandardMaterial
-                color="#1a237e"
-                emissive="#0d1642"
-                emissiveIntensity={0.3}
-                metalness={0.5}
-                roughness={0.3}
-              />
+            <mesh position={[-0.07, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <boxGeometry args={[0.1, 0.01, 0.05]} />
+              {panelMat()}
             </mesh>
-          </>
+          </group>
         );
     }
   };
@@ -218,11 +454,18 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
     <group>
       {/* Orbit path around parent planet */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive object={new THREE.Line(orbitGeometry, new THREE.LineBasicMaterial({
-          color: typeColors.color,
-          transparent: true,
-          opacity: 0.2,
-        }))} />
+        <primitive
+          object={
+            new THREE.Line(
+              orbitGeometry,
+              new THREE.LineBasicMaterial({
+                color: typeColors.color,
+                transparent: true,
+                opacity: 0.2,
+              })
+            )
+          }
+        />
       </group>
 
       {/* Satellite group */}
@@ -239,11 +482,10 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
           setHovered(false);
           document.body.style.cursor = 'auto';
         }}
-        scale={hovered ? 1.5 : 1}
       >
         {renderSatelliteModel()}
 
-        {/* Glow effect */}
+        {/* Base glow effect */}
         <mesh scale={2}>
           <sphereGeometry args={[0.05, 8, 8]} />
           <meshBasicMaterial
@@ -255,15 +497,19 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
           />
         </mesh>
 
+        {/* Animated hover glow effect */}
+        <HoverGlowMesh hovered={hovered} color={typeColors.glow} baseScale={3} />
+
         {/* Label */}
-        <Html distanceFactor={5}>
+        <Html>
           <div
             className={`text-white text-[10px] font-medium whitespace-nowrap transition-all duration-300 ${
-              hovered ? 'opacity-100 scale-110' : 'opacity-50 scale-100'
+              hovered ? 'opacity-100' : 'opacity-50'
             }`}
             style={{
               textShadow: `0 0 8px ${typeColors.color}`,
               transform: 'translate(-50%, -150%)',
+              pointerEvents: 'none',
             }}
           >
             {data.name}
