@@ -13,16 +13,17 @@ export const moons: MoonData[] = [
     color: '#C4C4C4',
     emissive: '#888888',
     emissiveIntensity: 0.1,
-    description: 'Earth\'s only natural satellite and the fifth largest moon in the solar system.',
+    texture: '/textures/moon.webp',
+    description: "Earth's only natural satellite and the fifth largest moon in the solar system.",
     facts: [
       'The Moon is about 4.5 billion years old',
-      'It\'s the only celestial body humans have visited',
+      "It's the only celestial body humans have visited",
       'The same side always faces Earth due to tidal locking',
-      'The Moon is slowly moving away from Earth at 3.8 cm per year'
+      'The Moon is slowly moving away from Earth at 3.8 cm per year',
     ],
     diameter: '3,474 km',
     discoveryYear: 'Prehistoric',
-    discoveredBy: 'Known since antiquity'
+    discoveredBy: 'Known since antiquity',
   },
 
   // Mars's Moons
@@ -36,16 +37,16 @@ export const moons: MoonData[] = [
     color: '#8B7355',
     emissive: '#5C4A36',
     emissiveIntensity: 0.1,
-    description: 'The larger and closer of Mars\'s two moons, likely a captured asteroid.',
+    description: "The larger and closer of Mars's two moons, likely a captured asteroid.",
     facts: [
       'Phobos orbits Mars three times per day',
-      'It\'s slowly spiraling toward Mars',
+      "It's slowly spiraling toward Mars",
       'Will crash into Mars or break apart in about 50 million years',
-      'Has a large crater called Stickney'
+      'Has a large crater called Stickney',
     ],
     diameter: '22.4 km',
     discoveryYear: '1877',
-    discoveredBy: 'Asaph Hall'
+    discoveredBy: 'Asaph Hall',
   },
   {
     id: 'deimos',
@@ -60,13 +61,13 @@ export const moons: MoonData[] = [
     description: 'The smaller and outer moon of Mars, also likely a captured asteroid.',
     facts: [
       'Deimos is one of the smallest moons in the solar system',
-      'It\'s slowly moving away from Mars',
+      "It's slowly moving away from Mars",
       'Has a very smooth surface compared to Phobos',
-      'Orbits Mars in about 30 hours'
+      'Orbits Mars in about 30 hours',
     ],
     diameter: '12.4 km',
     discoveryYear: '1877',
-    discoveredBy: 'Asaph Hall'
+    discoveredBy: 'Asaph Hall',
   },
 
   // Jupiter's Galilean Moons
@@ -85,11 +86,11 @@ export const moons: MoonData[] = [
       'Has over 400 active volcanoes',
       'Surface is constantly reshaped by volcanic activity',
       'Tidal heating from Jupiter causes the volcanic activity',
-      'Has mountains taller than Mount Everest'
+      'Has mountains taller than Mount Everest',
     ],
     diameter: '3,643 km',
     discoveryYear: '1610',
-    discoveredBy: 'Galileo Galilei'
+    discoveredBy: 'Galileo Galilei',
   },
   {
     id: 'europa',
@@ -106,11 +107,11 @@ export const moons: MoonData[] = [
       'Has a global ocean beneath its icy crust',
       'May have twice as much water as Earth',
       'Considered one of the best places to search for alien life',
-      'Surface is one of the smoothest in the solar system'
+      'Surface is one of the smoothest in the solar system',
     ],
     diameter: '3,122 km',
     discoveryYear: '1610',
-    discoveredBy: 'Galileo Galilei'
+    discoveredBy: 'Galileo Galilei',
   },
   {
     id: 'ganymede',
@@ -127,11 +128,11 @@ export const moons: MoonData[] = [
       'Larger than Mercury and Pluto',
       'The only moon with its own magnetic field',
       'Has an iron core like Earth',
-      'May have a subsurface ocean'
+      'May have a subsurface ocean',
     ],
     diameter: '5,268 km',
     discoveryYear: '1610',
-    discoveredBy: 'Galileo Galilei'
+    discoveredBy: 'Galileo Galilei',
   },
   {
     id: 'callisto',
@@ -147,12 +148,12 @@ export const moons: MoonData[] = [
     facts: [
       'Surface is the oldest and most cratered in the solar system',
       'May have a subsurface ocean',
-      'Not affected by Jupiter\'s intense radiation',
-      'Considered a potential base for human exploration'
+      "Not affected by Jupiter's intense radiation",
+      'Considered a potential base for human exploration',
     ],
     diameter: '4,821 km',
     discoveryYear: '1610',
-    discoveredBy: 'Galileo Galilei'
+    discoveredBy: 'Galileo Galilei',
   },
 
   // Saturn's Major Moons
@@ -169,13 +170,13 @@ export const moons: MoonData[] = [
     description: 'The only moon with a dense atmosphere and liquid lakes on its surface.',
     facts: [
       'Has lakes and seas of liquid methane and ethane',
-      'Atmosphere is thicker than Earth\'s',
+      "Atmosphere is thicker than Earth's",
       'The Huygens probe landed on Titan in 2005',
-      'Has a subsurface ocean of water'
+      'Has a subsurface ocean of water',
     ],
     diameter: '5,150 km',
     discoveryYear: '1655',
-    discoveredBy: 'Christiaan Huygens'
+    discoveredBy: 'Christiaan Huygens',
   },
   {
     id: 'enceladus',
@@ -192,11 +193,11 @@ export const moons: MoonData[] = [
       'Sprays water vapor and ice from its south pole',
       'Has a global subsurface ocean',
       'One of the brightest objects in the solar system',
-      'Prime candidate for finding extraterrestrial life'
+      'Prime candidate for finding extraterrestrial life',
     ],
     diameter: '504 km',
     discoveryYear: '1789',
-    discoveredBy: 'William Herschel'
+    discoveredBy: 'William Herschel',
   },
   {
     id: 'mimas',
@@ -213,11 +214,11 @@ export const moons: MoonData[] = [
       'Has a giant crater named Herschel',
       'The crater makes it look like the Death Star',
       'Smallest body known to be rounded by its own gravity',
-      'Orbits within Saturn\'s rings'
+      "Orbits within Saturn's rings",
     ],
     diameter: '396 km',
     discoveryYear: '1789',
-    discoveredBy: 'William Herschel'
+    discoveredBy: 'William Herschel',
   },
   {
     id: 'rhea',
@@ -229,16 +230,16 @@ export const moons: MoonData[] = [
     color: '#D4D4D4',
     emissive: '#A0A0A0',
     emissiveIntensity: 0.1,
-    description: 'Saturn\'s second-largest moon, a heavily cratered ice world.',
+    description: "Saturn's second-largest moon, a heavily cratered ice world.",
     facts: [
       'Made mostly of water ice',
       'May have a faint ring system',
       'Very thin atmosphere of oxygen and carbon dioxide',
-      'One of the most cratered moons'
+      'One of the most cratered moons',
     ],
     diameter: '1,527 km',
     discoveryYear: '1672',
-    discoveredBy: 'Giovanni Cassini'
+    discoveredBy: 'Giovanni Cassini',
   },
   {
     id: 'iapetus',
@@ -255,11 +256,11 @@ export const moons: MoonData[] = [
       'One side is bright, the other is extremely dark',
       'Has a distinctive equatorial ridge',
       'The ridge is up to 20 km high',
-      'Orbits at a significant tilt compared to other moons'
+      'Orbits at a significant tilt compared to other moons',
     ],
     diameter: '1,469 km',
     discoveryYear: '1671',
-    discoveredBy: 'Giovanni Cassini'
+    discoveredBy: 'Giovanni Cassini',
   },
 
   // Uranus's Major Moons
@@ -275,14 +276,14 @@ export const moons: MoonData[] = [
     emissiveIntensity: 0.1,
     description: 'The largest moon of Uranus and the eighth-largest in the solar system.',
     facts: [
-      'Named after the queen of fairies in A Midsummer Night\'s Dream',
+      "Named after the queen of fairies in A Midsummer Night's Dream",
       'Has enormous canyons and fault systems',
       'Made of roughly equal parts ice and rock',
-      'May have a thin carbon dioxide atmosphere'
+      'May have a thin carbon dioxide atmosphere',
     ],
     diameter: '1,578 km',
     discoveryYear: '1787',
-    discoveredBy: 'William Herschel'
+    discoveredBy: 'William Herschel',
   },
   {
     id: 'oberon',
@@ -296,14 +297,14 @@ export const moons: MoonData[] = [
     emissiveIntensity: 0.1,
     description: 'The outermost major moon of Uranus.',
     facts: [
-      'Named after the king of fairies in A Midsummer Night\'s Dream',
+      "Named after the king of fairies in A Midsummer Night's Dream",
       'Heavily cratered with dark material on crater floors',
       'Has at least one large mountain 6 km high',
-      'Likely formed from accretion disk around Uranus'
+      'Likely formed from accretion disk around Uranus',
     ],
     diameter: '1,523 km',
     discoveryYear: '1787',
-    discoveredBy: 'William Herschel'
+    discoveredBy: 'William Herschel',
   },
   {
     id: 'ariel',
@@ -320,11 +321,11 @@ export const moons: MoonData[] = [
       'Has the youngest and brightest surface of Uranian moons',
       'Features extensive canyons and valley systems',
       'Shows evidence of past geological activity',
-      'Named after a spirit in The Tempest and Pope\'s The Rape of the Lock'
+      "Named after a spirit in The Tempest and Pope's The Rape of the Lock",
     ],
     diameter: '1,158 km',
     discoveryYear: '1851',
-    discoveredBy: 'William Lassell'
+    discoveredBy: 'William Lassell',
   },
   {
     id: 'umbriel',
@@ -336,16 +337,16 @@ export const moons: MoonData[] = [
     color: '#5C5850',
     emissive: '#3C3834',
     emissiveIntensity: 0.1,
-    description: 'The darkest of Uranus\'s large moons.',
+    description: "The darkest of Uranus's large moons.",
     facts: [
       'Has the darkest surface of the major Uranian moons',
       'Features a mysterious bright ring named Wunda',
       'Surface is ancient and heavily cratered',
-      'Named after a character in Pope\'s The Rape of the Lock'
+      "Named after a character in Pope's The Rape of the Lock",
     ],
     diameter: '1,169 km',
     discoveryYear: '1851',
-    discoveredBy: 'William Lassell'
+    discoveredBy: 'William Lassell',
   },
   {
     id: 'miranda',
@@ -357,16 +358,16 @@ export const moons: MoonData[] = [
     color: '#B0A8A0',
     emissive: '#787068',
     emissiveIntensity: 0.1,
-    description: 'The smallest and innermost of Uranus\'s major moons with bizarre terrain.',
+    description: "The smallest and innermost of Uranus's major moons with bizarre terrain.",
     facts: [
       'Has one of the most extreme terrains in the solar system',
       'Features cliffs up to 20 km high',
       'May have been shattered and reassembled',
-      'Named after the heroine in The Tempest'
+      'Named after the heroine in The Tempest',
     ],
     diameter: '472 km',
     discoveryYear: '1948',
-    discoveredBy: 'Gerard Kuiper'
+    discoveredBy: 'Gerard Kuiper',
   },
 
   // Neptune's Moons
@@ -386,11 +387,11 @@ export const moons: MoonData[] = [
       'Orbits Neptune backwards (retrograde orbit)',
       'Has active geysers that spray nitrogen gas',
       'One of the coldest objects in the solar system at -235°C',
-      'Will eventually crash into Neptune or be torn apart'
+      'Will eventually crash into Neptune or be torn apart',
     ],
     diameter: '2,707 km',
     discoveryYear: '1846',
-    discoveredBy: 'William Lassell'
+    discoveredBy: 'William Lassell',
   },
   {
     id: 'nereid',
@@ -407,11 +408,11 @@ export const moons: MoonData[] = [
       'Has one of the most eccentric orbits of any known moon',
       'May be a captured asteroid or Kuiper Belt object',
       'Takes almost one Earth year to orbit Neptune',
-      'Very little is known about its surface composition'
+      'Very little is known about its surface composition',
     ],
     diameter: '340 km',
     discoveryYear: '1949',
-    discoveredBy: 'Gerard Kuiper'
+    discoveredBy: 'Gerard Kuiper',
   },
 
   // Pluto's Moons
@@ -425,16 +426,16 @@ export const moons: MoonData[] = [
     color: '#A0A0A0',
     emissive: '#686868',
     emissiveIntensity: 0.1,
-    description: 'Pluto\'s largest moon, so large that Pluto and Charon orbit a common center.',
+    description: "Pluto's largest moon, so large that Pluto and Charon orbit a common center.",
     facts: [
       'Pluto and Charon are sometimes called a double dwarf planet',
       'Charon is half the size of Pluto',
       'Both bodies are tidally locked to each other',
-      'Has canyons, mountains, and a red polar region'
+      'Has canyons, mountains, and a red polar region',
     ],
     diameter: '1,212 km',
     discoveryYear: '1978',
-    discoveredBy: 'James Christy'
+    discoveredBy: 'James Christy',
   },
   {
     id: 'nix',
@@ -448,14 +449,14 @@ export const moons: MoonData[] = [
     emissiveIntensity: 0.1,
     description: 'A small moon of Pluto with a chaotic, tumbling rotation.',
     facts: [
-      'Rotates chaotically due to Pluto-Charon\'s gravity',
+      "Rotates chaotically due to Pluto-Charon's gravity",
       'Named after the Greek goddess of night',
       'Has an elongated, irregular shape',
-      'Highly reflective surface suggests water ice'
+      'Highly reflective surface suggests water ice',
     ],
     diameter: '50 km',
     discoveryYear: '2005',
-    discoveredBy: 'Hubble Space Telescope Team'
+    discoveredBy: 'Hubble Space Telescope Team',
   },
   {
     id: 'hydra',
@@ -472,15 +473,15 @@ export const moons: MoonData[] = [
       'Irregularly shaped like a potato',
       'Named after the nine-headed serpent in Greek mythology',
       'Rotates rapidly, completing one rotation every 10 hours',
-      'Discovered along with Nix in 2005'
+      'Discovered along with Nix in 2005',
     ],
     diameter: '51 km',
     discoveryYear: '2005',
-    discoveredBy: 'Hubble Space Telescope Team'
-  }
+    discoveredBy: 'Hubble Space Telescope Team',
+  },
 ];
 
 // Helper function to get moons by planet
 export function getMoonsByPlanet(planetId: string): MoonData[] {
-  return moons.filter(moon => moon.parentPlanet === planetId);
+  return moons.filter((moon) => moon.parentPlanet === planetId);
 }

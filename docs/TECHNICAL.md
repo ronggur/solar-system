@@ -9,31 +9,32 @@ solar-system/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── ui/           # Radix UI components
-│   │   ├── Moon.tsx       # Natural moon 3D component
-│   │   ├── MoonInfo.tsx   # Moon details panel
+│   │   ├── Moon.tsx       # Natural moon 3D component with hover glow
+│   │   ├── MoonInfo.tsx   # Moon details panel (z-index: 100)
 │   │   ├── ObjectList.tsx  # Searchable object list
-│   │   ├── Planet.tsx     # Planet 3D component
-│   │   ├── PlanetInfo.tsx # Planet details panel
-│   │   ├── Satellite.tsx  # Satellite 3D component
-│   │   ├── SatelliteInfo.tsx # Satellite details panel
-│   │   ├── SolarSystem.tsx # Main 3D scene
+│   │   ├── Planet.tsx     # Planet 3D component with textures and hover glow
+│   │   ├── PlanetInfo.tsx # Planet details panel (z-index: 100)
+│   │   ├── Satellite.tsx  # Satellite 3D component with hover glow
+│   │   ├── SatelliteInfo.tsx # Satellite details panel (z-index: 100)
+│   │   ├── SolarSystem.tsx # Main 3D scene with camera interaction pause
 │   │   ├── Starfield.tsx  # Background stars
-│   │   ├── Sun.tsx        # Sun 3D component
-│   │   ├── ControlPanel.tsx # UI controls
+│   │   ├── Sun.tsx        # Sun 3D component with lighting
+│   │   ├── ControlPanel.tsx # UI controls (speed 0.1x-10x)
 │   │   └── Header.tsx     # App header
 │   ├── data/               # Celestial body data
 │   │   ├── moons.ts       # Natural moon data
-│   │   ├── planets.ts     # Planet data
+│   │   ├── planets.ts     # Planet data with texture support
 │   │   └── satellites.ts  # Satellite data
 │   ├── types/             # TypeScript definitions
 │   │   └── index.ts
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utility functions
-│   ├── App.tsx            # Main application
+│   ├── App.tsx            # Main application with camera interaction state
 │   ├── App.css            # App-specific styles
 │   ├── index.css          # Global styles
 │   └── main.tsx           # Entry point
 ├── public/               # Static assets
+│   └── textures/         # Planet textures (WebP format)
 ├── dist/                 # Production build
 ├── index.html            # HTML entry
 ├── package.json         # Dependencies
@@ -79,6 +80,7 @@ solar-system/
   - PerspectiveCamera component
   - Html for 3D labels
   - Loader for 3D assets
+  - useTexture for planet textures
 
 - **GSAP 3.14.2**
   - Camera animation transitions
@@ -111,31 +113,30 @@ App
 ├── Header
 ├── Canvas (React Three Fiber)
 │   ├── PerspectiveCamera
-│   ├── OrbitControls
+│   ├── OrbitControls (with onStart/onEnd callbacks)
 │   ├── SolarSystem
 │   │   ├── Starfield
-│   │   ├── Sun
-│   │   ├── Planet × 8
+│   │   ├── Sun (with point light)
+│   │   ├── Planet × 9 (with textures and hover glow)
 │   │   │   ├── Orbit Path
-│   │   │   ├── Trail
-│   │   │   ├── Planet Mesh
+│   │   │   ├── Planet Mesh (with emissive glow)
 │   │   │   ├── Atmosphere Glow
 │   │   │   ├── Saturn Rings
 │   │   │   ├── Uranus Rings
 │   │   │   └── HTML Label
-│   │   ├── Satellite × 12
+│   │   ├── Satellite × 12 (with hover glow)
 │   │   │   ├── Orbit Path
 │   │   │   └── Satellite Model
-│   │   └── Moon × 23
+│   │   └── Moon × 23 (with hover glow)
 │   │       ├── Orbit Path
 │   │       └── Moon Mesh
-│   ├── AsteroidBelt (InstancedMesh)
-│   └── KuiperBelt (InstancedMesh)
-├── ControlPanel
+│   ├── AsteroidBelt (InstancedMesh, frustumCulled: false)
+│   └── KuiperBelt (InstancedMesh, frustumCulled: false)
+├── ControlPanel (shows pause state during camera interaction)
 ├── ObjectList
-├── PlanetInfo
-├── SatelliteInfo
-└── MoonInfo
+├── PlanetInfo (z-index: 100)
+├── SatelliteInfo (z-index: 100)
+└── MoonInfo (z-index: 100)
 ```
 
 ### State Management
@@ -144,6 +145,7 @@ App
 - **Prop Drilling**: State passed down from App
 - **No Redux/Zustand**: Simple app doesn't need global state
 - **Ref Pattern**: useRef for Three.js objects
+- **Camera Interaction State**: Tracked in App.tsx and passed to ControlPanel
 
 ### Animation System
 
@@ -163,6 +165,9 @@ useFrame((_, delta) => {
   // Rotate on axis
   object.rotation.y += rotationSpeed;
 });
+
+// Hover glow animation (sine wave)
+const glowIntensity = baseIntensity + Math.sin(time * pulseSpeed) * 0.3;
 ```
 
 ### Camera Animation (GSAP)
@@ -186,6 +191,24 @@ gsap.to(controlsRef.current.target, {
 });
 ```
 
+### Camera Interaction Pause
+
+```typescript
+// In SolarSystem.tsx
+<DreiOrbitControls
+  onStart={() => setIsCameraInteracting(true)}
+  onEnd={() => setIsCameraInteracting(false)}
+/>
+
+// Pass to all moving objects
+isPaused={isPaused || isCameraInteracting}
+
+// Notify parent component
+useEffect(() => {
+  onCameraInteractionChange?.(isCameraInteracting);
+}, [isCameraInteracting, onCameraInteractionChange]);
+```
+
 ## 🎨 Styling System
 
 ### Tailwind CSS Configuration
@@ -194,10 +217,7 @@ gsap.to(controlsRef.current.target, {
 // tailwind.config.js
 module.exports = {
   darkMode: ['class'],
-  content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -205,10 +225,10 @@ module.exports = {
           900: '#0a0a0a',
           800: '#1a1a1a',
           700: '#2a2a2a',
-        }
+        },
       },
       animation: {
-        'glow': 'glow 3s ease-in-out infinite',
+        glow: 'glow 3s ease-in-out infinite',
       },
       keyframes: {
         glow: {
@@ -218,10 +238,8 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require('tailwindcss-animate'),
-  ],
-}
+  plugins: [require('tailwindcss-animate')],
+};
 ```
 
 ### Custom Classes
@@ -250,15 +268,16 @@ module.exports = {
 
 ```typescript
 interface PlanetData {
-  id: string;              // Unique identifier
-  name: string;            // Display name
-  radius: number;          // Relative size
-  distance: number;        // Distance from sun
-  orbitalSpeed: number;    // Orbit speed multiplier
-  rotationSpeed: number;   // Rotation speed
-  color: string;          // Base hex color
-  emissive?: string;      // Glow color
-  emissiveIntensity?: number;
+  id: string; // Unique identifier
+  name: string; // Display name
+  radius: number; // Relative size
+  distance: number; // Distance from sun
+  orbitalSpeed: number; // Orbit speed multiplier
+  rotationSpeed: number; // Rotation speed
+  color: string; // Base hex color
+  emissive?: string; // Glow color
+  emissiveIntensity?: number; // Glow strength
+  texture?: string; // Texture URL (WebP format)
   description: string;
   facts: string[];
   moons?: number;
@@ -278,7 +297,7 @@ interface MoonData {
   parentPlanet: string;
   orbitDistance: number;
   orbitalSpeed: number;
-  orbitInclination?: number;  // Orbital tilt in degrees
+  orbitInclination?: number; // Orbital tilt in degrees
   color: string;
   emissive: string;
   emissiveIntensity?: number;
@@ -317,6 +336,7 @@ interface SatelliteData {
 1. **Instanced Rendering**
    - Asteroid belt: 200+ asteroids in single draw call
    - Kuiper belt: 400+ objects in single draw call
+   - Both use `frustumCulled: false` to prevent disappearing when panning
 
 2. **Point Rendering**
    - Starfield: 5000+ stars using point geometry
@@ -328,9 +348,14 @@ interface SatelliteData {
    - Minimal material variants
 
 4. **Pixel Ratio Capping**
+
    ```typescript
    gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
    ```
+
+5. **Z-Index Optimization**
+   - Info panels use `z-[100]` to stay above 3D labels
+   - Prevents UI layering issues
 
 ### Animation Optimizations
 
@@ -343,11 +368,17 @@ interface SatelliteData {
    - Efficient tweening
 
 3. **Conditional Updates**
+
    ```typescript
-   if (!isPaused) {
-     // Only update when not paused
+   if (!isPaused && !isCameraInteracting) {
+     // Only update when not paused and not interacting
    }
    ```
+
+4. **Hover Glow Animation**
+   - Uses sine wave for smooth pulsing
+   - Different pulse speeds for different object types
+   - No performance impact
 
 ### Memory Management
 
@@ -357,6 +388,7 @@ interface SatelliteData {
    - Color calculations
 
 2. **Cleanup on Unmount**
+
    ```typescript
    useEffect(() => {
      // Setup
@@ -426,6 +458,7 @@ export default defineConfig({
 ### Adding a New Planet
 
 1. Add to `src/data/planets.ts`:
+
 ```typescript
 {
   id: 'new-planet',
@@ -436,6 +469,7 @@ export default defineConfig({
   rotationSpeed: 0.02,
   color: '#FFFFFF',
   emissive: '#CCCCCC',
+  texture: '/textures/new-planet.webp',  // Optional
   description: '...',
   facts: ['...'],
   moons: 0,
@@ -450,6 +484,7 @@ export default defineConfig({
 ### Adding a New Moon
 
 1. Add to `src/data/moons.ts`:
+
 ```typescript
 {
   id: 'new-moon',
@@ -474,6 +509,7 @@ export default defineConfig({
 ### Adding a New Satellite
 
 1. Add to `src/data/satellites.ts`:
+
 ```typescript
 {
   id: 'new-satellite',
@@ -512,24 +548,43 @@ function CustomModel({ url }) {
 ### Common Issues
 
 **Issue: Objects not rendering**
+
 - Check browser WebGL support
 - Verify Three.js version compatibility
 - Check console for errors
 
 **Issue: Performance problems**
+
 - Reduce star count in `Starfield.tsx`
 - Lower pixel ratio in `App.tsx`
 - Disable antialiasing in Canvas
 
 **Issue: Camera animations not smooth**
+
 - Check GSAP version
 - Verify transition duration
 - Check for conflicts with OrbitControls
 
 **Issue: TypeScript errors**
+
 - Run `npm install` to ensure dependencies
 - Clear `node_modules` and reinstall
 - Check tsconfig.json paths
+
+**Issue: Asteroid/Kuiper belt disappears when panning**
+
+- Ensure `frustumCulled={false}` is set on InstancedMesh
+- Check if belts are properly positioned in scene
+
+**Issue: Info panels appear behind 3D labels**
+
+- Verify z-index is set to `z-[100]` in info panel components
+- Check CSS stacking context
+
+**Issue: Pause button doesn't show camera interaction**
+
+- Verify `onCameraInteractionChange` callback is passed from App to SolarSystem
+- Check that `isPaused || isCameraInteracting` is used in ControlPanel
 
 ## 📚 References
 

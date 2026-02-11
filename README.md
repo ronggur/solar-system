@@ -18,12 +18,13 @@ An interactive 3D visualization of our solar system built with React, Three.js, 
 
 A stunning, interactive 3D solar system explorer that brings the cosmos to your browser. Built with cutting-edge web technologies, this application lets you:
 
-- **Explore** the entire solar system from the Sun to Pluto
+- **Explore** the entire solar system from the Sun to Pluto with realistic planet textures
 - **Discover** 23 major moons including Earth's Moon, Jupiter's Galilean moons, and Saturn's Titan
 - **Track** 12 artificial satellites and space probes from ISS to Voyager
-- **Learn** fascinating facts about each celestial body
-- **Navigate** freely in 3D space with smooth camera controls
+- **Learn** fascinating facts about each celestial body with detailed information panels
+- **Navigate** freely in 3D space with smooth camera controls and animated hover effects
 - **Search** and filter objects to quickly find what you're looking for
+- **Interactive Experience** with automatic pause during camera interaction and visual feedback
 
 Perfect for astronomy enthusiasts, students, educators, and anyone curious about our cosmic neighborhood.
 
@@ -53,12 +54,13 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 
 ### 3D Visualization
 
-- **Realistic Solar System**: All 8 planets plus Pluto with accurate relative sizes and orbital distances
+- **Realistic Solar System**: All 8 planets plus Pluto with accurate relative sizes, orbital distances, and WebP textures
 - **Interactive Camera**: Freely rotate, zoom, and pan around the solar system
 - **Smooth Animations**: GSAP-powered camera transitions when selecting celestial objects
+- **Animated Hover Effects**: Pulsing glow effects on planets, moons, and satellites when hovered
 - **Starfield Background**: 5000+ stars creating an immersive space environment
-- **Asteroid Belt**: Visualized between Mars and Jupiter with 200+ asteroids
-- **Kuiper Belt**: Icy objects beyond Neptune with 400+ objects
+- **Asteroid Belt**: Visualized between Mars and Jupiter with 200+ asteroids (always visible)
+- **Kuiper Belt**: Icy objects beyond Neptune with 400+ objects (always visible)
 
 ### Celestial Bodies
 
@@ -81,14 +83,15 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 
 ### Interactive Controls
 
-- **Speed Control**: Adjust orbital speed from 0.1x to 10x
-- **Pause/Play**: Freeze or animate the solar system
+- **Speed Control**: Adjust orbital speed from 0.1x to 10x (extended range for time-lapse viewing)
+- **Pause/Play**: Freeze or animate the solar system (automatically pauses during camera interaction)
 - **Orbit Visibility**: Toggle orbital paths on/off
 - **Visibility Toggles**: Show/hide satellites and moons independently
 - **Object Filtering**: Filter object list by type (Planets, Satellites, Moons)
 - **Camera Modes**: Free exploration or follow selected planet
 - **Click to Explore**: Click any planet, moon, or satellite for detailed information
 - **Search**: Search and filter objects by name, description, or parent planet
+- **Visual Feedback**: Control panel shows pause state during camera interaction
 
 ### Information Panels
 
@@ -178,7 +181,7 @@ For complete project structure and architecture, see [TECHNICAL.md](docs/TECHNIC
 Located in the bottom-left corner:
 
 - **Speed Slider**: Adjust orbital animation speed (0.1x - 10x)
-- **Pause/Play Button**: Freeze or resume orbital motion
+- **Pause/Play Button**: Freeze or resume orbital motion (shows active during camera interaction)
 - **Show Orbits**: Toggle orbital path visibility
 - **Show Satellites**: Toggle artificial satellite visibility
 - **Show Moons**: Toggle natural moon visibility

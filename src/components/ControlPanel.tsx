@@ -1,4 +1,15 @@
-import { Play, Pause, RotateCcw, Orbit, Zap, ChevronDown, ChevronUp, Satellite, Eye, Moon } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  Orbit,
+  Zap,
+  ChevronDown,
+  ChevronUp,
+  Satellite,
+  Eye,
+  Moon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -90,7 +101,7 @@ export function ControlPanel({
                 value={[speedMultiplier]}
                 onValueChange={(value) => setSpeedMultiplier(value[0])}
                 min={0.1}
-                max={5}
+                max={10}
                 step={0.1}
                 className="w-full"
               />
