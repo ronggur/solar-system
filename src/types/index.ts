@@ -18,11 +18,15 @@ export interface SunData {
   diameter?: string;
   /** Mass (e.g. "1.989 × 10³⁰ kg") */
   mass?: string;
+  /** Link to NASA science page */
+  url?: string;
 }
 
 export interface PlanetData {
   id: string;
   name: string;
+  /** 'dwarf-planet' for Ceres, Pluto, etc. Omit for regular planets */
+  type?: 'planet' | 'dwarf-planet';
   radius: number;
   distance: number;
   orbitalSpeed: number;
@@ -47,6 +51,8 @@ export interface PlanetData {
   atmosphere?: string;
   /** Single striking stat for comparisons */
   interestingNumber?: string;
+  /** Link to NASA science page */
+  url?: string;
 }
 
 export interface MoonData {
@@ -72,6 +78,8 @@ export interface MoonData {
   surfaceType?: 'icy' | 'volcanic' | 'rocky' | 'mixed';
   /** Past or planned mission highlights */
   missionHighlights?: string;
+  /** Link to NASA science page */
+  url?: string;
 }
 
 export interface SatelliteData {

@@ -10,6 +10,7 @@ import {
   Ruler,
   Cloud,
   Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PlanetData } from '@/types';
@@ -86,7 +87,9 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
             <h2 className="text-2xl font-bold text-white glow-text" style={{ color: planet.color }}>
               {planet.name}
             </h2>
-            <p className="text-white/70 text-xs mt-1">{isSun ? 'Star' : 'Planet'}</p>
+            <p className="text-white/70 text-xs mt-1">
+              {isSun ? 'Star' : planet.type === 'dwarf-planet' ? 'Dwarf Planet' : 'Planet'}
+            </p>
           </div>
         </div>
 
@@ -259,6 +262,23 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
                 {(planet as PlanetData).interestingNumber}
               </p>
             </div>
+          )}
+
+          {/* NASA link */}
+          {'url' in planet && planet.url && (
+            <a
+              href={planet.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border transition-colors hover:bg-white/10"
+              style={{
+                borderColor: `${planet.color}50`,
+                color: planet.color,
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm font-medium">Explore on NASA Science</span>
+            </a>
           )}
 
           {/* Close button */}
