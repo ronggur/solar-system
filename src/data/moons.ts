@@ -24,6 +24,9 @@ export const moons: MoonData[] = [
     diameter: '3,474 km',
     discoveryYear: 'Prehistoric',
     discoveredBy: 'Known since antiquity',
+    orbitalPeriod: '27.3 days',
+    surfaceType: 'rocky',
+    missionHighlights: 'Apollo 11–17 landings (1969–1972), Artemis program planned',
   },
 
   // Mars's Moons
@@ -47,6 +50,9 @@ export const moons: MoonData[] = [
     diameter: '22.4 km',
     discoveryYear: '1877',
     discoveredBy: 'Asaph Hall',
+    orbitalPeriod: '7.65 hours',
+    surfaceType: 'rocky',
+    missionHighlights: 'Mars Express, Curiosity imaging',
   },
   {
     id: 'deimos',
@@ -68,6 +74,9 @@ export const moons: MoonData[] = [
     diameter: '12.4 km',
     discoveryYear: '1877',
     discoveredBy: 'Asaph Hall',
+    orbitalPeriod: '30.3 hours',
+    surfaceType: 'rocky',
+    missionHighlights: 'Viking orbiter 1977, Mars Reconnaissance Orbiter',
   },
 
   // Jupiter's Galilean Moons
@@ -91,6 +100,9 @@ export const moons: MoonData[] = [
     diameter: '3,643 km',
     discoveryYear: '1610',
     discoveredBy: 'Galileo Galilei',
+    orbitalPeriod: '1.77 days',
+    surfaceType: 'volcanic',
+    missionHighlights: 'Voyager 1–2, Galileo, Juno (ongoing). Europa Clipper launching 2024',
   },
   {
     id: 'europa',
@@ -112,6 +124,9 @@ export const moons: MoonData[] = [
     diameter: '3,122 km',
     discoveryYear: '1610',
     discoveredBy: 'Galileo Galilei',
+    orbitalPeriod: '3.55 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager, Galileo, Juno. Europa Clipper will fly by',
   },
   {
     id: 'ganymede',
@@ -133,6 +148,9 @@ export const moons: MoonData[] = [
     diameter: '5,268 km',
     discoveryYear: '1610',
     discoveredBy: 'Galileo Galilei',
+    orbitalPeriod: '7.15 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager, Galileo, Juno. ESA JUICE mission (2023)',
   },
   {
     id: 'callisto',
@@ -154,6 +172,9 @@ export const moons: MoonData[] = [
     diameter: '4,821 km',
     discoveryYear: '1610',
     discoveredBy: 'Galileo Galilei',
+    orbitalPeriod: '16.7 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager, Galileo. Potential human base site',
   },
 
   // Saturn's Major Moons
@@ -177,6 +198,9 @@ export const moons: MoonData[] = [
     diameter: '5,150 km',
     discoveryYear: '1655',
     discoveredBy: 'Christiaan Huygens',
+    orbitalPeriod: '15.9 days',
+    surfaceType: 'mixed',
+    missionHighlights: 'Huygens probe landed 2005, Cassini 127 flybys. Dragonfly mission 2028',
   },
   {
     id: 'enceladus',
@@ -198,6 +222,9 @@ export const moons: MoonData[] = [
     diameter: '504 km',
     discoveryYear: '1789',
     discoveredBy: 'William Herschel',
+    orbitalPeriod: '1.37 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Cassini discovered geysers 2005. Top life-search target',
   },
   {
     id: 'mimas',
@@ -219,6 +246,9 @@ export const moons: MoonData[] = [
     diameter: '396 km',
     discoveryYear: '1789',
     discoveredBy: 'William Herschel',
+    orbitalPeriod: '0.94 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager, Cassini',
   },
   {
     id: 'rhea',
@@ -240,6 +270,9 @@ export const moons: MoonData[] = [
     diameter: '1,527 km',
     discoveryYear: '1672',
     discoveredBy: 'Giovanni Cassini',
+    orbitalPeriod: '4.52 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager, Cassini',
   },
   {
     id: 'iapetus',
@@ -261,6 +294,9 @@ export const moons: MoonData[] = [
     diameter: '1,469 km',
     discoveryYear: '1671',
     discoveredBy: 'Giovanni Cassini',
+    orbitalPeriod: '79.3 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1981, Cassini',
   },
 
   // Uranus's Major Moons
@@ -284,6 +320,9 @@ export const moons: MoonData[] = [
     diameter: '1,578 km',
     discoveryYear: '1787',
     discoveredBy: 'William Herschel',
+    orbitalPeriod: '8.71 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1986',
   },
   {
     id: 'oberon',
@@ -305,6 +344,9 @@ export const moons: MoonData[] = [
     diameter: '1,523 km',
     discoveryYear: '1787',
     discoveredBy: 'William Herschel',
+    orbitalPeriod: '13.5 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1986',
   },
   {
     id: 'ariel',
@@ -326,6 +368,9 @@ export const moons: MoonData[] = [
     diameter: '1,158 km',
     discoveryYear: '1851',
     discoveredBy: 'William Lassell',
+    orbitalPeriod: '2.52 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1986',
   },
   {
     id: 'umbriel',
@@ -347,6 +392,9 @@ export const moons: MoonData[] = [
     diameter: '1,169 km',
     discoveryYear: '1851',
     discoveredBy: 'William Lassell',
+    orbitalPeriod: '4.14 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1986',
   },
   {
     id: 'miranda',
@@ -368,6 +416,9 @@ export const moons: MoonData[] = [
     diameter: '472 km',
     discoveryYear: '1948',
     discoveredBy: 'Gerard Kuiper',
+    orbitalPeriod: '1.41 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 closest flyby 1986 – bizarre terrain discovered',
   },
 
   // Neptune's Moons
@@ -392,6 +443,9 @@ export const moons: MoonData[] = [
     diameter: '2,707 km',
     discoveryYear: '1846',
     discoveredBy: 'William Lassell',
+    orbitalPeriod: '5.88 days (retrograde)',
+    surfaceType: 'icy',
+    missionHighlights: 'Voyager 2 flyby 1989. Trident mission proposed',
   },
   {
     id: 'nereid',
@@ -413,6 +467,9 @@ export const moons: MoonData[] = [
     diameter: '340 km',
     discoveryYear: '1949',
     discoveredBy: 'Gerard Kuiper',
+    orbitalPeriod: '360 days',
+    surfaceType: 'rocky',
+    missionHighlights: 'Voyager 2 distant flyby 1989',
   },
 
   // Pluto's Moons
@@ -436,6 +493,9 @@ export const moons: MoonData[] = [
     diameter: '1,212 km',
     discoveryYear: '1978',
     discoveredBy: 'James Christy',
+    orbitalPeriod: '6.39 days',
+    surfaceType: 'icy',
+    missionHighlights: 'New Horizons flyby 2015 – detailed imaging',
   },
   {
     id: 'nix',
@@ -457,6 +517,9 @@ export const moons: MoonData[] = [
     diameter: '50 km',
     discoveryYear: '2005',
     discoveredBy: 'Hubble Space Telescope Team',
+    orbitalPeriod: '24.9 days',
+    surfaceType: 'icy',
+    missionHighlights: 'New Horizons flyby 2015',
   },
   {
     id: 'hydra',
@@ -478,6 +541,9 @@ export const moons: MoonData[] = [
     diameter: '51 km',
     discoveryYear: '2005',
     discoveredBy: 'Hubble Space Telescope Team',
+    orbitalPeriod: '38.2 days',
+    surfaceType: 'icy',
+    missionHighlights: 'New Horizons flyby 2015',
   },
 ];
 

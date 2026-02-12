@@ -1,4 +1,4 @@
-import { X, Calendar, User, Ruler, Info } from 'lucide-react';
+import { X, Calendar, User, Ruler, Info, Clock, Layers, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MoonData } from '@/types';
 import { useEffect, useState, useRef } from 'react';
@@ -92,6 +92,24 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
                 <div className="text-white text-sm font-medium">{moon.diameter}</div>
               </div>
             )}
+            {moon.orbitalPeriod && (
+              <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
+                  <Clock className="w-3 h-3" />
+                  Orbital Period
+                </div>
+                <div className="text-white text-sm font-medium">{moon.orbitalPeriod}</div>
+              </div>
+            )}
+            {moon.surfaceType && (
+              <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
+                  <Layers className="w-3 h-3" />
+                  Surface
+                </div>
+                <div className="text-white text-sm font-medium capitalize">{moon.surfaceType}</div>
+              </div>
+            )}
             {moon.discoveryYear && (
               <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                 <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
@@ -111,6 +129,17 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
               </div>
             )}
           </div>
+
+          {/* Mission Highlights */}
+          {moon.missionHighlights && (
+            <div className="flex items-start gap-2 rounded-lg p-3 bg-white/5 border border-white/10">
+              <Rocket className="w-4 h-4 flex-shrink-0 mt-0.5 text-white/50" />
+              <div>
+                <div className="text-white/50 text-xs mb-1">Mission Highlights</div>
+                <p className="text-white/80 text-sm leading-relaxed">{moon.missionHighlights}</p>
+              </div>
+            </div>
+          )}
 
           {/* Facts */}
           <div className="space-y-2">

@@ -23,6 +23,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'space-station',
     imageUrl: 'satellites/iss.webp',
+    missionStatus: 'active',
+    altitude: '400 km',
+    url: 'https://www.nasa.gov/mission_pages/station/main/index.html',
   },
   {
     id: 'hubble',
@@ -46,6 +49,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'telescope',
     imageUrl: 'satellites/hubble.webp',
+    missionStatus: 'extended',
+    altitude: '540 km',
+    url: 'https://science.nasa.gov/mission/hubble',
   },
   {
     id: 'jwst',
@@ -68,6 +74,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'telescope',
     imageUrl: 'satellites/jwst.webp',
+    missionStatus: 'active',
+    altitude: '1.5 million km (L2)',
+    url: 'https://webb.nasa.gov',
   },
   {
     id: 'gps',
@@ -90,6 +99,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'satellite',
     imageUrl: 'satellites/gps.jpg',
+    missionStatus: 'active',
+    altitude: '20,200 km',
+    url: 'https://www.gps.gov',
   },
   {
     id: 'starlink',
@@ -112,6 +124,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'satellite',
     imageUrl: 'satellites/starlink.webp',
+    missionStatus: 'active',
+    altitude: '550 km',
+    url: 'https://www.starlink.com',
   },
   {
     id: 'voyager1',
@@ -134,6 +149,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'probe',
     imageUrl: 'satellites/voyager.webp',
+    missionStatus: 'extended',
+    altitude: 'Interstellar space',
+    url: 'https://voyager.jpl.nasa.gov',
   },
   {
     id: 'voyager2',
@@ -157,6 +175,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'probe',
     imageUrl: 'satellites/voyager2.webp',
+    missionStatus: 'extended',
+    altitude: 'Interstellar space',
+    url: 'https://voyager.jpl.nasa.gov',
   },
   {
     id: 'cassini',
@@ -179,6 +200,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'probe',
     imageUrl: 'satellites/cassini.jpg',
+    missionStatus: 'ended',
+    altitude: 'Orbited Saturn',
+    url: 'https://science.nasa.gov/mission/cassini',
   },
   {
     id: 'juno',
@@ -201,6 +225,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'probe',
     imageUrl: 'satellites/juno.jpg',
+    missionStatus: 'extended',
+    altitude: '4,300 km (perijove)',
+    url: 'https://www.missionjuno.swri.edu',
   },
   {
     id: 'mars-reconnaissance',
@@ -223,6 +250,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'probe',
     imageUrl: 'satellites/mars-reconnaissance.jpg',
+    missionStatus: 'active',
+    altitude: '250–316 km',
+    url: 'https://mars.nasa.gov/mro',
   },
   {
     id: 'tianhe',
@@ -245,6 +275,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'space-station',
     imageUrl: 'satellites/tianhe.jpg',
+    missionStatus: 'active',
+    altitude: '340–450 km',
+    url: 'https://en.cmse.gov.cn',
   },
   {
     id: 'gaia',
@@ -267,6 +300,9 @@ export const satellites: SatelliteData[] = [
     ],
     type: 'telescope',
     imageUrl: 'satellites/gaia.webp',
+    missionStatus: 'extended',
+    altitude: '1.5 million km (L2)',
+    url: 'https://www.esa.int/Science_Exploration/Space_Science/Gaia',
   },
 ];
 
