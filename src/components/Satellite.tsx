@@ -500,8 +500,8 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
         {/* Animated hover glow effect */}
         <HoverGlowMesh hovered={hovered} color={typeColors.glow} baseScale={3} />
 
-        {/* Label */}
-        <Html>
+        {/* Label - zIndexRange keeps labels behind info panel (z-100) so they get backdrop-blur */}
+        <Html zIndexRange={[90, 0]}>
           <div
             className={`text-white text-[10px] font-medium whitespace-nowrap transition-all duration-300 ${
               hovered ? 'opacity-100' : 'opacity-50'

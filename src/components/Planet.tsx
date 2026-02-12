@@ -484,8 +484,8 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
           </group>
         )}
 
-        {/* Label */}
-        <Html>
+        {/* Label - zIndexRange keeps labels behind info panel (z-100) so they get backdrop-blur */}
+        <Html zIndexRange={[90, 0]}>
           <div
             className={`planet-label text-white text-xs font-medium whitespace-nowrap transition-all duration-300 ${
               hovered ? 'opacity-100' : 'opacity-60'
