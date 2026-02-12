@@ -1,4 +1,4 @@
-import { X, Calendar, User, Ruler, Info, Clock, Layers, Rocket } from 'lucide-react';
+import { X, Calendar, User, Ruler, Info, Clock, Layers, Rocket, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { MoonData } from '@/types';
 import { useEffect, useState, useRef } from 'react';
@@ -162,6 +162,23 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
               ))}
             </ul>
           </div>
+
+          {/* NASA link */}
+          {moon.url && (
+            <a
+              href={moon.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border transition-colors hover:bg-white/10"
+              style={{
+                borderColor: `${moon.color}50`,
+                color: moon.color,
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm font-medium">Explore on NASA Science</span>
+            </a>
+          )}
 
           {/* Close button */}
           <Button

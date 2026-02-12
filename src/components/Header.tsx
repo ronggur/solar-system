@@ -38,7 +38,10 @@ export function Header() {
                 <Info className="w-5 h-5" />
               </button>
             </DialogTrigger>
-            <DialogContent className="bg-black/90 backdrop-blur-xl border-white/10 text-white max-w-md">
+            <DialogContent
+              overlayClassName="z-[9999]"
+              className="z-[9999] bg-black/90 backdrop-blur-xl border-white/10 text-white max-w-md"
+            >
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold flex items-center gap-2">
                   <Orbit className="w-5 h-5 text-blue-400" />

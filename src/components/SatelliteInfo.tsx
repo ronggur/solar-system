@@ -1,4 +1,14 @@
-import { X, Rocket, Calendar, Building2, Info, Orbit, Activity, MapPin, ExternalLink } from 'lucide-react';
+import {
+  X,
+  Rocket,
+  Calendar,
+  Building2,
+  Info,
+  Orbit,
+  Activity,
+  MapPin,
+  ExternalLink,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SatelliteData } from '@/types';
 import { useEffect, useState, useRef } from 'react';
@@ -32,7 +42,9 @@ function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
       <img
         src={imageSrc}
         alt={satellite.name}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded && !error ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${
+          loaded && !error ? 'opacity-100' : 'opacity-0'
+        }`}
         onLoad={() => setLoaded(true)}
         onError={(e) => {
           console.error('[SatelliteImage] Error loading:', satellite.name, imageSrc, e);
@@ -192,23 +204,6 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
             </div>
           </div>
 
-          {/* Official link */}
-          {satellite.url && (
-            <a
-              href={satellite.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border transition-colors hover:bg-white/10"
-              style={{
-                borderColor: `${typeColors.color}50`,
-                color: typeColors.color,
-              }}
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span className="text-sm font-medium">Official Mission Page</span>
-            </a>
-          )}
-
           {/* Facts */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white/50 text-xs">
@@ -230,6 +225,23 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
               ))}
             </ul>
           </div>
+
+          {/* Official link */}
+          {satellite.url && (
+            <a
+              href={satellite.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg border transition-colors hover:bg-white/10"
+              style={{
+                borderColor: `${typeColors.color}50`,
+                color: typeColors.color,
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="text-sm font-medium">Official Mission Page</span>
+            </a>
+          )}
 
           {/* Close button */}
           <Button

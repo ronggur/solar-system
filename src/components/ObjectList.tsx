@@ -75,7 +75,10 @@ export function ObjectList({
       );
     }
 
-    return filtered;
+    // Sort by name (case-insensitive)
+    return [...filtered].sort((a, b) =>
+      a.data.name.localeCompare(b.data.name, undefined, { sensitivity: 'base' })
+    );
   }, [allObjects, searchQuery, filters]);
 
   const handleObjectClick = (obj: typeof allObjects[0]) => {
@@ -264,7 +267,11 @@ export function ObjectList({
                           ? `Orbits ${(obj.data as SatelliteData).parentPlanet}`
                           : obj.type === 'moon'
                           ? `Moon of ${(obj.data as MoonData).parentPlanet.charAt(0).toUpperCase() + (obj.data as MoonData).parentPlanet.slice(1)}`
-                          : obj.type.charAt(0).toUpperCase() + obj.type.slice(1)
+                          : (obj.data as PlanetData).type === 'dwarf-planet'
+                          ? 'Dwarf Planet'
+                          : obj.type === 'sun'
+                          ? 'Star'
+                          : 'Planet'
                         }
                       </div>
                     </div>

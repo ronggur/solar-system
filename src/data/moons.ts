@@ -27,6 +27,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '27.3 days',
     surfaceType: 'rocky',
     missionHighlights: 'Apollo 11–17 landings (1969–1972), Artemis program planned',
+    url: 'https://science.nasa.gov/moon/',
   },
 
   // Mars's Moons
@@ -53,6 +54,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '7.65 hours',
     surfaceType: 'rocky',
     missionHighlights: 'Mars Express, Curiosity imaging',
+    url: 'https://science.nasa.gov/mars/moons/',
   },
   {
     id: 'deimos',
@@ -77,6 +79,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '30.3 hours',
     surfaceType: 'rocky',
     missionHighlights: 'Viking orbiter 1977, Mars Reconnaissance Orbiter',
+    url: 'https://science.nasa.gov/mars/moons/',
   },
 
   // Jupiter's Galilean Moons
@@ -103,6 +106,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '1.77 days',
     surfaceType: 'volcanic',
     missionHighlights: 'Voyager 1–2, Galileo, Juno (ongoing). Europa Clipper launching 2024',
+    url: 'https://science.nasa.gov/jupiter/jupiter-moons/',
   },
   {
     id: 'europa',
@@ -127,6 +131,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '3.55 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager, Galileo, Juno. Europa Clipper will fly by',
+    url: 'https://science.nasa.gov/jupiter/jupiter-moons/',
   },
   {
     id: 'ganymede',
@@ -151,6 +156,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '7.15 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager, Galileo, Juno. ESA JUICE mission (2023)',
+    url: 'https://science.nasa.gov/jupiter/jupiter-moons/',
   },
   {
     id: 'callisto',
@@ -175,6 +181,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '16.7 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager, Galileo. Potential human base site',
+    url: 'https://science.nasa.gov/jupiter/jupiter-moons/',
   },
 
   // Saturn's Major Moons
@@ -201,6 +208,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '15.9 days',
     surfaceType: 'mixed',
     missionHighlights: 'Huygens probe landed 2005, Cassini 127 flybys. Dragonfly mission 2028',
+    url: 'https://science.nasa.gov/saturn/moons/',
   },
   {
     id: 'enceladus',
@@ -225,6 +233,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '1.37 days',
     surfaceType: 'icy',
     missionHighlights: 'Cassini discovered geysers 2005. Top life-search target',
+    url: 'https://science.nasa.gov/saturn/moons/',
   },
   {
     id: 'mimas',
@@ -249,6 +258,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '0.94 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager, Cassini',
+    url: 'https://science.nasa.gov/saturn/moons/',
   },
   {
     id: 'rhea',
@@ -273,6 +283,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '4.52 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager, Cassini',
+    url: 'https://science.nasa.gov/saturn/moons/',
   },
   {
     id: 'iapetus',
@@ -297,6 +308,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '79.3 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1981, Cassini',
+    url: 'https://science.nasa.gov/saturn/moons/',
   },
 
   // Uranus's Major Moons
@@ -323,6 +335,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '8.71 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1986',
+    url: 'https://science.nasa.gov/uranus/moons/',
   },
   {
     id: 'oberon',
@@ -347,6 +360,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '13.5 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1986',
+    url: 'https://science.nasa.gov/uranus/moons/',
   },
   {
     id: 'ariel',
@@ -371,6 +385,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '2.52 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1986',
+    url: 'https://science.nasa.gov/uranus/moons/',
   },
   {
     id: 'umbriel',
@@ -395,6 +410,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '4.14 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1986',
+    url: 'https://science.nasa.gov/uranus/moons/',
   },
   {
     id: 'miranda',
@@ -419,6 +435,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '1.41 days',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 closest flyby 1986 – bizarre terrain discovered',
+    url: 'https://science.nasa.gov/uranus/moons/',
   },
 
   // Neptune's Moons
@@ -446,6 +463,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '5.88 days (retrograde)',
     surfaceType: 'icy',
     missionHighlights: 'Voyager 2 flyby 1989. Trident mission proposed',
+    url: 'https://science.nasa.gov/neptune/moons/',
   },
   {
     id: 'nereid',
@@ -470,6 +488,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '360 days',
     surfaceType: 'rocky',
     missionHighlights: 'Voyager 2 distant flyby 1989',
+    url: 'https://science.nasa.gov/neptune/moons/',
   },
 
   // Pluto's Moons
@@ -496,6 +515,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '6.39 days',
     surfaceType: 'icy',
     missionHighlights: 'New Horizons flyby 2015 – detailed imaging',
+    url: 'https://science.nasa.gov/dwarf-planets/pluto/moons/',
   },
   {
     id: 'nix',
@@ -520,6 +540,7 @@ export const moons: MoonData[] = [
     orbitalPeriod: '24.9 days',
     surfaceType: 'icy',
     missionHighlights: 'New Horizons flyby 2015',
+    url: 'https://science.nasa.gov/dwarf-planets/pluto/moons/',
   },
   {
     id: 'hydra',
@@ -544,6 +565,113 @@ export const moons: MoonData[] = [
     orbitalPeriod: '38.2 days',
     surfaceType: 'icy',
     missionHighlights: 'New Horizons flyby 2015',
+    url: 'https://science.nasa.gov/dwarf-planets/pluto/moons/',
+  },
+
+  // Haumea's Moons
+  {
+    id: 'hiiaka',
+    name: "Hiʻiaka",
+    radius: 0.05,
+    parentPlanet: 'haumea',
+    orbitDistance: 0.6,
+    orbitalSpeed: 2.2,
+    color: '#B8A898',
+    emissive: '#706858',
+    emissiveIntensity: 0.1,
+    description: "The larger of Haumea's two moons, named after the Hawaiian goddess of dance.",
+    facts: [
+      'Hiʻiaka is the larger and outer of Haumea\'s two moons',
+      'Has a water-ice surface, suggesting a possible cryovolcanic past',
+      'Orbits Haumea in about 49 days',
+      'Discovered in 2005 alongside Namaka',
+    ],
+    diameter: '320 km',
+    discoveryYear: '2005',
+    discoveredBy: 'Michael E. Brown, Chad Trujillo, David Rabinowitz',
+    orbitalPeriod: '49 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Ground-based telescopes, no spacecraft visit yet',
+    url: 'https://science.nasa.gov/dwarf-planets/haumea/',
+  },
+  {
+    id: 'namaka',
+    name: 'Namaka',
+    radius: 0.03,
+    parentPlanet: 'haumea',
+    orbitDistance: 0.9,
+    orbitalSpeed: 1.5,
+    color: '#A89888',
+    emissive: '#605048',
+    emissiveIntensity: 0.1,
+    description: "The smaller inner moon of Haumea, named after a Hawaiian water spirit.",
+    facts: [
+      'Namaka is the smaller and inner of Haumea\'s two moons',
+      'Has an eccentric orbit that brings it closer to Haumea',
+      'Orbits Haumea in about 18 days',
+      'Discovered in 2005 with Hiʻiaka',
+    ],
+    diameter: '170 km',
+    discoveryYear: '2005',
+    discoveredBy: 'Michael E. Brown, Chad Trujillo, David Rabinowitz',
+    orbitalPeriod: '18 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Ground-based telescopes, no spacecraft visit yet',
+    url: 'https://science.nasa.gov/dwarf-planets/haumea/',
+  },
+
+  // Makemake's Moon
+  {
+    id: 'mk2',
+    name: 'MK 2',
+    radius: 0.012,
+    parentPlanet: 'makemake',
+    orbitDistance: 0.5,
+    orbitalSpeed: 2.8,
+    color: '#D0C8B8',
+    emissive: '#807870',
+    emissiveIntensity: 0.1,
+    description: "Makemake's only known moon, discovered by the Hubble Space Telescope.",
+    facts: [
+      'MK 2 is the provisional name; it has not yet received an official name',
+      'Discovered in 2015 by Hubble, 9 years after Makemake',
+      'Very dark surface, unlike bright Makemake',
+      'Orbit and size are still being refined',
+    ],
+    diameter: '~160 km',
+    discoveryYear: '2015',
+    discoveredBy: 'Hubble Space Telescope Team',
+    orbitalPeriod: '~12 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Hubble discovery, no spacecraft visit yet',
+    url: 'https://science.nasa.gov/dwarf-planets/makemake/',
+  },
+
+  // Eris's Moon
+  {
+    id: 'dysnomia',
+    name: 'Dysnomia',
+    radius: 0.06,
+    parentPlanet: 'eris',
+    orbitDistance: 0.7,
+    orbitalSpeed: 2.0,
+    color: '#C8C4B8',
+    emissive: '#888480',
+    emissiveIntensity: 0.1,
+    description: "Eris's only known moon, named after the demon goddess of lawlessness.",
+    facts: [
+      'Dysnomia helped astronomers determine Eris\'s mass',
+      'Much darker than Eris, suggesting a different composition',
+      'Orbits Eris in about 16 days',
+      'Discovered in 2005, same year as Eris',
+    ],
+    diameter: '~700 km',
+    discoveryYear: '2005',
+    discoveredBy: 'Michael E. Brown, Megan E. Schwamb',
+    orbitalPeriod: '15.8 days',
+    surfaceType: 'icy',
+    missionHighlights: 'Keck Observatory discovery, no spacecraft visit yet',
+    url: 'https://science.nasa.gov/dwarf-planets/eris/',
   },
 ];
 
