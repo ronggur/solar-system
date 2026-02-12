@@ -23,6 +23,11 @@ export const planets: PlanetData[] = [
     temperature: '-173°C to 427°C',
     dayLength: '59 Earth days',
     yearLength: '88 Earth days',
+    mass: 0.055,
+    gravity: '0.38g',
+    diameter: '4,879 km',
+    atmosphere: 'Exosphere (trace helium, sodium, oxygen)',
+    interestingNumber: '18 Mercurys could fit inside Earth',
   },
   {
     id: 'venus',
@@ -46,6 +51,11 @@ export const planets: PlanetData[] = [
     temperature: '462°C',
     dayLength: '243 Earth days',
     yearLength: '225 Earth days',
+    mass: 0.815,
+    gravity: '0.91g',
+    diameter: '12,104 km',
+    atmosphere: 'CO₂ 96.5%, N₂ 3.5%',
+    interestingNumber: 'Surface pressure 92x Earth – like being 900m underwater',
   },
   {
     id: 'earth',
@@ -69,6 +79,11 @@ export const planets: PlanetData[] = [
     temperature: '-88°C to 58°C',
     dayLength: '24 hours',
     yearLength: '365.25 days',
+    mass: 1,
+    gravity: '1g',
+    diameter: '12,742 km',
+    atmosphere: 'N₂ 78%, O₂ 21%, Ar 1%',
+    interestingNumber: 'Only known planet with liquid water on the surface',
   },
   {
     id: 'mars',
@@ -92,6 +107,11 @@ export const planets: PlanetData[] = [
     temperature: '-153°C to 20°C',
     dayLength: '24.6 hours',
     yearLength: '687 Earth days',
+    mass: 0.107,
+    gravity: '0.38g',
+    diameter: '6,779 km',
+    atmosphere: 'CO₂ 95%, N₂ 3%, Ar 2%',
+    interestingNumber: 'Olympus Mons is 3x taller than Everest',
   },
   {
     id: 'jupiter',
@@ -115,6 +135,11 @@ export const planets: PlanetData[] = [
     temperature: '-110°C',
     dayLength: '9.9 hours',
     yearLength: '11.9 Earth years',
+    mass: 317.8,
+    gravity: '2.36g',
+    diameter: '139,820 km',
+    atmosphere: 'H₂ 90%, He 10%',
+    interestingNumber: '1,300 Earths could fit inside Jupiter',
   },
   {
     id: 'saturn',
@@ -138,6 +163,11 @@ export const planets: PlanetData[] = [
     temperature: '-140°C',
     dayLength: '10.7 hours',
     yearLength: '29.5 Earth years',
+    mass: 95.2,
+    gravity: '0.92g',
+    diameter: '116,460 km',
+    atmosphere: 'H₂ 96%, He 3%',
+    interestingNumber: 'Less dense than water – it would float in an ocean',
   },
   {
     id: 'uranus',
@@ -161,6 +191,11 @@ export const planets: PlanetData[] = [
     temperature: '-195°C',
     dayLength: '17.2 hours',
     yearLength: '84 Earth years',
+    mass: 14.5,
+    gravity: '0.89g',
+    diameter: '50,724 km',
+    atmosphere: 'H₂ 83%, He 15%, CH₄ 2%',
+    interestingNumber: 'First planet discovered with a telescope (1781)',
   },
   {
     id: 'neptune',
@@ -184,6 +219,11 @@ export const planets: PlanetData[] = [
     temperature: '-200°C',
     dayLength: '16.1 hours',
     yearLength: '165 Earth years',
+    mass: 17.1,
+    gravity: '1.12g',
+    diameter: '49,244 km',
+    atmosphere: 'H₂ 80%, He 19%, CH₄ 1%',
+    interestingNumber: 'Winds up to 2,100 km/h – fastest in the solar system',
   },
   {
     id: 'pluto',
@@ -208,6 +248,11 @@ export const planets: PlanetData[] = [
     temperature: '-223°C to -233°C',
     dayLength: '6.4 Earth days',
     yearLength: '248 Earth years',
+    mass: 0.0022,
+    gravity: '0.06g',
+    diameter: '2,376 km',
+    atmosphere: 'N₂ 98%, CH₄ 2% (when closest to Sun)',
+    interestingNumber: 'Pluto and Charon orbit a point outside Pluto',
   },
 ];
 
@@ -230,6 +275,9 @@ export const sunData = {
   ],
   temperature: '5,500°C (surface), 15 million°C (core)',
   type: 'Yellow Dwarf Star',
+  age: '4.6 billion years',
+  diameter: '1.39 million km',
+  mass: '1.989 × 10³⁰ kg',
 };
 
 export const scaleFactors = {

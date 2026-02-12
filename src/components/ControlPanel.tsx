@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ControlPanelProps {
   speedMultiplier: number;
@@ -48,6 +48,29 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          setIsPaused(!isPaused);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setSpeedMultiplier(Math.min(10, speedMultiplier + 0.1));
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          setSpeedMultiplier(Math.max(0.1, speedMultiplier - 0.1));
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPaused, speedMultiplier, setIsPaused, setSpeedMultiplier]);
+
   return (
     <div className="absolute bottom-6 left-6 z-50">
       <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 glow-box">
@@ -68,6 +91,7 @@ export function ControlPanel({
         {!isCollapsed && (
           <div className="space-y-4 w-64">
             {/* Playback Controls */}
+            <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -86,6 +110,8 @@ export function ControlPanel({
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
+            </div>
+            <p className="text-[10px] text-white/40">Space: pause • ← →: speed</p>
             </div>
 
             {/* Speed Control */}

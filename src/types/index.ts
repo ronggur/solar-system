@@ -12,6 +12,12 @@ export interface SunData {
   description: string;
   facts: string[];
   temperature?: string;
+  /** Age in billions of years */
+  age?: string;
+  /** Physical diameter (e.g. "1.39 million km") */
+  diameter?: string;
+  /** Mass (e.g. "1.989 × 10³⁰ kg") */
+  mass?: string;
 }
 
 export interface PlanetData {
@@ -31,6 +37,16 @@ export interface PlanetData {
   temperature?: string;
   dayLength?: string;
   yearLength?: string;
+  /** Mass in Earth masses */
+  mass?: number;
+  /** Surface gravity (e.g. "0.38g") */
+  gravity?: string;
+  /** Physical diameter (e.g. "12,742 km") */
+  diameter?: string;
+  /** Atmosphere composition */
+  atmosphere?: string;
+  /** Single striking stat for comparisons */
+  interestingNumber?: string;
 }
 
 export interface MoonData {
@@ -50,6 +66,12 @@ export interface MoonData {
   diameter?: string;
   discoveryYear?: string;
   discoveredBy?: string;
+  /** Orbital period (e.g. "27.3 days") */
+  orbitalPeriod?: string;
+  /** Surface category */
+  surfaceType?: 'icy' | 'volcanic' | 'rocky' | 'mixed';
+  /** Past or planned mission highlights */
+  missionHighlights?: string;
 }
 
 export interface SatelliteData {
@@ -68,6 +90,12 @@ export interface SatelliteData {
   type: 'space-station' | 'telescope' | 'satellite' | 'probe';
   /** URL to a real photo or illustration of the satellite (e.g. NASA, ESA, Wikimedia Commons) */
   imageUrl?: string;
+  /** Current mission status */
+  missionStatus?: 'active' | 'ended' | 'extended';
+  /** Orbital altitude (e.g. "400 km") */
+  altitude?: string;
+  /** Link to official mission page */
+  url?: string;
 }
 
 export interface CameraState {
