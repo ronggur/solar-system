@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, ChevronDown, ChevronUp, Globe, Satellite as SatelliteIcon, Moon, Filter } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Globe, Moon, Filter, Building2, Telescope, Rocket, Radio } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { planets, sunData } from '@/data/planets';
 import { satellites } from '@/data/satellites';
@@ -19,8 +19,11 @@ type ObjectType = 'sun' | 'planet' | 'satellite' | 'moon';
 
 interface FilterState {
   planets: boolean;
-  satellites: boolean;
   moons: boolean;
+  spaceStations: boolean;
+  telescopes: boolean;
+  probes: boolean;
+  navigation: boolean;
 }
 
 export function ObjectList({
@@ -36,8 +39,11 @@ export function ObjectList({
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     planets: true,
-    satellites: true,
     moons: true,
+    spaceStations: true,
+    telescopes: true,
+    probes: true,
+    navigation: true,
   });
 
   // Combine all objects for filtering
@@ -59,8 +65,15 @@ export function ObjectList({
     // Apply type filters
     filtered = filtered.filter(obj => {
       if (obj.type === 'sun' || obj.type === 'planet') return filters.planets;
-      if (obj.type === 'satellite') return filters.satellites;
       if (obj.type === 'moon') return filters.moons;
+      if (obj.type === 'satellite') {
+        const satType = (obj.data as SatelliteData).type;
+        if (satType === 'space-station') return filters.spaceStations;
+        if (satType === 'telescope') return filters.telescopes;
+        if (satType === 'probe') return filters.probes;
+        if (satType === 'satellite') return filters.navigation;
+        return true;
+      }
       return true;
     });
 
@@ -109,20 +122,30 @@ export function ObjectList({
     }
   };
 
-  const getObjectIcon = (type: ObjectType) => {
-    if (type === 'satellite') {
-      return <SatelliteIcon className="w-3 h-3" />;
+  const getObjectIcon = (type: ObjectType, data?: { type?: string }) => {
+    if (type === 'satellite' && data && 'type' in data) {
+      const t = (data as SatelliteData).type;
+      if (t === 'space-station') return <Building2 className="w-3 h-3" />;
+      if (t === 'telescope') return <Telescope className="w-3 h-3" />;
+      if (t === 'probe') return <Rocket className="w-3 h-3" />;
+      if (t === 'satellite') return <Radio className="w-3 h-3" />;
     }
-    if (type === 'moon') {
-      return <Moon className="w-3 h-3" />;
-    }
+    if (type === 'satellite') return <Rocket className="w-3 h-3" />;
+    if (type === 'moon') return <Moon className="w-3 h-3" />;
     return <Globe className="w-3 h-3" />;
   };
 
-  const getObjectTypeColor = (type: ObjectType) => {
+  const getObjectTypeColor = (type: ObjectType, data?: { type?: string }) => {
     if (type === 'sun') return 'text-yellow-400';
-    if (type === 'satellite') return 'text-green-400';
     if (type === 'moon') return 'text-amber-400';
+    if (type === 'satellite' && data && 'type' in data) {
+      const t = (data as SatelliteData).type;
+      if (t === 'space-station') return 'text-orange-400';
+      if (t === 'telescope') return 'text-violet-400';
+      if (t === 'probe') return 'text-slate-400';
+      if (t === 'satellite') return 'text-cyan-400';
+    }
+    if (type === 'satellite') return 'text-slate-400';
     return 'text-blue-400';
   };
 
@@ -186,49 +209,73 @@ export function ObjectList({
             {/* Filter Panel */}
             {showFilters && (
               <div className="bg-white/5 rounded-lg p-3 border border-white/10 space-y-2">
-                <div className="text-[10px] text-white/50 uppercase tracking-wider mb-2">Filter by type</div>
-                <div className="flex flex-wrap gap-2">
+                <div className="text-[10px] text-white/50 uppercase tracking-wider mb-2">Filter by category</div>
+                <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => toggleFilter('planets')}
                     className={`
-                      px-3 py-1.5 rounded-full text-[11px] font-medium
-                      transition-all duration-200 flex items-center gap-1.5
-                      ${filters.planets
-                        ? 'bg-blue-500/30 text-blue-400 border border-blue-400/50'
-                        : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
-                      }
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.planets ? 'bg-blue-500/30 text-blue-400 border border-blue-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
                     `}
                   >
                     <Globe className="w-3 h-3" />
                     Planets
                   </button>
                   <button
-                    onClick={() => toggleFilter('satellites')}
-                    className={`
-                      px-3 py-1.5 rounded-full text-[11px] font-medium
-                      transition-all duration-200 flex items-center gap-1.5
-                      ${filters.satellites
-                        ? 'bg-green-500/30 text-green-400 border border-green-400/50'
-                        : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
-                      }
-                    `}
-                  >
-                    <SatelliteIcon className="w-3 h-3" />
-                    Satellites
-                  </button>
-                  <button
                     onClick={() => toggleFilter('moons')}
                     className={`
-                      px-3 py-1.5 rounded-full text-[11px] font-medium
-                      transition-all duration-200 flex items-center gap-1.5
-                      ${filters.moons
-                        ? 'bg-amber-500/30 text-amber-400 border border-amber-400/50'
-                        : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'
-                      }
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.moons ? 'bg-amber-500/30 text-amber-400 border border-amber-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
                     `}
                   >
                     <Moon className="w-3 h-3" />
                     Moons
+                  </button>
+                  <button
+                    onClick={() => toggleFilter('spaceStations')}
+                    className={`
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.spaceStations ? 'bg-orange-500/30 text-orange-400 border border-orange-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
+                    `}
+                  >
+                    <Building2 className="w-3 h-3" />
+                    Stations
+                  </button>
+                  <button
+                    onClick={() => toggleFilter('telescopes')}
+                    className={`
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.telescopes ? 'bg-violet-500/30 text-violet-400 border border-violet-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
+                    `}
+                  >
+                    <Telescope className="w-3 h-3" />
+                    Telescopes
+                  </button>
+                  <button
+                    onClick={() => toggleFilter('probes')}
+                    className={`
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.probes ? 'bg-slate-500/30 text-slate-300 border border-slate-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
+                    `}
+                  >
+                    <Rocket className="w-3 h-3" />
+                    Probes
+                  </button>
+                  <button
+                    onClick={() => toggleFilter('navigation')}
+                    className={`
+                      px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
+                      transition-all duration-200
+                      ${filters.navigation ? 'bg-cyan-500/30 text-cyan-400 border border-cyan-400/50' : 'bg-white/5 text-white/40 border border-white/10 hover:bg-white/10'}
+                    `}
+                  >
+                    <Radio className="w-3 h-3" />
+                    Navigation
                   </button>
                 </div>
               </div>
@@ -255,8 +302,8 @@ export function ObjectList({
                       }
                     `}
                   >
-                    <span className={getObjectTypeColor(obj.type)}>
-                      {getObjectIcon(obj.type)}
+                    <span className={getObjectTypeColor(obj.type, obj.data)}>
+                      {getObjectIcon(obj.type, obj.data)}
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="text-white text-xs font-medium truncate">
@@ -264,7 +311,9 @@ export function ObjectList({
                       </div>
                       <div className="text-white/50 text-[10px] truncate">
                         {obj.type === 'satellite'
-                          ? `Orbits ${(obj.data as SatelliteData).parentPlanet}`
+                          ? (obj.data as SatelliteData).escapeTrajectory
+                            ? 'Escape trajectory'
+                            : `Orbits ${(obj.data as SatelliteData).parentPlanet.charAt(0).toUpperCase() + (obj.data as SatelliteData).parentPlanet.slice(1)}`
                           : obj.type === 'moon'
                           ? `Moon of ${(obj.data as MoonData).parentPlanet.charAt(0).toUpperCase() + (obj.data as MoonData).parentPlanet.slice(1)}`
                           : (obj.data as PlanetData).type === 'dwarf-planet'

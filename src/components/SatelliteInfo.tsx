@@ -196,10 +196,10 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
             <div className="bg-white/5 rounded-lg p-2 border border-white/10 col-span-2">
               <div className="flex items-center gap-2 text-white/50 text-xs mb-1">
                 <Orbit className="w-3 h-3" />
-                Orbiting
+                {satellite.escapeTrajectory ? 'Trajectory' : 'Orbiting'}
               </div>
               <div className="text-white text-xs font-medium capitalize">
-                {satellite.parentPlanet}
+                {satellite.escapeTrajectory ? 'Escape (interstellar)' : satellite.parentPlanet}
               </div>
             </div>
           </div>

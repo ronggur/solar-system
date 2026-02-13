@@ -124,7 +124,7 @@ App
 │   │   │   ├── Saturn Rings
 │   │   │   ├── Uranus Rings
 │   │   │   └── HTML Label
-│   │   ├── Satellite × 12 (with hover glow)
+│   │   ├── Satellite × 23 (with hover glow; escape trajectory for Voyager/New Horizons)
 │   │   │   ├── Orbit Path
 │   │   │   └── Satellite Model
 │   │   └── Moon × 23 (with hover glow)
@@ -316,7 +316,7 @@ interface SatelliteData {
   id: string;
   name: string;
   radius: number;
-  parentPlanet: string;
+  parentPlanet: string;  // Planet id, 'sun', or 'moon' (for LRO)
   orbitDistance: number;
   orbitalSpeed: number;
   color: string;
@@ -326,8 +326,16 @@ interface SatelliteData {
   operator: string;
   facts: string[];
   type: 'space-station' | 'telescope' | 'satellite' | 'probe';
+  imageUrl?: string;
+  missionStatus?: 'active' | 'ended' | 'extended';
+  altitude?: string;
+  url?: string;
+  escapeTrajectory?: boolean;  // If true, no closed orbit; dashed trail (Voyager, New Horizons)
 }
 ```
+
+- **parentPlanet**: Use `'sun'` for L2 telescopes (JWST, Gaia), deep-space probes (Voyager, Parker, Europa Clipper), or `'moon'` for LRO. Use planet id (e.g. `'earth'`, `'mars'`) for orbiters.
+- **escapeTrajectory**: When true, the probe is shown with a dashed line (escape path) and no orbital motion.
 
 ## 🚀 Performance Optimizations
 
@@ -515,7 +523,7 @@ export default defineConfig({
   id: 'new-satellite',
   name: 'New Satellite',
   radius: 0.05,
-  parentPlanet: 'earth',
+  parentPlanet: 'earth',  // or 'sun', 'moon', 'mars', etc.
   orbitDistance: 2,
   orbitalSpeed: 5,
   color: '#FFFFFF',
@@ -524,11 +532,18 @@ export default defineConfig({
   launchDate: '2024-01-01',
   operator: 'Space Agency',
   facts: ['...'],
-  type: 'satellite'
+  type: 'space-station' | 'telescope' | 'satellite' | 'probe',
+  missionStatus: 'active',
+  altitude: '400 km',
+  escapeTrajectory: false,  // set true for escape-trajectory probes (e.g. Voyager)
+  url: 'https://...'
 }
 ```
 
-2. Add model in `Satellite.tsx` `renderSatelliteModel()` function
+- Use **parentPlanet: 'sun'** for L2 telescopes (JWST, Gaia) or deep-space probes; **parentPlanet: 'moon'** for lunar orbiters (LRO).
+- Set **escapeTrajectory: true** for probes on escape trajectories (Voyager 1/2, New Horizons).
+
+2. Optionally add a custom 3D model in `Satellite.tsx` `renderSatelliteModel()`; otherwise the type fallback (probe/telescope/station) is used.
 
 ### Custom 3D Models
 

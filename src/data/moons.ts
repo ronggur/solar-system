@@ -78,7 +78,7 @@ export const moons: MoonData[] = [
     discoveredBy: 'Asaph Hall',
     orbitalPeriod: '30.3 hours',
     surfaceType: 'rocky',
-    missionHighlights: 'Viking orbiter 1977, Mars Reconnaissance Orbiter',
+    missionHighlights: 'Viking orbiters (1976–1980), Mars Reconnaissance Orbiter',
     url: 'https://science.nasa.gov/mars/moons/',
   },
 
@@ -105,7 +105,7 @@ export const moons: MoonData[] = [
     discoveredBy: 'Galileo Galilei',
     orbitalPeriod: '1.77 days',
     surfaceType: 'volcanic',
-    missionHighlights: 'Voyager 1–2, Galileo, Juno (ongoing). Europa Clipper launching 2024',
+    missionHighlights: 'Voyager 1–2, Galileo, Juno (ongoing). Europa Clipper launched October 2024',
     url: 'https://science.nasa.gov/jupiter/jupiter-moons/',
   },
   {

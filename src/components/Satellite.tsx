@@ -57,11 +57,34 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
   const orbitGroupRef = useRef<THREE.Group>(null);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
   const [hovered, setHovered] = useState(false);
+  const escapeAngleRef = useRef(Math.random() * Math.PI * 2);
 
   const typeColors = satelliteTypeColors[data.type];
+  const isEscape = data.escapeTrajectory === true;
 
-  // Orbit path geometry
-  const orbitGeometry = useMemo(() => {
+  // Orbit path: closed circle, or escape trail (dashed line from parent to probe)
+  const orbitLine = useMemo(() => {
+    if (isEscape) {
+      const points = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(
+          Math.cos(escapeAngleRef.current) * data.orbitDistance,
+          0,
+          Math.sin(escapeAngleRef.current) * data.orbitDistance
+        ),
+      ];
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineDashedMaterial({
+        color: typeColors.color,
+        transparent: true,
+        opacity: 0.35,
+        dashSize: 3,
+        gapSize: 2,
+      });
+      const line = new THREE.Line(geometry, material);
+      line.computeLineDistances();
+      return line;
+    }
     const points = [];
     const segments = 64;
     for (let i = 0; i <= segments; i++) {
@@ -74,39 +97,53 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
         )
       );
     }
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [data.orbitDistance]);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: typeColors.color,
+      transparent: true,
+      opacity: 0.2,
+    });
+    return new THREE.Line(geometry, material);
+  }, [data.orbitDistance, isEscape, typeColors.color]);
 
   useFrame((_, delta) => {
-    // Get parent planet position from scene
-    const planetGroup = scene.getObjectByName(`planet-${data.parentPlanet}`);
+    const planetGroup = scene.getObjectByName(
+      data.parentPlanet === 'moon' ? 'moon-moon' : `planet-${data.parentPlanet}`
+    );
 
     if (planetGroup && satelliteRef.current && orbitGroupRef.current) {
       const parentPosition = new THREE.Vector3();
       planetGroup.getWorldPosition(parentPosition);
 
-      // Update orbit visualization position
       orbitGroupRef.current.position.copy(parentPosition);
 
-      // Update satellite orbital motion
-      if (!isPaused) {
-        const newAngle = angle + data.orbitalSpeed * speedMultiplier * delta * 0.1;
-        setAngle(newAngle);
-      }
-
-      const x = Math.cos(angle) * data.orbitDistance;
-      const z = Math.sin(angle) * data.orbitDistance;
-
-      satelliteRef.current.position.set(
-        parentPosition.x + x,
-        parentPosition.y,
-        parentPosition.z + z
-      );
-    } else {
-      // Fallback: if planet not found yet, position at origin
-      if (satelliteRef.current) {
+      if (isEscape) {
+        const a = escapeAngleRef.current;
+        const x = Math.cos(a) * data.orbitDistance;
+        const z = Math.sin(a) * data.orbitDistance;
+        satelliteRef.current.position.set(
+          parentPosition.x + x,
+          parentPosition.y,
+          parentPosition.z + z
+        );
+      } else {
+        if (!isPaused) {
+          const newAngle = angle + data.orbitalSpeed * speedMultiplier * delta * 0.1;
+          setAngle(newAngle);
+        }
         const x = Math.cos(angle) * data.orbitDistance;
         const z = Math.sin(angle) * data.orbitDistance;
+        satelliteRef.current.position.set(
+          parentPosition.x + x,
+          parentPosition.y,
+          parentPosition.z + z
+        );
+      }
+    } else {
+      if (satelliteRef.current) {
+        const a = isEscape ? escapeAngleRef.current : angle;
+        const x = Math.cos(a) * data.orbitDistance;
+        const z = Math.sin(a) * data.orbitDistance;
         satelliteRef.current.position.set(x, 0, z);
       }
     }
@@ -452,20 +489,9 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
 
   return (
     <group>
-      {/* Orbit path around parent planet */}
+      {/* Orbit path (closed circle) or escape trajectory (dashed line) */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive
-          object={
-            new THREE.Line(
-              orbitGeometry,
-              new THREE.LineBasicMaterial({
-                color: typeColors.color,
-                transparent: true,
-                opacity: 0.2,
-              })
-            )
-          }
-        />
+        <primitive object={orbitLine} />
       </group>
 
       {/* Satellite group */}
