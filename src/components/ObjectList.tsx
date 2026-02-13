@@ -122,7 +122,7 @@ export function ObjectList({
     }
   };
 
-  const getObjectIcon = (type: ObjectType, data?: { type?: string }) => {
+  const getObjectIcon = (type: ObjectType, data?: SunData | PlanetData | MoonData | SatelliteData) => {
     if (type === 'satellite' && data && 'type' in data) {
       const t = (data as SatelliteData).type;
       if (t === 'space-station') return <Building2 className="w-3 h-3" />;
@@ -135,7 +135,7 @@ export function ObjectList({
     return <Globe className="w-3 h-3" />;
   };
 
-  const getObjectTypeColor = (type: ObjectType, data?: { type?: string }) => {
+  const getObjectTypeColor = (type: ObjectType, data?: SunData | PlanetData | MoonData | SatelliteData) => {
     if (type === 'sun') return 'text-yellow-400';
     if (type === 'moon') return 'text-amber-400';
     if (type === 'satellite' && data && 'type' in data) {
