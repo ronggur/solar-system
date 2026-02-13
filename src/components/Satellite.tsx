@@ -57,10 +57,18 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
   const orbitGroupRef = useRef<THREE.Group>(null);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
   const [hovered, setHovered] = useState(false);
-  const escapeAngleRef = useRef(Math.random() * Math.PI * 2);
 
   const typeColors = satelliteTypeColors[data.type];
   const isEscape = data.escapeTrajectory === true;
+
+  // Stable escape angle derived from id (pure, no Math.random in render)
+  const escapeAngle = useMemo(() => {
+    let hash = 0;
+    for (let i = 0; i < data.id.length; i++) {
+      hash = (hash << 5) - hash + data.id.charCodeAt(i);
+    }
+    return (Math.abs(hash) % 360) * (Math.PI / 180);
+  }, [data.id]);
 
   // Orbit path: closed circle, or escape trail (dashed line from parent to probe)
   const orbitLine = useMemo(() => {
@@ -68,9 +76,9 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
       const points = [
         new THREE.Vector3(0, 0, 0),
         new THREE.Vector3(
-          Math.cos(escapeAngleRef.current) * data.orbitDistance,
+          Math.cos(escapeAngle) * data.orbitDistance,
           0,
-          Math.sin(escapeAngleRef.current) * data.orbitDistance
+          Math.sin(escapeAngle) * data.orbitDistance
         ),
       ];
       const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -104,7 +112,7 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
       opacity: 0.2,
     });
     return new THREE.Line(geometry, material);
-  }, [data.orbitDistance, isEscape, typeColors.color]);
+  }, [data.orbitDistance, isEscape, typeColors.color, escapeAngle]);
 
   useFrame((_, delta) => {
     const planetGroup = scene.getObjectByName(
@@ -118,9 +126,8 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
       orbitGroupRef.current.position.copy(parentPosition);
 
       if (isEscape) {
-        const a = escapeAngleRef.current;
-        const x = Math.cos(a) * data.orbitDistance;
-        const z = Math.sin(a) * data.orbitDistance;
+        const x = Math.cos(escapeAngle) * data.orbitDistance;
+        const z = Math.sin(escapeAngle) * data.orbitDistance;
         satelliteRef.current.position.set(
           parentPosition.x + x,
           parentPosition.y,
@@ -141,7 +148,7 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
       }
     } else {
       if (satelliteRef.current) {
-        const a = isEscape ? escapeAngleRef.current : angle;
+        const a = isEscape ? escapeAngle : angle;
         const x = Math.cos(a) * data.orbitDistance;
         const z = Math.sin(a) * data.orbitDistance;
         satelliteRef.current.position.set(x, 0, z);
