@@ -1,5 +1,28 @@
 # Release Notes
 
+## Latest – Data, spacecraft & filter categories
+
+### Spacecraft & data
+
+- **23 spacecraft** (was 12): Added Parker Solar Probe, New Horizons, Europa Clipper, SOHO, BepiColombo, OSIRIS-APEX, Lucy, Psyche, Chandra, LRO, Mars Odyssey, MAVEN.
+- **Escape trajectory**: Voyager 1/2 and New Horizons use `escapeTrajectory: true` (dashed trail, no closed orbit).
+- **Orbital correctness**: JWST and Gaia at Sun–Earth L2 orbit the Sun (not Earth). LRO orbits the Moon (`parentPlanet: 'moon'`).
+- **Planet data**: Saturn 274 moons; Venus 465°C; Mercury sidereal day 58.6 Earth days; Europa Clipper launched Oct 2024; Deimos mission highlights (Viking orbiters 1976–1980).
+
+### Object list & categories
+
+- **Six filter categories**: Planets, Moons, **Space Stations**, **Telescopes**, **Probes**, **Navigation** (replacing a single “Satellites” toggle).
+- **Icons & colors** per spacecraft type (Stations, Telescopes, Probes, Navigation) in the object list.
+
+### Documentation
+
+- **README.md**: Updated features, celestial bodies list, Object List, Configuration.
+- **docs/TECHNICAL.md**: SatelliteData (escapeTrajectory, parentPlanet sun/moon), “Adding a New Satellite”.
+- **docs/ARCHITECTURE.md**: Satellite count, filter categories, SatelliteData.
+- **docs/API.md**: SatelliteData interface and properties.
+
+---
+
 ## Version 1.0.0 - Enhanced 3D Solar System Explorer
 
 ### Overview

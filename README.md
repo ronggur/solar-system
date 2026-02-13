@@ -18,9 +18,9 @@ An interactive 3D visualization of our solar system built with React, Three.js, 
 
 A stunning, interactive 3D solar system explorer that brings the cosmos to your browser. Built with cutting-edge web technologies, this application lets you:
 
-- **Explore** the entire solar system from the Sun to Pluto with realistic planet textures
-- **Discover** 23 major moons including Earth's Moon, Jupiter's Galilean moons, and Saturn's Titan
-- **Track** 12 artificial satellites and space probes from ISS to Voyager
+- **Explore** the entire solar system from the Sun to dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris) with realistic planet textures
+- **Discover** 26 major moons including Earth's Moon, Jupiter's Galilean moons, Saturn's Titan, and dwarf-planet moons
+- **Track** 23 spacecraft in four categories: Space Stations, Telescopes, Probes, and Navigation (ISS, Hubble, JWST, Voyagers, Parker Solar Probe, New Horizons, and more)
 - **Learn** fascinating facts about each celestial body with detailed information panels
 - **Navigate** freely in 3D space with smooth camera controls and animated hover effects
 - **Search** and filter objects to quickly find what you're looking for
@@ -65,9 +65,9 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 ### Celestial Bodies
 
 - **Planets**: All 8 planets from Mercury to Neptune with accurate orbital characteristics
-- **Dwarf Planets**: Pluto with its unique elliptical orbit and 17-degree inclination
+- **Dwarf Planets**: Pluto, Ceres, Haumea, Makemake, Eris (with orbits and textures)
 - **The Sun**: Central star with realistic glow effects
-- **Natural Moons**: 23 major moons including:
+- **Natural Moons**: 26 major moons including:
   - Earth: Moon
   - Mars: Phobos, Deimos
   - Jupiter: Galilean moons (Io, Europa, Ganymede, Callisto)
@@ -75,11 +75,12 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
   - Uranus: Titania, Oberon, Ariel, Umbriel, Miranda
   - Neptune: Triton, Nereid
   - Pluto: Charon, Nix, Hydra
-- **Artificial Satellites**: 12 real-world satellites and space probes including:
-  - Space Stations: ISS, Tiangong
-  - Telescopes: Hubble, James Webb, Gaia
-  - Navigation: GPS, Starlink
-  - Probes: Voyager 1 & 2, Cassini, Juno, Mars Reconnaissance Orbiter
+  - Dwarf planets: Haumea (Hiʻiaka, Namaka), Makemake (MK 2), Eris (Dysnomia)
+- **Spacecraft** (23 total), filterable by category:
+  - **Space Stations**: ISS, Tiangong
+  - **Telescopes**: Hubble, James Webb, Gaia, Chandra, SOHO
+  - **Probes**: Voyager 1 & 2 (escape trajectory), New Horizons, Parker Solar Probe, Cassini, Juno, MRO, Mars Odyssey, MAVEN, LRO, Europa Clipper, BepiColombo, OSIRIS-APEX, Lucy, Psyche
+  - **Navigation**: GPS, Starlink
 
 ### Interactive Controls
 
@@ -87,7 +88,7 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 - **Pause/Play**: Freeze or animate the solar system (automatically pauses during camera interaction)
 - **Orbit Visibility**: Toggle orbital paths on/off
 - **Visibility Toggles**: Show/hide satellites and moons independently
-- **Object Filtering**: Filter object list by type (Planets, Satellites, Moons)
+- **Object Filtering**: Filter object list by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
 - **Camera Modes**: Free exploration or follow selected planet
 - **Click to Explore**: Click any planet, moon, or satellite for detailed information
 - **Search**: Search and filter objects by name, description, or parent planet
@@ -192,12 +193,16 @@ Located in the bottom-left corner:
 
 Located in the bottom-left above the control panel:
 
-- **Search**: Search all objects by name, description, or parent planet
-- **Filter by Type**: Toggle visibility of object types in the list:
-  - Planets (blue): Sun and all planets
-  - Satellites (green): Artificial satellites and probes
-  - Moons (amber): Natural satellites
+- **Search**: Search all objects by name, description, or parent body
+- **Filter by Category**: Toggle visibility of object types in the list:
+  - **Planets** (blue): Sun and all planets (including dwarf planets)
+  - **Moons** (amber): Natural satellites
+  - **Space Stations** (rose): ISS, Tiangong
+  - **Telescopes** (violet): Hubble, JWST, Gaia, Chandra, SOHO
+  - **Probes** (slate): Planetary and deep-space missions (Voyagers, Cassini, Juno, Parker, New Horizons, LRO, etc.)
+  - **Navigation** (cyan): GPS, Starlink
 - **Quick Navigation**: Click any object to zoom and view details
+- **Escape Trajectory**: Probes like Voyager 1/2 and New Horizons show a dashed trail (no closed orbit)
 
 ### Information Panels
 
@@ -211,7 +216,11 @@ Click any celestial body to open its information panel showing:
 
 ## ⚙️ Configuration
 
-Data for all celestial bodies is in `src/data/` directory. Add or modify planets, moons, and satellites by editing those files.
+Data for all celestial bodies is in `src/data/`:
+
+- **planets.ts** – Sun, planets, dwarf planets (Ceres, Pluto, Haumea, Makemake, Eris)
+- **moons.ts** – Natural moons (26), including dwarf-planet moons
+- **satellites.ts** – Spacecraft (23) with `type`: `space-station` | `telescope` | `probe` | `satellite` (navigation). Probes can use `escapeTrajectory: true` (Voyager, New Horizons) or `parentPlanet: 'sun'` (L2 telescopes, deep-space probes). LRO uses `parentPlanet: 'moon'`.
 
 For detailed configuration guide, see [TECHNICAL.md](docs/TECHNICAL.md).
 

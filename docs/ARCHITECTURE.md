@@ -41,7 +41,7 @@ App (Root)
 │       │   ├── Orbit visualization (Line)
 │       │   ├── Planet mesh with emissive glow
 │       │   └── Hover glow animation
-│       ├── Satellite (x12 instances with hover glow)
+│       ├── Satellite (x23 instances with hover glow; escape trajectory for Voyager/New Horizons)
 │       │   ├── Parent planet tracking
 │       │   └── Satellite mesh with glow
 │       ├── Moon (x23 instances with hover glow)
@@ -60,7 +60,7 @@ App (Root)
 │   └── Reset button
 ├── ObjectList
 │   ├── Search functionality
-│   └── Filter by type (Planets, Satellites, Moons)
+│   └── Filter by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
 ├── PlanetInfo (z-index: 100)
 │   └── Sliding panel with planet details
 ├── SatelliteInfo (z-index: 100)
@@ -348,19 +348,24 @@ interface PlanetData {
 
 ```typescript
 interface SatelliteData {
-  id: string; // Unique identifier
-  name: string; // Display name
-  radius: number; // Size
-  parentPlanet: string; // Planet id to orbit
-  orbitDistance: number; // Distance from parent
-  orbitalSpeed: number; // Orbit speed
-  color: string; // Base color
-  emissive: string; // Glow color
-  description: string; // Mission description
-  launchDate: string; // Launch date
-  operator: string; // Operating agency
-  facts: string[]; // Mission facts
+  id: string;
+  name: string;
+  radius: number;
+  parentPlanet: string;  // Planet id, 'sun' (L2/deep-space), or 'moon' (LRO)
+  orbitDistance: number;
+  orbitalSpeed: number;
+  color: string;
+  emissive: string;
+  description: string;
+  launchDate: string;
+  operator: string;
+  facts: string[];
   type: 'space-station' | 'telescope' | 'satellite' | 'probe';
+  imageUrl?: string;
+  missionStatus?: 'active' | 'ended' | 'extended';
+  altitude?: string;
+  url?: string;
+  escapeTrajectory?: boolean;  // If true: dashed trail, no closed orbit (Voyager, New Horizons)
 }
 ```
 

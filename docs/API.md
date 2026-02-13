@@ -155,14 +155,14 @@ const moon: MoonData = {
 
 ### SatelliteData
 
-Represents a satellite, space station, telescope, or probe.
+Represents a spacecraft: space station, telescope, probe, or navigation satellite.
 
 ```typescript
 interface SatelliteData {
   id: string;
   name: string;
   radius: number;
-  parentPlanet: string;
+  parentPlanet: string;  // Planet id, 'sun', or 'moon'
   orbitDistance: number;
   orbitalSpeed: number;
   color: string;
@@ -172,26 +172,36 @@ interface SatelliteData {
   operator: string;
   facts: string[];
   type: 'space-station' | 'telescope' | 'satellite' | 'probe';
+  imageUrl?: string;
+  missionStatus?: 'active' | 'ended' | 'extended';
+  altitude?: string;
+  url?: string;
+  escapeTrajectory?: boolean;
 }
 ```
 
 #### Properties
 
-| Property        | Type            | Required | Description                                          |
-| --------------- | --------------- | -------- | ---------------------------------------------------- |
-| `id`            | `string`        | Yes      | Unique identifier (e.g., "iss", "hubble")            |
-| `name`          | `string`        | Yes      | Display name (e.g., "ISS", "Hubble Space Telescope") |
-| `radius`        | `number`        | Yes      | Size of the satellite                                |
-| `parentPlanet`  | `string`        | Yes      | ID of the planet to orbit                            |
-| `orbitDistance` | `number`        | Yes      | Distance from parent planet                          |
-| `orbitalSpeed`  | `number`        | Yes      | Orbit speed multiplier                               |
-| `color`         | `string`        | Yes      | Base color as hex string                             |
-| `emissive`      | `string`        | Yes      | Glow color as hex string                             |
-| `description`   | `string`        | Yes      | Mission description                                  |
-| `launchDate`    | `string`        | Yes      | Launch date (formatted string)                       |
-| `operator`      | `string`        | Yes      | Operating agency/company                             |
-| `facts`         | `string[]`      | Yes      | Array of mission facts                               |
-| `type`          | `SatelliteType` | Yes      | Type of satellite                                    |
+| Property           | Type            | Required | Description                                                                 |
+| ------------------ | --------------- | -------- | --------------------------------------------------------------------------- |
+| `id`               | `string`        | Yes      | Unique identifier (e.g., "iss", "hubble")                                   |
+| `name`             | `string`        | Yes      | Display name (e.g., "ISS", "Hubble Space Telescope")                         |
+| `radius`           | `number`        | Yes      | Size of the spacecraft                                                       |
+| `parentPlanet`     | `string`        | Yes      | Body to orbit: planet id (`earth`, `mars`, etc.), `sun` (L2/deep-space), or `moon` (lunar orbiter) |
+| `orbitDistance`    | `number`        | Yes      | Distance from parent (scene units)                                           |
+| `orbitalSpeed`     | `number`        | Yes      | Orbit speed multiplier                                                       |
+| `color`            | `string`        | Yes      | Base color as hex string                                                     |
+| `emissive`         | `string`        | Yes      | Glow color as hex string                                                     |
+| `description`      | `string`        | Yes      | Mission description                                                          |
+| `launchDate`       | `string`        | Yes      | Launch date (formatted string)                                               |
+| `operator`         | `string`        | Yes      | Operating agency/company                                                     |
+| `facts`            | `string[]`      | Yes      | Array of mission facts                                                       |
+| `type`             | `SatelliteType` | Yes      | Category (drives Object List filter)                                         |
+| `imageUrl`         | `string`        | No       | URL to mission image                                                         |
+| `missionStatus`    | `string`        | No       | `active` \| `ended` \| `extended`                                            |
+| `altitude`         | `string`        | No       | Orbital altitude (e.g., "400 km", "1.5 million km (L2)")                     |
+| `url`              | `string`        | No       | Link to official mission page                                                |
+| `escapeTrajectory` | `boolean`       | No       | If true: dashed trail, no closed orbit (e.g. Voyager 1/2, New Horizons)       |
 
 #### SatelliteType
 
@@ -200,9 +210,11 @@ type SatelliteType = 'space-station' | 'telescope' | 'satellite' | 'probe';
 ```
 
 - **space-station**: Crewed orbital facility (ISS, Tiangong)
-- **telescope**: Space-based observatory (Hubble, JWST)
-- **satellite**: Communication/navigation satellite (GPS, Starlink)
-- **probe**: Deep space or planetary probe (Voyager, Cassini)
+- **telescope**: Space-based observatory (Hubble, JWST, Gaia, Chandra, SOHO)
+- **satellite**: Communication/navigation (GPS, Starlink)
+- **probe**: Planetary or deep-space mission (Voyager, Cassini, Juno, Parker, New Horizons, LRO, etc.)
+
+Object List filter categories map to these types: **Space Stations**, **Telescopes**, **Probes**, **Navigation** (type `satellite`).
 
 #### Example
 

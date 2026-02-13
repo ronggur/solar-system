@@ -104,6 +104,8 @@ export interface SatelliteData {
   altitude?: string;
   /** Link to official mission page */
   url?: string;
+  /** If true, probe is on escape trajectory (no closed orbit; show dashed trail instead) */
+  escapeTrajectory?: boolean;
 }
 
 export interface CameraState {
