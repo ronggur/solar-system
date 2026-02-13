@@ -288,7 +288,8 @@ export function SolarSystem({
         }
       }
     }
-  }, [selectedPlanet?.id, selectedPlanet?.name, scene, handlePlanetClick]);
+  // Intentionally omit full selectedPlanet/isTransitioning to avoid redundant camera animations
+  }, [selectedPlanet?.id, selectedPlanet?.name, scene, handlePlanetClick, handleSunClick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle satellite selection from ObjectList — same POV as direct click (use actual position from scene)
   const prevSelectedSatelliteIdRef = useRef<string | null>(null);
@@ -316,7 +317,8 @@ export function SolarSystem({
         isAnimatingSatelliteFromListRef.current = false;
       }
     }
-  }, [selectedSatellite?.id, scene, handleSatelliteClick]);
+  // Intentionally omit isTransitioning/selectedSatellite to avoid redundant camera animations
+  }, [selectedSatellite?.id, scene, handleSatelliteClick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle moon selection from ObjectList — same POV as direct click (use actual position from scene)
   const prevSelectedMoonIdRef = useRef<string | null>(null);
@@ -344,7 +346,8 @@ export function SolarSystem({
         isAnimatingMoonFromListRef.current = false;
       }
     }
-  }, [selectedMoon?.id, scene, handleMoonClick]);
+  // Intentionally omit selectedMoon (use id only) to avoid redundant camera animations
+  }, [selectedMoon?.id, scene, handleMoonClick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Follow selected object (planet, satellite, or moon)
   useFrame(() => {
