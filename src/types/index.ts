@@ -106,6 +106,12 @@ export interface SatelliteData {
   url?: string;
   /** If true, probe is on escape trajectory (no closed orbit; show dashed trail instead) */
   escapeTrajectory?: boolean;
+  /** Path to 3D model file (GLB/GLTF) */
+  modelPath?: string;
+  /** Scale for 3D model */
+  modelScale?: number;
+  /** Credit URL for 3D model */
+  modelCreditUrl?: string;
 }
 
 export interface CameraState {

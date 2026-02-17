@@ -56,6 +56,10 @@ export function SolarSystem({
     onCameraInteractionChange?.(isCameraInteracting);
   }, [isCameraInteracting, onCameraInteractionChange]);
 
+  // Pause animations when any object is selected from the ObjectList
+  // so users don't lose the moving object while camera transitions
+  const isObjectSelected = selectedPlanet !== null || selectedSatellite !== null || selectedMoon !== null;
+
   // Initial camera position
   useEffect(() => {
     if (cameraRef.current) {
@@ -253,6 +257,13 @@ export function SolarSystem({
   const prevSelectedPlanetIdRef = useRef<string | null>(null);
   const isAnimatingFromListRef = useRef(false);
 
+  // Reset planet ref when planet is deselected (user clicked satellite/moon/other)
+  useEffect(() => {
+    if (!selectedPlanet) {
+      prevSelectedPlanetIdRef.current = null;
+    }
+  }, [selectedPlanet]);
+
   useEffect(() => {
     if (isTransitioning || isAnimatingFromListRef.current) return;
 
@@ -295,6 +306,13 @@ export function SolarSystem({
   const prevSelectedSatelliteIdRef = useRef<string | null>(null);
   const isAnimatingSatelliteFromListRef = useRef(false);
 
+  // Reset satellite ref when satellite is deselected (user clicked planet/moon/other)
+  useEffect(() => {
+    if (!selectedSatellite) {
+      prevSelectedSatelliteIdRef.current = null;
+    }
+  }, [selectedSatellite]);
+
   useEffect(() => {
     if (isTransitioning || isAnimatingSatelliteFromListRef.current) return;
     if (!selectedSatellite) return;
@@ -323,6 +341,13 @@ export function SolarSystem({
   // Handle moon selection from ObjectList — same POV as direct click (use actual position from scene)
   const prevSelectedMoonIdRef = useRef<string | null>(null);
   const isAnimatingMoonFromListRef = useRef(false);
+
+  // Reset moon ref when moon is deselected (user clicked planet/satellite/other)
+  useEffect(() => {
+    if (!selectedMoon) {
+      prevSelectedMoonIdRef.current = null;
+    }
+  }, [selectedMoon]);
 
   useEffect(() => {
     if (isAnimatingMoonFromListRef.current) return;
@@ -413,7 +438,7 @@ export function SolarSystem({
           <Planet
             data={planet}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting}
+            isPaused={isPaused || isCameraInteracting || isObjectSelected}
             onClick={handlePlanetClick}
             showOrbits={showOrbits}
           />
@@ -427,7 +452,7 @@ export function SolarSystem({
             key={satellite.id}
             data={satellite}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting}
+            isPaused={isPaused || isCameraInteracting || isObjectSelected}
             onClick={handleSatelliteClick}
           />
         ))}
@@ -439,16 +464,16 @@ export function SolarSystem({
             key={moon.id}
             data={moon}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting}
+            isPaused={isPaused || isCameraInteracting || isObjectSelected}
             onClick={handleMoonClick}
           />
         ))}
 
       {/* Asteroid Belt */}
-      <AsteroidBelt isPaused={isPaused || isCameraInteracting} />
+      <AsteroidBelt isPaused={isPaused || isCameraInteracting || isObjectSelected} />
 
       {/* Kuiper Belt */}
-      <KuiperBelt isPaused={isPaused || isCameraInteracting} />
+      <KuiperBelt isPaused={isPaused || isCameraInteracting || isObjectSelected} />
     </>
   );
 }
