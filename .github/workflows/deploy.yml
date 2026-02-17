@@ -1,6 +1,12 @@
 name: Deploy Solar System to Vultr
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   release:
     types: [published] # Auto-deploy on release
   workflow_dispatch: # Manual trigger from GitHub UI
@@ -74,6 +80,7 @@ jobs:
           VITE_APP_VERSION: ${{ steps.version.outputs.version }}
 
       - name: 📦 Create deployment archive
+        if: github.event_name != 'pull_request'
         run: |
           echo "📂 Files to archive:"
           ls -la dist/
@@ -86,6 +93,7 @@ jobs:
           tar -tzf deploy.tar.gz | head -20
 
       - name: 💾 Upload build artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: deploy-archive
@@ -97,6 +105,7 @@ jobs:
     name: 🚀 Deploy to Vultr
     runs-on: ubuntu-latest
     needs: build
+    if: github.event_name != 'pull_request'
     environment: production
 
     steps:

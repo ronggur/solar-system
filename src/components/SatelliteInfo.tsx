@@ -19,6 +19,12 @@ function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
+  // Reset state when satellite changes
+  useEffect(() => {
+    setLoaded(false);
+    setError(false);
+  }, [satellite.id]);
+
   if (!satellite.imageUrl) return null;
 
   // In dev, Vite serves public at root, so use relative path (/satellites/...).
@@ -28,7 +34,7 @@ function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
   const imageSrc = baseUrl ? `${baseUrl}${satellite.imageUrl}` : `/${satellite.imageUrl}`;
 
   return (
-    <div className="relative w-full aspect-video bg-white/5 rounded-lg overflow-hidden border border-white/10">
+    <div className="relative w-full aspect-video bg-white/5 rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
       {!loaded && !error && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
@@ -42,7 +48,7 @@ function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
       <img
         src={imageSrc}
         alt={satellite.name}
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
+        className={`size-auto h-full w-auto object-cover transition-opacity duration-300 ${
           loaded && !error ? 'opacity-100' : 'opacity-0'
         }`}
         onLoad={() => setLoaded(true)}
@@ -225,6 +231,20 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
               ))}
             </ul>
           </div>
+
+
+
+          {/* 3D Model Credit */}
+          {satellite.modelCreditUrl && (
+            <a
+              href={satellite.modelCreditUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-left text-white/40 text-[11px] italic hover:text-white/60 transition-colors"
+            >
+              3D model source
+            </a>
+          )}
 
           {/* Official link */}
           {satellite.url && (

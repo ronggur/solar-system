@@ -1,8 +1,8 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, Suspense } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SatelliteData } from '@/types';
-import { Html } from '@react-three/drei';
+import { Html, useGLTF } from '@react-three/drei';
 import { satelliteTypeColors } from '@/data/satellites';
 
 // Animated glow mesh component for satellites
@@ -36,12 +36,20 @@ function HoverGlowMesh({
       <meshBasicMaterial
         color={color}
         transparent
-        opacity={0.4 + Math.sin(pulsePhase) * 0.15}
+        opacity={0.1 + Math.sin(pulsePhase) * 0.05}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
     </mesh>
   );
+}
+
+// GLB Model loader component
+function GLBModel({ path, scale = 1 }: { path: string; scale?: number }) {
+  const { scene } = useGLTF(path);
+  const clonedScene = useMemo(() => scene.clone(true), [scene]);
+
+  return <primitive object={clonedScene} scale={scale} />;
 }
 
 interface SatelliteProps {
@@ -177,7 +185,16 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
 
   // Shape models closer to real spacecraft (simplified silhouettes)
   const renderSatelliteModel = () => {
-    const { id, type, color } = data;
+    const { id, type, color, modelPath, modelScale } = data;
+
+    // ---- GLB models with modelScale from data ----
+    if (modelPath && modelScale) {
+      return (
+        <Suspense fallback={null}>
+          <GLBModel path={modelPath} scale={modelScale} />
+        </Suspense>
+      );
+    }
 
     // ---- Space stations ----
     if (id === 'iss') {
@@ -524,7 +541,7 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
           <meshBasicMaterial
             color={typeColors.glow}
             transparent
-            opacity={0.3}
+            opacity={0.05}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
           />
