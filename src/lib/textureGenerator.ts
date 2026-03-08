@@ -356,6 +356,134 @@ export function generateEarthTexture(): THREE.CanvasTexture {
   return texture;
 }
 
+// Generate procedural moon texture based on real surface appearance
+// Research: NASA, Voyager, Cassini, New Horizons imagery and spectral data
+export function generateMoonTexture(
+  moonId: string,
+  baseColor: string,
+  surfaceType: 'rocky' | 'icy' | 'volcanic' | 'mixed' = 'icy',
+  options?: { twoTone?: boolean; polarCap?: string }
+): THREE.CanvasTexture {
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not get canvas context');
+
+  // Deterministic seed from moonId
+  const seed = moonId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rnd = (n: number) => ((Math.sin(seed * n) * 0.5 + 0.5) * 1000) % 1;
+
+  const base = new THREE.Color(baseColor);
+
+  // Fill base
+  ctx.fillStyle = baseColor;
+  ctx.fillRect(0, 0, size, size);
+
+  const imageData = ctx.getImageData(0, 0, size, size);
+  const data = imageData.data;
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      const u = x / size;
+      const v = y / size;
+
+      let r = base.r * 255;
+      let g = base.g * 255;
+      let b = base.b * 255;
+
+      // Per-pixel noise (deterministic)
+      const nx = (x + seed * 7) * 0.02;
+      const ny = (y + seed * 11) * 0.02;
+      const noise =
+        (Math.sin(nx) * Math.cos(ny) + Math.sin(nx * 2 + 1) * Math.cos(ny * 2 + 2)) * 0.5 + 0.5;
+
+      if (surfaceType === 'rocky') {
+        // Phobos, Deimos, Nereid: gray-brown, cratered, grooves
+        const craterNoise = Math.sin((x + seed) * 0.03) * Math.cos((y + seed * 2) * 0.03);
+        const variation = (noise - 0.5) * 40 + craterNoise * 25;
+        r = Math.max(0, Math.min(255, r + variation));
+        g = Math.max(0, Math.min(255, g + variation * 0.9));
+        b = Math.max(0, Math.min(255, b + variation * 0.7));
+      } else if (surfaceType === 'volcanic') {
+        // Io: sulfur yellows, oranges, reds, lava flows
+        const lava = Math.sin(u * Math.PI * 6 + seed) * Math.cos(v * Math.PI * 4 + seed * 0.7);
+        const sulfur = noise > 0.6 ? 1 : noise > 0.3 ? 0.5 : 0;
+        r = Math.min(255, r + 80 * sulfur + lava * 30);
+        g = Math.min(255, g + 60 * sulfur + lava * 10);
+        b = Math.max(0, Math.min(255, b - 20 * sulfur + lava * 5));
+      } else if (surfaceType === 'mixed') {
+        // Titan: orange-brown haze, methane lakes
+        const haze = 0.7 + noise * 0.3;
+        r = Math.min(255, r * haze + 30);
+        g = Math.min(255, g * haze);
+        b = Math.max(0, b * haze - 20);
+      } else {
+        // icy: Europa, Ganymede, Callisto, Enceladus, etc.
+        if (options?.twoTone) {
+          // Iapetus: dark leading / bright trailing
+          const hemisphere = u < 0.5 ? 0.3 : 1;
+          r *= hemisphere + noise * 0.2;
+          g *= hemisphere + noise * 0.2;
+          b *= hemisphere + noise * 0.2;
+        } else if (options?.polarCap) {
+          // Charon: gray with reddish polar cap
+          const cap = v < 0.15 || v > 0.85 ? 1 : 0;
+          r = Math.min(255, r + (cap * 40));
+          g = Math.max(0, g - (cap * 10));
+          b = Math.max(0, b - (cap * 15));
+        } else {
+          const frost = noise > 0.7 ? 1.15 : 1;
+          const dark = noise < 0.25 ? 0.85 : 1;
+          r = Math.max(0, Math.min(255, r * frost * dark + (noise - 0.5) * 40));
+          g = Math.max(0, Math.min(255, g * frost * dark + (noise - 0.5) * 40));
+          b = Math.max(0, Math.min(255, b * frost * dark + (noise - 0.5) * 40));
+        }
+      }
+
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+      data[i + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  // Add craters for rocky/icy
+  if (surfaceType === 'rocky' || surfaceType === 'icy') {
+    const craterCount = surfaceType === 'rocky' ? 35 : 25;
+    for (let c = 0; c < craterCount; c++) {
+      const cx = (rnd(c * 3) * 0.8 + 0.1) * size;
+      const cy = (rnd(c * 5 + 1) * 0.8 + 0.1) * size;
+      const radius = (rnd(c * 7 + 2) * 15 + 3) | 0;
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      grad.addColorStop(0, 'rgba(0,0,0,0.35)');
+      grad.addColorStop(0.5, 'rgba(0,0,0,0.1)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Triton: pinkish tint overlay
+  if (moonId === 'triton') {
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = 'rgba(255, 180, 180, 0.15)';
+    ctx.fillRect(0, 0, size, size);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
 // Cache for generated textures
 const textureCache = new Map<string, THREE.CanvasTexture>();
 
@@ -374,4 +502,21 @@ export function clearTextureCache() {
     texture.dispose();
   });
   textureCache.clear();
+}
+
+/** Get or create cached procedural moon texture */
+export function getCachedMoonTexture(
+  moonId: string,
+  baseColor: string,
+  surfaceType?: 'rocky' | 'icy' | 'volcanic' | 'mixed',
+  options?: { twoTone?: boolean; polarCap?: string }
+): THREE.CanvasTexture {
+  const key = `moon-${moonId}`;
+  if (!textureCache.has(key)) {
+    textureCache.set(
+      key,
+      generateMoonTexture(moonId, baseColor, surfaceType || 'icy', options)
+    );
+  }
+  return textureCache.get(key)!;
 }
