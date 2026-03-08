@@ -240,7 +240,7 @@ export const moons: MoonData[] = [
     name: 'Mimas',
     radius: 0.12,
     parentPlanet: 'saturn',
-    orbitDistance: 3.5,
+    orbitDistance: 4.2,
     orbitalSpeed: 4,
     color: '#C4C4C4',
     emissive: '#888888',

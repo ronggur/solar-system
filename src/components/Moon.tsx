@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { TextureLoader } from 'three';
 import type { MoonData } from '@/types';
 import { Html } from '@react-three/drei';
+import { getCachedMoonTexture } from '@/lib/textureGenerator';
 
 // Animated glow mesh component
 function HoverGlowMesh({
@@ -86,8 +87,8 @@ function TexturedMoonMesh({
   );
 }
 
-// Fallback colored moon mesh
-function ColoredMoonMesh({
+// Procedural moon mesh (generated texture based on real surface appearance)
+function ProceduralMoonMesh({
   data,
   hovered,
   meshRef,
@@ -96,19 +97,31 @@ function ColoredMoonMesh({
   hovered: boolean;
   meshRef: React.RefObject<THREE.Mesh | null>;
 }) {
+  const texture = useMemo(() => {
+    const opts: { twoTone?: boolean; polarCap?: string } = {};
+    if (data.id === 'iapetus') opts.twoTone = true;
+    if (data.id === 'charon') opts.polarCap = '#8B4545';
+    return getCachedMoonTexture(
+      data.id,
+      data.color,
+      data.surfaceType as 'rocky' | 'icy' | 'volcanic' | 'mixed' | undefined,
+      opts
+    );
+  }, [data.id, data.color, data.surfaceType]);
+
+  const processedTexture = useMemo(() => {
+    const t = texture.clone();
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.needsUpdate = true;
+    return t;
+  }, [texture]);
+
   return (
     <group>
       <mesh ref={meshRef}>
-        <sphereGeometry args={[data.radius, 24, 24]} />
-        <meshStandardMaterial
-          color={data.color}
-          emissive={data.emissive}
-          emissiveIntensity={data.emissiveIntensity || 0.1}
-          roughness={0.8}
-          metalness={0.1}
-        />
+        <sphereGeometry args={[data.radius, 32, 32]} />
+        <meshStandardMaterial map={processedTexture} roughness={0.8} metalness={0.1} />
       </mesh>
-      {/* Animated hover glow effect */}
       <HoverGlowMesh hovered={hovered} radius={data.radius} color={data.color} />
     </group>
   );
@@ -218,15 +231,15 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
           document.body.style.cursor = 'auto';
         }}
       >
-        {/* Moon sphere - textured or colored */}
+        {/* Moon sphere - file texture, procedural, or colored fallback */}
         {data.texture ? (
           <Suspense
-            fallback={<ColoredMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />}
+            fallback={<ProceduralMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />}
           >
             <TexturedMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />
           </Suspense>
         ) : (
-          <ColoredMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />
+          <ProceduralMoonMesh data={data} hovered={hovered} meshRef={moonMeshRef} />
         )}
 
         {/* Subtle glow */}
