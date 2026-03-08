@@ -56,9 +56,8 @@ export function SolarSystem({
     onCameraInteractionChange?.(isCameraInteracting);
   }, [isCameraInteracting, onCameraInteractionChange]);
 
-  // Pause animations when any object is selected from the ObjectList
-  // so users don't lose the moving object while camera transitions
-  const isObjectSelected = selectedPlanet !== null || selectedSatellite !== null || selectedMoon !== null;
+  // Pause animations only during camera transition (not while object stays selected)
+  // so users can resume movements after zoom completes
 
   // Initial camera position
   useEffect(() => {
@@ -438,7 +437,7 @@ export function SolarSystem({
           <Planet
             data={planet}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting || isObjectSelected}
+            isPaused={isPaused || isCameraInteracting || isTransitioning}
             onClick={handlePlanetClick}
             showOrbits={showOrbits}
           />
@@ -452,7 +451,7 @@ export function SolarSystem({
             key={satellite.id}
             data={satellite}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting || isObjectSelected}
+            isPaused={isPaused || isCameraInteracting || isTransitioning}
             onClick={handleSatelliteClick}
           />
         ))}
@@ -464,16 +463,16 @@ export function SolarSystem({
             key={moon.id}
             data={moon}
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused || isCameraInteracting || isObjectSelected}
+            isPaused={isPaused || isCameraInteracting || isTransitioning}
             onClick={handleMoonClick}
           />
         ))}
 
       {/* Asteroid Belt */}
-      <AsteroidBelt isPaused={isPaused || isCameraInteracting || isObjectSelected} />
+      <AsteroidBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
 
       {/* Kuiper Belt */}
-      <KuiperBelt isPaused={isPaused || isCameraInteracting || isObjectSelected} />
+      <KuiperBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
     </>
   );
 }
