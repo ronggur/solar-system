@@ -1,15 +1,8 @@
 name: Deploy Solar System to Vultr
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   release:
-    types: [published] # Auto-deploy on release
-  workflow_dispatch: # Manual trigger from GitHub UI
+    types: [published]
 
 env:
   NODE_VERSION: "20"
@@ -49,8 +42,6 @@ jobs:
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch all history and tags for version detection
 
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -64,11 +55,7 @@ jobs:
       - name: 📌 Extract version from release tag
         id: version
         run: |
-          if [ "${{ github.event_name }}" = "release" ] && [ -n "${{ github.event.release.tag_name }}" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-          else
-            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
-          fi
+          VERSION="${{ github.event.release.tag_name }}"
           VERSION=${VERSION#v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "📌 Extracted version: $VERSION"
@@ -80,7 +67,6 @@ jobs:
           VITE_APP_VERSION: ${{ steps.version.outputs.version }}
 
       - name: 📦 Create deployment archive
-        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         run: |
           echo "📂 Files to archive:"
           ls -la dist/
@@ -93,7 +79,6 @@ jobs:
           tar -tzf deploy.tar.gz | head -20
 
       - name: 💾 Upload build artifact
-        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: deploy-archive
@@ -105,7 +90,6 @@ jobs:
     name: 🚀 Deploy to Vultr
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     environment: production
 
     steps:
