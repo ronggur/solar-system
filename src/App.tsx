@@ -1,4 +1,4 @@
-import { useState, useCallback, Suspense } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
 import * as THREE from 'three';
@@ -23,6 +23,27 @@ function App() {
   const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
   const [selectedMoon, setSelectedMoon] = useState<MoonData | null>(null);
   const [isCameraInteracting, setIsCameraInteracting] = useState(false);
+  const [resumeWhileSelected, setResumeWhileSelected] = useState(false);
+
+  const isObjectSelected =
+    selectedPlanet !== null || selectedSatellite !== null || selectedMoon !== null;
+  const effectivePaused =
+    isPaused || isCameraInteracting || (isObjectSelected && !resumeWhileSelected);
+
+  // Reset resume override when selection clears
+  useEffect(() => {
+    if (!isObjectSelected) setResumeWhileSelected(false);
+  }, [isObjectSelected]);
+
+  const handlePauseToggle = useCallback(() => {
+    if (effectivePaused) {
+      setIsPaused(false);
+      setResumeWhileSelected(true);
+    } else {
+      setIsPaused(true);
+      setResumeWhileSelected(false);
+    }
+  }, [effectivePaused]);
 
   const handleReset = useCallback(() => {
     window.resetSolarSystemCamera?.();
@@ -81,7 +102,7 @@ function App() {
         <Suspense fallback={null}>
           <SolarSystem
             speedMultiplier={speedMultiplier}
-            isPaused={isPaused}
+            isPaused={effectivePaused}
             showOrbits={showOrbits}
             selectedPlanet={selectedPlanet}
             onPlanetSelect={handlePlanetSelect}
@@ -130,8 +151,8 @@ function App() {
       <ControlPanel
         speedMultiplier={speedMultiplier}
         setSpeedMultiplier={setSpeedMultiplier}
-        isPaused={isPaused || isCameraInteracting}
-        setIsPaused={setIsPaused}
+        isPaused={effectivePaused}
+        onPauseToggle={handlePauseToggle}
         showOrbits={showOrbits}
         setShowOrbits={setShowOrbits}
         showSatellites={showSatellites}

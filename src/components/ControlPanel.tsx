@@ -19,7 +19,7 @@ interface ControlPanelProps {
   speedMultiplier: number;
   setSpeedMultiplier: (value: number) => void;
   isPaused: boolean;
-  setIsPaused: (value: boolean) => void;
+  onPauseToggle: () => void;
   showOrbits: boolean;
   setShowOrbits: (value: boolean) => void;
   showSatellites: boolean;
@@ -35,7 +35,7 @@ export function ControlPanel({
   speedMultiplier,
   setSpeedMultiplier,
   isPaused,
-  setIsPaused,
+  onPauseToggle,
   showOrbits,
   setShowOrbits,
   showSatellites,
@@ -55,7 +55,7 @@ export function ControlPanel({
       switch (e.key) {
         case ' ':
           e.preventDefault();
-          setIsPaused(!isPaused);
+          onPauseToggle();
           break;
         case 'ArrowRight':
           e.preventDefault();
@@ -69,7 +69,7 @@ export function ControlPanel({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPaused, speedMultiplier, setIsPaused, setSpeedMultiplier]);
+  }, [speedMultiplier, onPauseToggle, setSpeedMultiplier]);
 
   return (
     <div className="absolute bottom-6 left-6 z-50">
@@ -96,7 +96,7 @@ export function ControlPanel({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsPaused(!isPaused)}
+                onClick={onPauseToggle}
                 className="flex-1 bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/40 text-white"
               >
                 {isPaused ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
