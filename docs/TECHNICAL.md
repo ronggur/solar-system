@@ -34,7 +34,10 @@ solar-system/
 │   ├── index.css          # Global styles
 │   └── main.tsx           # Entry point
 ├── public/               # Static assets
-│   └── textures/         # Planet textures (WebP format)
+│   ├── textures/         # Planet / belt textures (WebP; Saturn ring PNG)
+│   ├── satellites/       # Spacecraft panel images (WebP)
+│   └── 3d-objects/
+│       └── satellites/   # GLB models (optional per satellite `modelPath`)
 ├── dist/                 # Production build
 ├── index.html            # HTML entry
 ├── package.json         # Dependencies
@@ -80,7 +83,7 @@ solar-system/
   - PerspectiveCamera component
   - Html for 3D labels
   - Loader for 3D assets
-  - useTexture for planet textures
+  - `TextureLoader` via `useLoader` for planet/sun/moon/belt textures; `useGLTF` for satellite GLBs
 
 - **GSAP 3.14.2**
   - Camera animation transitions
@@ -117,21 +120,21 @@ App
 │   ├── SolarSystem
 │   │   ├── Starfield
 │   │   ├── Sun (with point light)
-│   │   ├── Planet × 9 (with textures and hover glow)
+│   │   ├── Planet × 13 (8 planets + 5 dwarf planets; textures and hover glow)
 │   │   │   ├── Orbit Path
 │   │   │   ├── Planet Mesh (with emissive glow)
 │   │   │   ├── Atmosphere Glow
 │   │   │   ├── Saturn Rings
 │   │   │   ├── Uranus Rings
 │   │   │   └── HTML Label
-│   │   ├── Satellite × 23 (with hover glow; escape trajectory for Voyager/New Horizons)
+│   │   ├── Satellite × 24 (GLB or procedural; staggered GLB load; escape trajectory for Voyager/New Horizons)
 │   │   │   ├── Orbit Path
 │   │   │   └── Satellite Model
-│   │   └── Moon × 23 (with hover glow)
+│   │   └── Moon × 27 (with hover glow)
 │   │       ├── Orbit Path
 │   │       └── Moon Mesh
-│   ├── AsteroidBelt (InstancedMesh, frustumCulled: false)
-│   └── KuiperBelt (InstancedMesh, frustumCulled: false)
+│   ├── AsteroidBelt (InstancedMesh + texture; frustumCulled: false)
+│   └── KuiperBelt (InstancedMesh + texture; frustumCulled: false)
 ├── ControlPanel (shows pause state during camera interaction)
 ├── ObjectList
 ├── PlanetInfo (z-index: 100)
@@ -342,7 +345,8 @@ interface SatelliteData {
 ### Rendering Optimizations
 
 1. **Instanced Rendering**
-   - Asteroid belt: 200+ asteroids in single draw call
+   - Asteroid / Kuiper belts: instanced meshes with shared textures (Ceres / Pluto); 200 + 400 instances
+   - Satellite GLBs: staggered requests; selected satellite loads immediately
    - Kuiper belt: 400+ objects in single draw call
    - Both use `frustumCulled: false` to prevent disappearing when panning
 
@@ -421,19 +425,27 @@ No environment variables required. The application runs standalone.
 ### Build Configuration
 
 ```typescript
-// vite.config.ts
+// vite.config.ts (simplified; see repo for imports)
 export default defineConfig({
-  plugins: [react()],
+  base: '/solar-system/',
+  plugins: [inspectAttr(), react()], // inspectAttr from kimi-plugin-inspect-react (dev)
   resolve: {
     alias: {
-      '@': '/src',
+      '@': path.resolve(__dirname, './src'),
     },
-  },
-  optimizeDeps: {
-    include: ['three'],
   },
 });
 ```
+
+Use `import.meta.env.BASE_URL` when building paths to files under `public/` (textures, GLBs, satellite images).
+
+### NPM scripts (assets)
+
+| Script | Purpose |
+|--------|---------|
+| `download-satellite-images` | Fetch Wikimedia images into `public/satellites/` |
+| `optimize-satellite-images` | WebP resize/compress for panel thumbnails (ImageMagick) |
+| `compress-satellite-glbs` | `gltf-transform optimize` on `public/3d-objects/satellites/*.glb` |
 
 ### TypeScript Configuration
 
@@ -543,7 +555,7 @@ export default defineConfig({
 - Use **parentPlanet: 'sun'** for L2 telescopes (JWST, Gaia) or deep-space probes; **parentPlanet: 'moon'** for lunar orbiters (LRO).
 - Set **escapeTrajectory: true** for probes on escape trajectories (Voyager 1/2, New Horizons).
 
-2. Optionally add a custom 3D model in `Satellite.tsx` `renderSatelliteModel()`; otherwise the type fallback (probe/telescope/station) is used.
+2. Prefer **`modelPath`** + **`modelScale`** in `satellites.ts` pointing to `public/3d-objects/satellites/your.glb` (URLs resolve with Vite `base`). Optionally extend `renderSatelliteModel()` for procedural-only craft. Run `npm run compress-satellite-glbs` after adding GLBs to shrink files.
 
 ### Custom 3D Models
 

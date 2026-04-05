@@ -417,7 +417,8 @@ export const moons: MoonData[] = [
     name: 'Miranda',
     radius: 0.12,
     parentPlanet: 'uranus',
-    orbitDistance: 2.5,
+    // Must exceed Uranus scene radius (2.5) + moon radius or the moon intersects the planet (z-fighting).
+    orbitDistance: 3.15,
     orbitalSpeed: 4,
     color: '#B0A8A0',
     emissive: '#787068',

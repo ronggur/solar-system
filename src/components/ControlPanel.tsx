@@ -111,7 +111,9 @@ export function ControlPanel({
                 <RotateCcw className="w-4 h-4" />
               </Button>
             </div>
-            <p className="text-[10px] text-white/40">Space: pause • ← →: speed</p>
+            <p className="text-[10px] text-white/40">
+              Space: pause • ← →: speed • ↑ ↓: objects
+            </p>
             </div>
 
             {/* Speed Control */}

@@ -32,23 +32,23 @@ App (Root)
 │       ├── PerspectiveCamera (Three.js camera)
 │       ├── OrbitControls (User camera control with onStart/onEnd callbacks)
 │       ├── Lighting
-│       │   ├── ambientLight (0.15 intensity)
-│       │   └── pointLight (sun position, intensity 200)
+│       │   ├── ambientLight (0.02 scene fill)
+│       │   └── Sun group: pointLight (intensity 200, decay 1) + ambientLight (0.15) for visibility
 │       ├── Starfield (5000 point particles)
 │       ├── Sun
 │       │   └── Sphere mesh with glow material
-│       ├── Planet (x9 instances with textures and hover glow)
+│       ├── Planet (×13: 8 planets + 5 dwarf planets, textures and hover glow)
 │       │   ├── Orbit visualization (Line)
 │       │   ├── Planet mesh with emissive glow
 │       │   └── Hover glow animation
-│       ├── Satellite (x23 instances with hover glow; escape trajectory for Voyager/New Horizons)
-│       │   ├── Parent planet tracking
+│       ├── Satellite (×24; GLB models when modelPath set — staggered load + placeholder until ready)
+│       │   ├── Parent planet / sun / moon tracking
 │       │   └── Satellite mesh with glow
-│       ├── Moon (x23 instances with hover glow)
+│       ├── Moon (×27)
 │       │   ├── Parent planet tracking
 │       │   └── Moon mesh with glow
-│       ├── AsteroidBelt (InstancedMesh, frustumCulled: false)
-│       └── KuiperBelt (InstancedMesh, frustumCulled: false)
+│       ├── AsteroidBelt (InstancedMesh + Ceres texture; Suspense; frustumCulled: false)
+│       └── KuiperBelt (InstancedMesh + Pluto texture; Suspense; frustumCulled: false)
 ├── Loader (R3F loading screen)
 ├── ControlPanel
 │   ├── Speed slider (0.1x - 10x)
@@ -60,7 +60,9 @@ App (Root)
 │   └── Reset button
 ├── ObjectList
 │   ├── Search functionality
-│   └── Filter by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
+│   ├── Filter by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
+│   ├── All / None category toggles
+│   └── Keyboard: ArrowUp/ArrowDown cycle filtered list (when search input not focused)
 ├── PlanetInfo (z-index: 100)
 │   └── Sliding panel with planet details
 ├── SatelliteInfo (z-index: 100)
@@ -217,23 +219,22 @@ useFrame((state, delta) => {
 
 **Texture Support:**
 
-- Uses @react-three/drei useTexture hook
-- Supports WebP format for better compression
-- Falls back to color if texture not available
+- Uses `useLoader(TextureLoader, …)` from React Three Fiber (WebP textures; Earth day/night; Saturn rings in inner `Suspense` with solid ring fallback)
+- Colored mesh fallback while textures load (`Suspense` + `ColoredPlanetMesh`)
 
 ### Satellite.tsx (Satellite Rendering)
 
 **Responsibilities:**
 
-- Rendering satellite meshes with 3D models
-- Orbiting parent planet
+- Rendering satellite meshes (procedural shapes and/or GLB via `useGLTF`, resolved with Vite `base` URL)
+- Orbiting parent planet, sun, or moon
 - Tracking parent planet position
 - Click interaction handling
 - Hover glow animation
 
 **Key Logic:**
 
-- Receives parent planet position from SolarSystem
+- Receives parent body position from scene (`planet-*`, `moon-*`, etc.)
 - Calculates local orbit around parent
 - Position = parent position + orbital offset
 - Independent orbital speed control
@@ -265,10 +266,9 @@ useFrame((state, delta) => {
 
 **Visual Effects:**
 
-- Base sphere (radius 6)
-- Emissive material for self-illumination
-- Additional point light at center
-- Large glowing outer sphere for corona effect
+- Textured or colored sphere (`sunData.radius` = 6)
+- Emissive / texture-driven surface
+- Point light and fill ambient at center (see Lighting Strategy)
 
 ### Starfield.tsx (Background Stars)
 
@@ -366,6 +366,9 @@ interface SatelliteData {
   altitude?: string;
   url?: string;
   escapeTrajectory?: boolean;  // If true: dashed trail, no closed orbit (Voyager, New Horizons)
+  modelPath?: string;         // e.g. 3d-objects/satellites/iss.glb (under public/)
+  modelScale?: number;
+  modelCreditUrl?: string;
 }
 ```
 
@@ -599,19 +602,15 @@ y = sin(angle) * distance * sin(inclination);
 
 ## Lighting Strategy
 
-### Ambient Light
+### Scene Ambient (`SolarSystem`)
 
-- Intensity: 0.15 (increased from 0.1 for better visibility)
-- Purpose: Base illumination so planets are visible
-- Prevents completely black shadowed sides
+- Intensity: **0.02** — minimal fill so unlit areas stay deep-space dark
 
-### Point Light (Sun)
+### Sun Group (`Sun.tsx`)
 
-- Position: (0, 0, 0) at sun center
-- Intensity: 200 (reduced from 300 for better texture visibility)
-- Distance: 300 units
-- Decay: 1
-- Purpose: Main light source simulating sunlight
+- **Point light**: position (0, 0, 0), intensity **200**, **distance: 0** (unbounded), **decay: 1** (linear falloff)
+- **Ambient light**: intensity **0.15** on the Sun group for readable planet/moon shading
+- Purpose: Main “sunlight” plus fill so day sides and textures remain visible
 
 ### Emissive Materials
 
@@ -647,14 +646,17 @@ _Note: These are defined but not currently applied. Actual scaling is done direc
 
 ```typescript
 export default defineConfig({
-  plugins: [react()],
+  base: '/solar-system/', // GitHub Pages / subpath; affects public asset URLs
+  plugins: [inspectAttr(), react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // @ alias for imports
+      '@': path.resolve(__dirname, './src'),
     },
   },
 });
 ```
+
+Public assets (textures, GLBs, satellite images) are loaded with paths that include this `base` (see `import.meta.env.BASE_URL` in components).
 
 ### TypeScript Configuration
 

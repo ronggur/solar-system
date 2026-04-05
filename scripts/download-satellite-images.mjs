@@ -52,7 +52,7 @@ async function main() {
       console.error(`  ✗ ${entry.file}: ${e.message}`);
     }
   }
-  console.log('\nDone.');
+  console.log('\nDone. Run `npm run optimize-satellite-images` to resize and convert to WebP.');
 }
 
 main();

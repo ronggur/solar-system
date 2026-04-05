@@ -1,5 +1,6 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useRef, useState, useCallback, useEffect, useMemo, Suspense } from 'react';
+import { useFrame, useThree, useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 import { OrbitControls as DreiOrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -446,13 +447,15 @@ export function SolarSystem({
 
       {/* Satellites */}
       {showSatellites &&
-        satellites.map((satellite) => (
+        satellites.map((satellite, satIndex) => (
           <Satellite
             key={satellite.id}
             data={satellite}
             speedMultiplier={speedMultiplier}
             isPaused={isPaused || isCameraInteracting || isTransitioning}
             onClick={handleSatelliteClick}
+            glbStaggerIndex={satIndex}
+            glbLoadNow={selectedSatellite?.id === satellite.id}
           />
         ))}
 
@@ -468,21 +471,35 @@ export function SolarSystem({
           />
         ))}
 
-      {/* Asteroid Belt */}
-      <AsteroidBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
-
-      {/* Kuiper Belt */}
-      <KuiperBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
+      {/* Asteroid / Kuiper belts: textures load in Suspense (Ceres = belt prototype; Pluto = icy KBO) */}
+      <Suspense fallback={null}>
+        <AsteroidBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <KuiperBelt isPaused={isPaused || isCameraInteracting || isTransitioning} />
+      </Suspense>
     </>
   );
 }
 
-// Asteroid Belt Component
+// Asteroid Belt — Ceres surface (largest main-belt body: cratered rock/salt, good generic asteroid look)
 function AsteroidBelt({ isPaused }: { isPaused: boolean }) {
   const asteroidsRef = useRef<THREE.InstancedMesh>(null);
   const count = 200;
   const innerRadius = 42;
   const outerRadius = 48;
+
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const ceresPath = `${baseUrl}textures/ceres.webp`.replace(/\/\//g, '/');
+  const ceresMapRaw = useLoader(TextureLoader, ceresPath);
+  const ceresMap = useMemo(() => {
+    const map = ceresMapRaw.clone();
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    return map;
+  }, [ceresMapRaw]);
+  useEffect(() => () => ceresMap.dispose(), [ceresMap]);
 
   useEffect(() => {
     if (!asteroidsRef.current) return;
@@ -522,22 +539,35 @@ function AsteroidBelt({ isPaused }: { isPaused: boolean }) {
     <instancedMesh ref={asteroidsRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <dodecahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
-        color="#A89B8E"
-        emissive="#8B7355"
-        emissiveIntensity={0.15}
-        roughness={0.8}
-        metalness={0.2}
+        map={ceresMap}
+        color="#ffffff"
+        roughness={0.88}
+        metalness={0.12}
+        emissive="#1a1512"
+        emissiveIntensity={0.1}
       />
     </instancedMesh>
   );
 }
 
-// Kuiper Belt Component - icy objects beyond Neptune
+// Kuiper Belt — Pluto surface (nitrogen/methane ice + rock; reads as generic icy KBO)
 function KuiperBelt({ isPaused }: { isPaused: boolean }) {
   const kuiperRef = useRef<THREE.InstancedMesh>(null);
   const count = 400; // More objects than asteroid belt
   const innerRadius = 155; // Beyond Neptune (140)
   const outerRadius = 220; // Extends well beyond Pluto (170)
+
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const plutoPath = `${baseUrl}textures/pluto.webp`.replace(/\/\//g, '/');
+  const plutoMapRaw = useLoader(TextureLoader, plutoPath);
+  const plutoMap = useMemo(() => {
+    const map = plutoMapRaw.clone();
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    return map;
+  }, [plutoMapRaw]);
+  useEffect(() => () => plutoMap.dispose(), [plutoMap]);
 
   useEffect(() => {
     if (!kuiperRef.current) return;
@@ -580,11 +610,12 @@ function KuiperBelt({ isPaused }: { isPaused: boolean }) {
     <instancedMesh ref={kuiperRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <icosahedronGeometry args={[1, 0]} />
       <meshStandardMaterial
-        color="#B8C4D0" // Icy blue-gray color
-        emissive="#6B8399"
-        emissiveIntensity={0.2}
-        roughness={0.6}
-        metalness={0.3}
+        map={plutoMap}
+        color="#e8eef2"
+        roughness={0.65}
+        metalness={0.2}
+        emissive="#1c2832"
+        emissiveIntensity={0.14}
       />
     </instancedMesh>
   );
