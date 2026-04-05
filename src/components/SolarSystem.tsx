@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, Suspense, useLayoutEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, useMemo, Suspense } from 'react';
 import { useFrame, useThree, useLoader } from '@react-three/fiber';
 import { TextureLoader } from 'three';
 import { OrbitControls as DreiOrbitControls, PerspectiveCamera } from '@react-three/drei';
@@ -491,12 +491,15 @@ function AsteroidBelt({ isPaused }: { isPaused: boolean }) {
 
   const baseUrl = import.meta.env.BASE_URL || '/';
   const ceresPath = `${baseUrl}textures/ceres.webp`.replace(/\/\//g, '/');
-  const ceresMap = useLoader(TextureLoader, ceresPath);
-  useLayoutEffect(() => {
-    ceresMap.colorSpace = THREE.SRGBColorSpace;
-    ceresMap.wrapS = THREE.RepeatWrapping;
-    ceresMap.wrapT = THREE.RepeatWrapping;
-  }, [ceresMap]);
+  const ceresMapRaw = useLoader(TextureLoader, ceresPath);
+  const ceresMap = useMemo(() => {
+    const map = ceresMapRaw.clone();
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    return map;
+  }, [ceresMapRaw]);
+  useEffect(() => () => ceresMap.dispose(), [ceresMap]);
 
   useEffect(() => {
     if (!asteroidsRef.current) return;
@@ -556,12 +559,15 @@ function KuiperBelt({ isPaused }: { isPaused: boolean }) {
 
   const baseUrl = import.meta.env.BASE_URL || '/';
   const plutoPath = `${baseUrl}textures/pluto.webp`.replace(/\/\//g, '/');
-  const plutoMap = useLoader(TextureLoader, plutoPath);
-  useLayoutEffect(() => {
-    plutoMap.colorSpace = THREE.SRGBColorSpace;
-    plutoMap.wrapS = THREE.RepeatWrapping;
-    plutoMap.wrapT = THREE.RepeatWrapping;
-  }, [plutoMap]);
+  const plutoMapRaw = useLoader(TextureLoader, plutoPath);
+  const plutoMap = useMemo(() => {
+    const map = plutoMapRaw.clone();
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = THREE.RepeatWrapping;
+    map.wrapT = THREE.RepeatWrapping;
+    return map;
+  }, [plutoMapRaw]);
+  useEffect(() => () => plutoMap.dispose(), [plutoMap]);
 
   useEffect(() => {
     if (!kuiperRef.current) return;
