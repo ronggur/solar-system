@@ -29,7 +29,7 @@ function SatelliteImage({ satellite }: { satellite: SatelliteData }) {
 
   // In dev, Vite serves public at root, so use relative path (/satellites/...).
   // In prod, base is set (/solar-system/), so prepend BASE_URL.
-  // Data stores paths without the base (e.g. /satellites/iss.jpg), so handle both cases.
+  // Data stores paths without the base (e.g. satellites/iss.webp), so handle both cases.
   const baseUrl = import.meta.env.BASE_URL || '';
   const imageSrc = baseUrl ? `${baseUrl}${satellite.imageUrl}` : `/${satellite.imageUrl}`;
 

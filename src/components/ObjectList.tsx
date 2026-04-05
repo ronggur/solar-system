@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Search, ChevronDown, ChevronUp, Globe, Moon, Filter, Building2, Telescope, Rocket, Radio } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { planets, sunData } from '@/data/planets';
@@ -26,6 +26,24 @@ interface FilterState {
   navigation: boolean;
 }
 
+const FILTERS_ALL_ON: FilterState = {
+  planets: true,
+  moons: true,
+  spaceStations: true,
+  telescopes: true,
+  probes: true,
+  navigation: true,
+};
+
+const FILTERS_ALL_OFF: FilterState = {
+  planets: false,
+  moons: false,
+  spaceStations: false,
+  telescopes: false,
+  probes: false,
+  navigation: false,
+};
+
 export function ObjectList({
   onPlanetSelect,
   onSatelliteSelect,
@@ -37,14 +55,7 @@ export function ObjectList({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    planets: true,
-    moons: true,
-    spaceStations: true,
-    telescopes: true,
-    probes: true,
-    navigation: true,
-  });
+  const [filters, setFilters] = useState<FilterState>({ ...FILTERS_ALL_ON });
 
   // Combine all objects for filtering
   const allObjects = useMemo(() => {
@@ -94,24 +105,85 @@ export function ObjectList({
     );
   }, [allObjects, searchQuery, filters]);
 
-  const handleObjectClick = (obj: typeof allObjects[0]) => {
-    // Clear all other selections first
-    if (obj.type === 'satellite') {
-      onSatelliteSelect(obj.data as SatelliteData);
-      onPlanetSelect(null);
-      onMoonSelect(null);
-    } else if (obj.type === 'moon') {
-      onMoonSelect(obj.data as MoonData);
-      onPlanetSelect(null);
-      onSatelliteSelect(null);
-    } else {
-      onPlanetSelect(obj.data as PlanetData);
-      onSatelliteSelect(null);
-      onMoonSelect(null);
-    }
-  };
+  type ListEntry = (typeof allObjects)[number];
 
-  const isSelected = (obj: typeof allObjects[0]) => {
+  const handleObjectClick = useCallback(
+    (obj: ListEntry) => {
+      if (obj.type === 'satellite') {
+        onSatelliteSelect(obj.data as SatelliteData);
+        onPlanetSelect(null);
+        onMoonSelect(null);
+      } else if (obj.type === 'moon') {
+        onMoonSelect(obj.data as MoonData);
+        onPlanetSelect(null);
+        onSatelliteSelect(null);
+      } else {
+        onPlanetSelect(obj.data as PlanetData);
+        onSatelliteSelect(null);
+        onMoonSelect(null);
+      }
+    },
+    [onPlanetSelect, onSatelliteSelect, onMoonSelect],
+  );
+
+  const listScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isCollapsed || filteredObjects.length === 0) return;
+
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (target.isContentEditable) return true;
+      return Boolean(target.closest('[contenteditable="true"]'));
+    };
+
+    const selectionIndex = () =>
+      filteredObjects.findIndex((obj) => {
+        if (obj.type === 'satellite') return selectedSatellite?.id === obj.data.id;
+        if (obj.type === 'moon') return selectedMoon?.id === obj.data.id;
+        return selectedPlanet?.id === obj.data.id;
+      });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      if (isEditableTarget(e.target)) return;
+
+      e.preventDefault();
+
+      const idx = selectionIndex();
+      const delta = e.key === 'ArrowDown' ? 1 : -1;
+      const len = filteredObjects.length;
+      const nextIndex =
+        idx === -1
+          ? e.key === 'ArrowDown'
+            ? 0
+            : len - 1
+          : (idx + delta + len) % len;
+
+      const next = filteredObjects[nextIndex];
+      if (next) handleObjectClick(next);
+
+      requestAnimationFrame(() => {
+        listScrollRef.current
+          ?.querySelector<HTMLElement>(`button[data-object-list-index="${nextIndex}"]`)
+          ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [
+    isCollapsed,
+    filteredObjects,
+    handleObjectClick,
+    selectedPlanet?.id,
+    selectedSatellite?.id,
+    selectedMoon?.id,
+  ]);
+
+  const isSelected = (obj: ListEntry) => {
     if (obj.type === 'satellite') {
       return selectedSatellite?.id === obj.data.id;
     } else if (obj.type === 'moon') {
@@ -209,9 +281,28 @@ export function ObjectList({
             {/* Filter Panel */}
             {showFilters && (
               <div className="bg-white/5 rounded-lg p-3 border border-white/10 space-y-2">
-                <div className="text-[10px] text-white/50 uppercase tracking-wider mb-2">Filter by category</div>
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="text-[10px] text-white/50 uppercase tracking-wider">Filter by category</div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setFilters({ ...FILTERS_ALL_ON })}
+                      className="text-[10px] px-2 py-0.5 rounded-md bg-white/10 text-white/80 border border-white/15 hover:bg-white/15 hover:text-white transition-colors"
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFilters({ ...FILTERS_ALL_OFF })}
+                      className="text-[10px] px-2 py-0.5 rounded-md bg-white/5 text-white/55 border border-white/10 hover:bg-white/10 hover:text-white/80 transition-colors"
+                    >
+                      None
+                    </button>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   <button
+                    type="button"
                     onClick={() => toggleFilter('planets')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -223,6 +314,7 @@ export function ObjectList({
                     Planets
                   </button>
                   <button
+                    type="button"
                     onClick={() => toggleFilter('moons')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -234,6 +326,7 @@ export function ObjectList({
                     Moons
                   </button>
                   <button
+                    type="button"
                     onClick={() => toggleFilter('spaceStations')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -245,6 +338,7 @@ export function ObjectList({
                     Stations
                   </button>
                   <button
+                    type="button"
                     onClick={() => toggleFilter('telescopes')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -256,6 +350,7 @@ export function ObjectList({
                     Telescopes
                   </button>
                   <button
+                    type="button"
                     onClick={() => toggleFilter('probes')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -267,6 +362,7 @@ export function ObjectList({
                     Probes
                   </button>
                   <button
+                    type="button"
                     onClick={() => toggleFilter('navigation')}
                     className={`
                       px-2.5 py-1 rounded-full text-[10px] font-medium flex items-center gap-1
@@ -282,7 +378,10 @@ export function ObjectList({
             )}
 
             {/* Objects List */}
-            <div className="max-h-64 overflow-y-auto space-y-1 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+            <div
+              ref={listScrollRef}
+              className="max-h-64 overflow-y-auto space-y-1 pr-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+            >
               {filteredObjects.length === 0 ? (
                 <div className="text-center text-white/40 text-xs py-4">
                   No objects found
@@ -291,6 +390,8 @@ export function ObjectList({
                 filteredObjects.map((obj, index) => (
                   <button
                     key={`${obj.type}-${obj.data.id || obj.data.name}-${index}`}
+                    type="button"
+                    data-object-list-index={index}
                     onClick={() => handleObjectClick(obj)}
                     className={`
                       w-full text-left px-3 py-2 rounded-lg
