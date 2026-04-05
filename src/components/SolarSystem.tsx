@@ -447,13 +447,15 @@ export function SolarSystem({
 
       {/* Satellites */}
       {showSatellites &&
-        satellites.map((satellite) => (
+        satellites.map((satellite, satIndex) => (
           <Satellite
             key={satellite.id}
             data={satellite}
             speedMultiplier={speedMultiplier}
             isPaused={isPaused || isCameraInteracting || isTransitioning}
             onClick={handleSatelliteClick}
+            glbStaggerIndex={satIndex}
+            glbLoadNow={selectedSatellite?.id === satellite.id}
           />
         ))}
 

@@ -47,7 +47,7 @@ Reference for finding 3D models for each satellite in the Solar System Explorer.
 ## Using a model in the app
 
 1. Download as **GLB** (or convert to GLB).
-2. Place under `public/models/satellites/` (e.g. `iss.glb`, `hubble.glb`).
+2. Place under `public/3d-objects/satellites/` (e.g. `iss.glb`, `hubble.glb`) and set `modelPath` / `modelScale` in `src/data/satellites.ts`.
 3. In `Satellite.tsx`, for a given `data.id` load and render the model, e.g.:
 
 ```tsx
@@ -59,10 +59,21 @@ function SatelliteModel({ id }: { id: string }) {
 }
 ```
 
-4. Preload models where needed: `useGLTF.preload('/models/satellites/iss.glb')`.
+4. Optional preload (use the same URL as runtime, including Vite `base`): e.g. `useGLTF.preload('/solar-system/3d-objects/satellites/iss.glb')` when `base` is `/solar-system/`.
 5. Keep your existing `renderSatelliteModel()` as fallback when no GLB exists for an `id`.
 
 ## Converting NASA formats to GLB
 
 - **Blender:** File → Import → 3DS/OBJ/etc. → File → Export → glTF 2.0 (.glb).
 - **Online:** Use a converter that supports your source format (e.g. 3DS/OBJ → GLB).
+
+## Compressing GLBs in this repo
+
+After adding or updating files in `public/3d-objects/satellites/`:
+
+```bash
+npm install
+npm run compress-satellite-glbs
+```
+
+This runs `@gltf-transform/cli` `optimize` on each `.glb` in place (back up originals if needed). Stronger options (meshopt, Draco) need extra CLI flags **and** matching decoder setup in the app (`MeshoptDecoder`, or Draco WASM under `public` + `useGLTF` draco path in drei).

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "download-satellite-images": "node scripts/download-satellite-images.mjs",
-    "optimize-satellite-images": "node scripts/optimize-satellite-images.mjs"
+    "optimize-satellite-images": "node scripts/optimize-satellite-images.mjs",
+    "compress-satellite-glbs": "node scripts/compress-satellite-glbs.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -64,6 +65,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.2.1",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",

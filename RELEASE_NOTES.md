@@ -1,10 +1,21 @@
 # Release Notes
 
-## Latest – Data, spacecraft & filter categories
+## Latest – Docs sync (see README / docs for full detail)
+
+### Counts & UX (current)
+
+- **24 spacecraft**, **27 natural moons**, **13** entries in `planets` (8 planets + 5 dwarf planets) plus **Sun** via `sunData`.
+- **Object list**: **All** / **None** for category filters; **↑** / **↓** to cycle the filtered list (control panel hints: Space, ←→, ↑↓).
+- **Belts**: Asteroid and Kuiper instanced meshes use **Ceres**-like and **Pluto**-like textures; **Saturn** ring texture loads inside inner `Suspense` with solid fallback.
+- **Satellite GLBs**: Loaded with Vite `base`-aware URLs; **staggered** fetch with immediate load when a satellite is selected; `npm run compress-satellite-glbs` for batch optimize.
+
+---
+
+## Previous – Data, spacecraft & filter categories
 
 ### Spacecraft & data
 
-- **23 spacecraft** (was 12): Added Parker Solar Probe, New Horizons, Europa Clipper, SOHO, BepiColombo, OSIRIS-APEX, Lucy, Psyche, Chandra, LRO, Mars Odyssey, MAVEN.
+- **24 spacecraft** (grown from early 12): Includes Parker Solar Probe, New Horizons, Europa Clipper, SOHO, BepiColombo, OSIRIS-APEX, Lucy, Psyche, Chandra, LRO, Mars Odyssey, MAVEN, Tiangong, etc.
 - **Escape trajectory**: Voyager 1/2 and New Horizons use `escapeTrajectory: true` (dashed trail, no closed orbit).
 - **Orbital correctness**: JWST and Gaia at Sun–Earth L2 orbit the Sun (not Earth). LRO orbits the Moon (`parentPlanet: 'moon'`).
 - **Planet data**: Saturn 274 moons; Venus 465°C; Mercury sidereal day 58.6 Earth days; Europa Clipper launched Oct 2024; Deimos mission highlights (Viking orbiters 1976–1980).
@@ -42,14 +53,14 @@ This release brings significant visual and interactive improvements to the 3D So
 ### Animated Hover Glow Effects
 
 - **Planets**: Smooth pulsing glow effect when hovered (sine wave animation, 3x pulse speed)
-- **Moons**: Subtle glow animation for all 23 natural moons (4x pulse speed)
-- **Satellites**: Energetic glow effect for all 12 artificial satellites (5x pulse speed)
+- **Moons**: Subtle glow animation for natural moons (4x pulse speed)
+- **Satellites**: Energetic glow effect for artificial satellites (5x pulse speed)
 - **Visual Feedback**: Clear indication of interactive objects without jittering
 
 ### Improved Lighting
 
-- **Ambient Light**: Increased from 0.1 to 0.15 for better visibility of dark-side textures
-- **Point Light (Sun)**: Reduced from 300 to 200 for more balanced illumination
+- **Scene ambient**: Very low (`SolarSystem`) for deep-space look; **Sun** group adds fill ambient + point light (intensity 200, linear decay)
+- **Earlier note**: Global ambient was raised to 0.15 before fill moved onto the Sun group
 - **Texture Visibility**: Mercury and Venus now clearly show surface details
 
 ---
@@ -87,7 +98,7 @@ This release brings significant visual and interactive improvements to the 3D So
 
 ### Moon Data Expansion
 
-- **23 Natural Moons**: Complete dataset including Earth's Moon, Mars' Phobos and Deimos, Jupiter's Galilean moons, Saturn's major moons, Uranus' moons, Neptune's Triton and Nereid, and Pluto's Charon, Nix, and Hydra
+- **27 Natural Moons**: Includes dwarf-planet satellites (e.g. Haumea, Makemake, Eris) in addition to classical planet moons
 - **Detailed Information**: Discovery year, discoverer, diameter, and orbital inclination for each moon
 - **Interactive**: All moons clickable with detailed information panels
 
@@ -160,19 +171,16 @@ This release brings significant visual and interactive improvements to the 3D So
 
 ## 📦 Assets
 
-### Textures Added
+### Textures (see `public/textures/`)
 
-- `/public/textures/earth.webp` - Earth day map
-- `/public/textures/mars.webp` - Mars surface
-- `/public/textures/jupiter.webp` - Jupiter atmosphere
-- `/public/textures/saturn.webp` - Saturn atmosphere
-- `/public/textures/uranus.webp` - Uranus atmosphere
-- `/public/textures/neptune.webp` - Neptune atmosphere
-- `/public/textures/pluto.webp` - Pluto surface
+- **Earth**: `earth_day.webp`, `earth_night.webp` (separate day/night in scene)
+- **Other planets / dwarfs**: WebP maps (e.g. Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Ceres, etc.)
+- **Saturn rings**: `saturn_ring_alpha.png`
 
 ### Scripts
 
-- `scripts/download-earth-texture.mjs` - Utility for downloading textures from solarsystemscope.com
+- `scripts/download-earth-texture.mjs` - Download Earth day/night sources (convert/optimize separately as needed)
+- `scripts/optimize-satellite-images.mjs`, `scripts/compress-satellite-glbs.mjs` - Optional asset pipelines (see README)
 
 ---
 

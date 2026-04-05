@@ -572,7 +572,7 @@ export const satellites: SatelliteData[] = [
     type: 'probe',
     imageUrl: 'satellites/lro.webp',
     modelPath: '3d-objects/satellites/lro.glb',
-    modelScale: 0.01,
+    modelScale: 0.004,
     missionStatus: 'active',
     altitude: '~50 km (lunar orbit)',
     url: 'https://science.nasa.gov/mission/lro',

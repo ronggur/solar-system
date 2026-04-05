@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, Suspense } from 'react';
+import { useRef, useState, useMemo, Suspense, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SatelliteData } from '@/types';
@@ -44,7 +44,7 @@ function HoverGlowMesh({
   );
 }
 
-// GLB Model loader component
+// GLB Model loader component (path must be absolute URL, e.g. with Vite base)
 function GLBModel({ path, scale = 1 }: { path: string; scale?: number }) {
   const { scene } = useGLTF(path);
   const clonedScene = useMemo(() => scene.clone(true), [scene]);
@@ -52,14 +52,45 @@ function GLBModel({ path, scale = 1 }: { path: string; scale?: number }) {
   return <primitive object={clonedScene} scale={scale} />;
 }
 
+function GlbLoadPlaceholder({ color }: { color: string }) {
+  return (
+    <mesh>
+      <sphereGeometry args={[0.09, 14, 14]} />
+      <meshStandardMaterial
+        color={color}
+        emissive={color}
+        emissiveIntensity={0.35}
+        metalness={0.35}
+        roughness={0.45}
+      />
+    </mesh>
+  );
+}
+
+function resolvePublicAssetUrl(relativePath: string) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  return `${baseUrl}${relativePath}`.replace(/\/\//g, '/');
+}
+
 interface SatelliteProps {
   data: SatelliteData;
   speedMultiplier: number;
   isPaused: boolean;
   onClick: (satellite: SatelliteData, position: THREE.Vector3) => void;
+  /** Order for staggering GLB downloads (lower = sooner). */
+  glbStaggerIndex?: number;
+  /** When true, start loading this satellite's GLB immediately (e.g. list selection). */
+  glbLoadNow?: boolean;
 }
 
-export function Satellite({ data, speedMultiplier, isPaused, onClick }: SatelliteProps) {
+export function Satellite({
+  data,
+  speedMultiplier,
+  isPaused,
+  onClick,
+  glbStaggerIndex = 0,
+  glbLoadNow = false,
+}: SatelliteProps) {
   const { scene } = useThree();
   const satelliteRef = useRef<THREE.Group>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
@@ -68,6 +99,18 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
 
   const typeColors = satelliteTypeColors[data.type];
   const isEscape = data.escapeTrajectory === true;
+
+  const [allowGlbLoad, setAllowGlbLoad] = useState(glbLoadNow);
+
+  useEffect(() => {
+    if (glbLoadNow) {
+      setAllowGlbLoad(true);
+      return;
+    }
+    const delayMs = Math.min(glbStaggerIndex * 150, 2000);
+    const id = window.setTimeout(() => setAllowGlbLoad(true), delayMs);
+    return () => window.clearTimeout(id);
+  }, [glbLoadNow, glbStaggerIndex]);
 
   // Stable escape angle derived from id (pure, no Math.random in render)
   const escapeAngle = useMemo(() => {
@@ -187,11 +230,15 @@ export function Satellite({ data, speedMultiplier, isPaused, onClick }: Satellit
   const renderSatelliteModel = () => {
     const { id, type, color, modelPath, modelScale } = data;
 
-    // ---- GLB models with modelScale from data ----
+    // ---- GLB models with modelScale from data (deferred + staggered network) ----
     if (modelPath && modelScale) {
+      const glbUrl = resolvePublicAssetUrl(modelPath);
+      if (!allowGlbLoad) {
+        return <GlbLoadPlaceholder color={color} />;
+      }
       return (
-        <Suspense fallback={null}>
-          <GLBModel path={modelPath} scale={modelScale} />
+        <Suspense fallback={<GlbLoadPlaceholder color={color} />}>
+          <GLBModel path={glbUrl} scale={modelScale} />
         </Suspense>
       );
     }

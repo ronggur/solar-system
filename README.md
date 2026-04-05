@@ -19,8 +19,8 @@ An interactive 3D visualization of our solar system built with React, Three.js, 
 A stunning, interactive 3D solar system explorer that brings the cosmos to your browser. Built with cutting-edge web technologies, this application lets you:
 
 - **Explore** the entire solar system from the Sun to dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris) with realistic planet textures
-- **Discover** 26 major moons including Earth's Moon, Jupiter's Galilean moons, Saturn's Titan, and dwarf-planet moons
-- **Track** 23 spacecraft in four categories: Space Stations, Telescopes, Probes, and Navigation (ISS, Hubble, JWST, Voyagers, Parker Solar Probe, New Horizons, and more)
+- **Discover** 27 major moons including Earth's Moon, Jupiter's Galilean moons, Saturn's Titan, Uranian moons, and dwarf-planet moons
+- **Track** 24 spacecraft in four categories: Space Stations, Telescopes, Probes, and Navigation (ISS, Hubble, JWST, Voyagers, Parker Solar Probe, New Horizons, LRO, and more)
 - **Learn** fascinating facts about each celestial body with detailed information panels
 - **Navigate** freely in 3D space with smooth camera controls and animated hover effects
 - **Search** and filter objects to quickly find what you're looking for
@@ -54,20 +54,20 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 
 ### 3D Visualization
 
-- **Realistic Solar System**: All 8 planets plus Pluto with accurate relative sizes, orbital distances, and WebP textures
+- **Realistic Solar System**: Eight classical planets, five dwarf planets (Ceres, Pluto, Haumea, Makemake, Eris), WebP textures, and stylized orbital layout (distances scaled for the view)
 - **Interactive Camera**: Freely rotate, zoom, and pan around the solar system
 - **Smooth Animations**: GSAP-powered camera transitions when selecting celestial objects
 - **Animated Hover Effects**: Pulsing glow effects on planets, moons, and satellites when hovered
 - **Starfield Background**: 5000+ stars creating an immersive space environment
-- **Asteroid Belt**: Visualized between Mars and Jupiter with 200+ asteroids (always visible)
-- **Kuiper Belt**: Icy objects beyond Neptune with 400+ objects (always visible)
+- **Asteroid Belt**: Visualized between Mars and Jupiter with 200+ instanced asteroids using a Ceres-like surface texture (always visible)
+- **Kuiper Belt**: Icy objects beyond Neptune with 400+ instanced objects using a Pluto-like surface texture (always visible)
 
 ### Celestial Bodies
 
 - **Planets**: All 8 planets from Mercury to Neptune with accurate orbital characteristics
 - **Dwarf Planets**: Pluto, Ceres, Haumea, Makemake, Eris (with orbits and textures)
 - **The Sun**: Central star with realistic glow effects
-- **Natural Moons**: 26 major moons including:
+- **Natural Moons**: 27 major moons including:
   - Earth: Moon
   - Mars: Phobos, Deimos
   - Jupiter: Galilean moons (Io, Europa, Ganymede, Callisto)
@@ -76,7 +76,7 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
   - Neptune: Triton, Nereid
   - Pluto: Charon, Nix, Hydra
   - Dwarf planets: Haumea (Hiʻiaka, Namaka), Makemake (MK 2), Eris (Dysnomia)
-- **Spacecraft** (23 total), filterable by category:
+- **Spacecraft** (24 total), filterable by category:
   - **Space Stations**: ISS, Tiangong
   - **Telescopes**: Hubble, James Webb, Gaia, Chandra, SOHO
   - **Probes**: Voyager 1 & 2 (escape trajectory), New Horizons, Parker Solar Probe, Cassini, Juno, MRO, Mars Odyssey, MAVEN, LRO, Europa Clipper, BepiColombo, OSIRIS-APEX, Lucy, Psyche
@@ -88,7 +88,8 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 - **Pause/Play**: Freeze or animate the solar system (automatically pauses during camera interaction)
 - **Orbit Visibility**: Toggle orbital paths on/off
 - **Visibility Toggles**: Show/hide satellites and moons independently
-- **Object Filtering**: Filter object list by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
+- **Object Filtering**: Filter object list by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation); **All** / **None** toggles for categories
+- **Keyboard**: **Space** pause/resume, **←** / **→** adjust orbit speed when the object list is not focused; **↑** / **↓** move selection in the expanded object list
 - **Camera Modes**: Free exploration or follow selected planet
 - **Click to Explore**: Click any planet, moon, or satellite for detailed information
 - **Search**: Search and filter objects by name, description, or parent planet
@@ -175,7 +176,10 @@ For complete project structure and architecture, see [TECHNICAL.md](docs/TECHNIC
 - **Left Mouse + Drag**: Rotate camera around solar system
 - **Right Mouse + Drag**: Pan the camera
 - **Scroll Wheel**: Zoom in/out
-- **Click on Planet/Satellite**: View detailed information and zoom to object
+- **Click on Planet/Satellite/Moon**: View detailed information and zoom to object
+- **Space**: Toggle pause (also indicated in the control panel hint)
+- **←** / **→**: Decrease / increase orbit speed (when not typing in a search field)
+- **↑** / **↓**: Previous / next object in the expanded Objects list (when not typing in search)
 
 ### Control Panel
 
@@ -201,7 +205,8 @@ Located in the bottom-left above the control panel:
   - **Telescopes** (violet): Hubble, JWST, Gaia, Chandra, SOHO
   - **Probes** (slate): Planetary and deep-space missions (Voyagers, Cassini, Juno, Parker, New Horizons, LRO, etc.)
   - **Navigation** (cyan): GPS, Starlink
-- **Quick Navigation**: Click any object to zoom and view details
+- **All / None**: Turn every category filter on or off at once
+- **Quick Navigation**: Click any object to zoom and view details; use **↑** / **↓** to cycle the filtered list
 - **Escape Trajectory**: Probes like Voyager 1/2 and New Horizons show a dashed trail (no closed orbit)
 
 ### Information Panels
@@ -219,8 +224,8 @@ Click any celestial body to open its information panel showing:
 Data for all celestial bodies is in `src/data/`:
 
 - **planets.ts** – Sun, planets, dwarf planets (Ceres, Pluto, Haumea, Makemake, Eris)
-- **moons.ts** – Natural moons (26), including dwarf-planet moons
-- **satellites.ts** – Spacecraft (23) with `type`: `space-station` | `telescope` | `probe` | `satellite` (navigation). Probes can use `escapeTrajectory: true` (Voyager, New Horizons) or `parentPlanet: 'sun'` (L2 telescopes, deep-space probes). LRO uses `parentPlanet: 'moon'`.
+- **moons.ts** – Natural moons (27), including dwarf-planet moons
+- **satellites.ts** – Spacecraft (24) with `type`: `space-station` | `telescope` | `probe` | `satellite` (navigation). Probes can use `escapeTrajectory: true` (Voyager, New Horizons) or `parentPlanet: 'sun'` (L2 telescopes, deep-space probes). LRO uses `parentPlanet: 'moon'`. Many probes use **`modelPath`** / **`modelScale`** for GLB models under `public/3d-objects/satellites/`.
 
 For detailed configuration guide, see [TECHNICAL.md](docs/TECHNICAL.md).
 
@@ -230,6 +235,9 @@ For detailed configuration guide, see [TECHNICAL.md](docs/TECHNICAL.md).
 - `npm run build` - Build for production (runs TypeScript compiler + Vite build)
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint on codebase
+- `npm run download-satellite-images` - Download reference images into `public/satellites/` (see script header)
+- `npm run optimize-satellite-images` - Resize/compress panel images to WebP (requires ImageMagick `magick`)
+- `npm run compress-satellite-glbs` - Run `gltf-transform optimize` on each GLB in `public/3d-objects/satellites/` (requires devDependency install)
 
 ## Browser Support
 
@@ -246,6 +254,7 @@ The application is optimized for smooth 60fps performance:
 
 - Instanced rendering for 600+ belt objects
 - Efficient starfield with 5000+ stars
+- Satellite GLB models load on a short stagger (and immediately when a satellite is selected) to avoid burst network load
 - Hardware-accelerated camera animations
 - Mobile-optimized pixel ratio capping
 
@@ -270,7 +279,8 @@ For detailed technical roadmap, see [TECHNICAL.md](docs/TECHNICAL.md).
 
 Planned features:
 
-- [ ] Planet surface textures and realistic terrain
+- [x] Planet surface textures (WebP maps; Earth uses separate day/night maps)
+- [ ] Higher-resolution terrain / normal-mapped surfaces
 - [ ] Day/night cycle with proper lighting
 - [ ] Comet and asteroid tracking
 - [ ] Audio narration and sound effects

@@ -218,6 +218,27 @@ function SaturnRings({ planetRadius }: { planetRadius: number }) {
   );
 }
 
+/** Untextured ring while saturn_ring_alpha.png loads — same radii/tilt as SaturnRings */
+function SaturnRingsFallback({ planetRadius }: { planetRadius: number }) {
+  const innerRadius = planetRadius * 1.2;
+  const outerRadius = planetRadius * 2.2;
+  return (
+    <group rotation={[0.466, 0, 0]}>
+      <mesh>
+        <ringGeometry args={[innerRadius, outerRadius, 64]} />
+        <meshStandardMaterial
+          color="#c9b896"
+          transparent
+          opacity={0.45}
+          side={THREE.DoubleSide}
+          roughness={0.85}
+          metalness={0.05}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 // Fallback colored planet mesh
 function ColoredPlanetMesh({
   data,
@@ -466,8 +487,12 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
           </mesh>
         )}
 
-        {/* Saturn's rings with texture */}
-        {data.id === 'saturn' && <SaturnRings planetRadius={data.radius} />}
+        {/* Saturn's rings: inner Suspense so ring texture does not block root canvas */}
+        {data.id === 'saturn' && (
+          <Suspense fallback={<SaturnRingsFallback planetRadius={data.radius} />}>
+            <SaturnRings planetRadius={data.radius} />
+          </Suspense>
+        )}
 
         {/* Uranus rings (opaque) */}
         {data.id === 'uranus' && (

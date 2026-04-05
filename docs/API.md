@@ -70,7 +70,7 @@ const earth: PlanetData = {
   color: '#4A90D9',
   emissive: '#1a4d80',
   emissiveIntensity: 0.2,
-  texture: '/textures/earth.webp',
+  texture: '/textures/earth_day.webp',
   description: 'Our home planet, the only known planet to support life.',
   facts: ['Earth is 71% water and 29% land', 'The atmosphere is 78% nitrogen and 21% oxygen'],
   moons: 1,
@@ -640,7 +640,7 @@ export const planets: PlanetData[];
 
 Location: `src/data/planets.ts`
 
-Contains 9 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto.
+Contains **13** entries: Mercury, Venus, Earth, Mars, Ceres (dwarf), Jupiter, Saturn, Uranus, Neptune, Pluto, Haumea, Makemake, and Eris (dwarf planets). The Sun is separate (`sunData`).
 
 ---
 
@@ -677,7 +677,7 @@ export function getMoonsByPlanet(planetId: string): MoonData[];
 
 Location: `src/data/moons.ts`
 
-Contains 23 moons across all planets.
+Contains 27 moons across all parent bodies (planets and dwarf planets).
 
 ---
 
@@ -691,7 +691,7 @@ export const satellites: SatelliteData[];
 
 Location: `src/data/satellites.ts`
 
-Contains 12 satellites including ISS, Hubble, JWST, GPS, Starlink, Voyager 1 & 2, and various probes.
+Contains 24 spacecraft (stations, telescopes, navigation constellations, and probes). Many entries include `modelPath` / `modelScale` for GLB models under `public/3d-objects/satellites/`.
 
 ---
 
@@ -793,16 +793,14 @@ satellites: 5; // Faster, energetic
 
 ### Ambient Light
 
-```typescript
-intensity: 0.15;
-```
+Scene (`SolarSystem`): `intensity: 0.02`. Sun group (`Sun.tsx`): additional `ambientLight` at `0.15` for fill.
 
 ### Point Light (Sun)
 
 ```typescript
 position: [0, 0, 0];
 intensity: 200;
-distance: 300;
+distance: 0; // unbounded
 decay: 1;
 ```
 
@@ -970,13 +968,11 @@ Potential future APIs to consider:
 ## Version History
 
 - **v0.1.0** (Current):
-  - 9 planets with WebP textures
-  - 23 natural moons
-  - 12 artificial satellites
-  - Animated hover glow effects
-  - Camera interaction pause
-  - Extended speed range (0.1x - 10x)
-  - Improved lighting and z-index management
+  - Sun + 13 orbiting bodies in `planets` data (8 planets + 5 dwarf planets) with WebP textures; Earth uses day/night maps
+  - 27 natural moons
+  - 24 artificial satellites (GLB and/or procedural meshes; staggered GLB loading)
+  - Asteroid / Kuiper belts with instanced textures; object list filters with All/None and keyboard navigation
+  - Animated hover glow effects; camera interaction pause; speed range 0.1x–10x; layered lighting and z-index for UI
 
 ---
 
