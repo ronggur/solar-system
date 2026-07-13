@@ -5,16 +5,27 @@
  * Usage: npm run compress-satellite-glbs
  * Requires: npm install (installs devDependency @gltf-transform/cli)
  *
- * Runs `gltf-transform optimize` per file (in-place replace via temp file).
- * That applies sensible defaults (prune, join, dedup, texture resize, etc.).
+ * Runs `gltf-transform optimize` per file (in-place replace via temp file)
+ * with meshopt geometry compression and WebP texture compression. Files are
+ * only replaced when the optimized output is smaller than the original.
  *
- * For stronger compression you can extend the pipeline with meshopt or Draco;
- * meshopt requires MeshoptDecoder in the Three.js loader path; Draco needs
- * decoder assets under public and useGLTF(..., dracoPath). See three.js / drei docs.
+ * No runtime changes are needed for meshopt: drei's useGLTF wires
+ * MeshoptDecoder (from three-stdlib) into GLTFLoader by default.
+ *
+ * Note: maven.glb was additionally pre-simplified (4.2M-vertex disconnected
+ * triangle soup that the standard simplifier cannot reduce) with
+ * scripts/simplify-glb-sloppy.mjs before running this script.
  */
 
-import { readdirSync, unlinkSync, existsSync, copyFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import {
+  readdirSync,
+  unlinkSync,
+  existsSync,
+  copyFileSync,
+  statSync,
+  readFileSync,
+} from 'node:fs';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { platform } from 'node:os';
@@ -32,14 +43,36 @@ function gltfTransformBin() {
   return join(dir, 'gltf-transform');
 }
 
+const COMMON_ARGS = [
+  '--compress', 'meshopt',
+  '--texture-compress', 'webp',
+  '--texture-size', '1024',
+  '--simplify-error', '0.001',
+];
+
+function usesDraco(glbPath) {
+  return readFileSync(glbPath).includes('KHR_draco_mesh_compression');
+}
+
 function optimizeInPlace(glbPath) {
   const tmp = `${glbPath}.opt-tmp.glb`;
   const bin = gltfTransformBin();
   try {
-    execFileSync(bin, ['optimize', glbPath, tmp], { stdio: 'inherit', cwd: root });
-    copyFileSync(tmp, glbPath);
+    execFileSync(bin, ['optimize', glbPath, tmp, ...COMMON_ARGS], {
+      stdio: 'inherit',
+      cwd: root,
+    });
+    const before = statSync(glbPath).size;
+    const after = statSync(tmp).size;
+    // Always replace draco sources even if meshopt is slightly larger: draco
+    // decoding pulls the decoder wasm from gstatic.com at runtime.
+    if (after < before || usesDraco(glbPath)) {
+      copyFileSync(tmp, glbPath);
+      console.log(`  ok ${glbPath.replace(root + '/', '')} (${before} -> ${after})`);
+    } else {
+      console.log(`  skip ${basename(glbPath)} (would grow ${before} -> ${after})`);
+    }
     unlinkSync(tmp);
-    console.log(`  ok ${glbPath.replace(root + '/', '')}`);
   } catch (e) {
     if (existsSync(tmp)) {
       try {
