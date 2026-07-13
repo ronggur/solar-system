@@ -107,9 +107,23 @@ export function Satellite({
       setAllowGlbLoad(true);
       return;
     }
-    const delayMs = Math.min(glbStaggerIndex * 150, 2000);
-    const id = window.setTimeout(() => setAllowGlbLoad(true), delayMs);
-    return () => window.clearTimeout(id);
+    // Defer background GLB downloads until the browser is idle so they never
+    // compete with first paint / initial texture loads, then stagger them.
+    let timeoutId: number | undefined;
+    let idleId: number | undefined;
+    const schedule = () => {
+      timeoutId = window.setTimeout(() => setAllowGlbLoad(true), glbStaggerIndex * 250);
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(schedule, { timeout: 5000 });
+    } else {
+      // Safari has no requestIdleCallback; wait past first paint instead.
+      timeoutId = window.setTimeout(schedule, 3000);
+    }
+    return () => {
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
   }, [glbLoadNow, glbStaggerIndex]);
 
   // Stable escape angle derived from id (pure, no Math.random in render)
@@ -282,31 +296,68 @@ export function Satellite({
       );
     }
     if (id === 'tianhe') {
+      // T-shaped Tiangong: Tianhe core (down the stem), Wentian/Mengtian labs
+      // across the bar, giant twin solar wings at each lab tip.
+      const hull = () => mat('#EDEAE3', '#6b6b66', 0.4, 0.45);
+      const wing = () => mat('#2c3570', '#141c4a', 0.5, 0.35);
       return (
         <group>
-          {/* Core module (cylinder) */}
+          {/* Multi-docking node at the T junction */}
           <mesh>
-            <cylinderGeometry args={[0.05, 0.055, 0.14, 12]} />
-            {mat(color)}
+            <sphereGeometry args={[0.034, 14, 14]} />
+            {hull()}
           </mesh>
-          {/* Lab modules (smaller cylinders) */}
-          <mesh position={[0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
-            {mat(color)}
+          {/* Forward docking port */}
+          <mesh position={[0, 0.045, 0]}>
+            <cylinderGeometry args={[0.016, 0.02, 0.035, 10]} />
+            {mat('#B0ADA5', '#555', 0.6, 0.4)}
           </mesh>
-          <mesh position={[-0.08, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.03, 0.03, 0.1, 12]} />
-            {mat(color)}
+          {/* Tianhe core: narrow forward section */}
+          <mesh position={[0, -0.08, 0]}>
+            <cylinderGeometry args={[0.026, 0.028, 0.1, 14]} />
+            {hull()}
           </mesh>
-          {/* Solar panels */}
-          <mesh position={[0, 0.07, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <boxGeometry args={[0.2, 0.012, 0.06]} />
-            {panelMat()}
+          {/* Tianhe core: wider aft section */}
+          <mesh position={[0, -0.165, 0]}>
+            <cylinderGeometry args={[0.028, 0.037, 0.075, 14]} />
+            {hull()}
           </mesh>
-          <mesh position={[0, -0.07, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <boxGeometry args={[0.2, 0.012, 0.06]} />
-            {panelMat()}
+          {/* Core solar panels (small, near aft) */}
+          <mesh position={[0.08, -0.165, 0]}>
+            <boxGeometry args={[0.08, 0.008, 0.035]} />
+            {wing()}
           </mesh>
+          <mesh position={[-0.08, -0.165, 0]}>
+            <boxGeometry args={[0.08, 0.008, 0.035]} />
+            {wing()}
+          </mesh>
+          {/* Wentian + Mengtian lab modules (the T bar) */}
+          <mesh position={[0.09, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.026, 0.026, 0.125, 14]} />
+            {hull()}
+          </mesh>
+          <mesh position={[-0.09, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.026, 0.026, 0.125, 14]} />
+            {hull()}
+          </mesh>
+          {/* Solar wing hubs at the lab tips */}
+          <mesh position={[0.16, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.025, 10]} />
+            {mat('#B0ADA5', '#555', 0.6, 0.4)}
+          </mesh>
+          <mesh position={[-0.16, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.025, 10]} />
+            {mat('#B0ADA5', '#555', 0.6, 0.4)}
+          </mesh>
+          {/* Giant twin solar wings (Tiangong's signature feature) */}
+          {[0.16, -0.16].map((x) =>
+            [0.095, -0.095].map((z) => (
+              <mesh key={`${x}:${z}`} position={[x, 0, z]}>
+                <boxGeometry args={[0.05, 0.008, 0.135]} />
+                {wing()}
+              </mesh>
+            ))
+          )}
         </group>
       );
     }
@@ -356,17 +407,33 @@ export function Satellite({
       );
     }
     if (id === 'gaia') {
+      // Wide flat deployable sunshield "hat" with the conical payload atop.
       return (
         <group>
-          {/* Disc / sunshield */}
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.015, 8]} />
-            {mat(color)}
-          </mesh>
-          {/* Central payload */}
+          {/* Sunshield disc (solar cells on the sun-facing side) */}
           <mesh>
-            <cylinderGeometry args={[0.03, 0.035, 0.08, 8]} />
-            {mat(color)}
+            <cylinderGeometry args={[0.09, 0.09, 0.006, 24]} />
+            {panelMat()}
+          </mesh>
+          {/* Shield rim */}
+          <mesh>
+            <cylinderGeometry args={[0.091, 0.091, 0.004, 24]} />
+            {mat('#C0BDB4', '#666', 0.7, 0.3)}
+          </mesh>
+          {/* Payload module: truncated cone atop the shield */}
+          <mesh position={[0, 0.038, 0]}>
+            <cylinderGeometry args={[0.03, 0.045, 0.065, 14]} />
+            {mat('#D8D4CB', '#666', 0.5, 0.4)}
+          </mesh>
+          {/* Thermal tent cap */}
+          <mesh position={[0, 0.075, 0]}>
+            <cylinderGeometry args={[0.012, 0.03, 0.012, 14]} />
+            {mat('#B8B4AB', '#555', 0.5, 0.4)}
+          </mesh>
+          {/* Phased-array antenna skirt below the shield */}
+          <mesh position={[0, -0.02, 0]}>
+            <cylinderGeometry args={[0.032, 0.022, 0.032, 12]} />
+            {mat('#9A968E', '#555', 0.6, 0.35)}
           </mesh>
         </group>
       );
@@ -453,38 +520,280 @@ export function Satellite({
       );
     }
 
-    // ---- Satellites (navigation / comms) ----
-    if (id === 'gps') {
+    if (id === 'soho') {
+      // Boxy bus with twin solar wings and instrument snouts facing the Sun.
       return (
         <group>
+          {/* Main bus */}
           <mesh>
-            <boxGeometry args={[0.05, 0.05, 0.06]} />
-            {mat(color)}
+            <boxGeometry args={[0.06, 0.08, 0.05]} />
+            {mat('#C9C4B8', '#666', 0.5, 0.4)}
           </mesh>
-          <mesh position={[0.06, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <boxGeometry args={[0.1, 0.008, 0.05]} />
+          {/* Instrument snouts (coronagraphs/imagers) on the sun face */}
+          <mesh position={[0.015, 0.05, 0.01]}>
+            <cylinderGeometry args={[0.009, 0.009, 0.022, 8]} />
+            {mat('#8F8B83', '#555', 0.7, 0.3)}
+          </mesh>
+          <mesh position={[-0.015, 0.048, -0.008]}>
+            <cylinderGeometry args={[0.007, 0.007, 0.018, 8]} />
+            {mat('#8F8B83', '#555', 0.7, 0.3)}
+          </mesh>
+          {/* Solar wings on short booms */}
+          <mesh position={[0.09, 0, 0]}>
+            <boxGeometry args={[0.095, 0.007, 0.055]} />
             {panelMat()}
           </mesh>
-          <mesh position={[-0.06, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <boxGeometry args={[0.1, 0.008, 0.05]} />
+          <mesh position={[-0.09, 0, 0]}>
+            <boxGeometry args={[0.095, 0.007, 0.055]} />
             {panelMat()}
+          </mesh>
+          {/* High-gain antenna below */}
+          <mesh position={[0, -0.05, 0]}>
+            <cylinderGeometry args={[0.02, 0.008, 0.014, 12]} />
+            {mat('#DAD7D0', '#666', 0.8, 0.2)}
           </mesh>
         </group>
       );
     }
-    if (id === 'starlink') {
+    if (id === 'bepicolombo') {
+      // Cruise stack: transfer module with very long thin wings,
+      // MPO with its single wing, MMO sunshield cone on top.
       return (
         <group>
-          {/* Flat body (flat-sat style) */}
-          <mesh rotation={[0, 0, Math.PI / 4]}>
-            <boxGeometry args={[0.08, 0.08, 0.02]} />
-            {mat(color)}
+          {/* Mercury Transfer Module (bottom) */}
+          <mesh position={[0, -0.045, 0]}>
+            <boxGeometry args={[0.055, 0.05, 0.055]} />
+            {mat('#BFBAB0', '#666', 0.5, 0.4)}
           </mesh>
-          {/* Single solar array */}
-          <mesh position={[0, 0.06, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <boxGeometry args={[0.12, 0.01, 0.06]} />
+          {/* MTM's extremely long, narrow solar wings */}
+          <mesh position={[0.145, -0.045, 0]}>
+            <boxGeometry args={[0.21, 0.006, 0.034]} />
             {panelMat()}
           </mesh>
+          <mesh position={[-0.145, -0.045, 0]}>
+            <boxGeometry args={[0.21, 0.006, 0.034]} />
+            {panelMat()}
+          </mesh>
+          {/* Mercury Planetary Orbiter (middle) */}
+          <mesh position={[0, 0.008, 0]}>
+            <boxGeometry args={[0.05, 0.042, 0.05]} />
+            {mat('#D9D5CC', '#666', 0.5, 0.4)}
+          </mesh>
+          {/* MPO's single solar wing */}
+          <mesh position={[0, 0.008, 0.095]}>
+            <boxGeometry args={[0.032, 0.006, 0.12]} />
+            {panelMat()}
+          </mesh>
+          {/* MMO sunshield cone (top) */}
+          <mesh position={[0, 0.052, 0]}>
+            <cylinderGeometry args={[0.036, 0.027, 0.035, 14]} />
+            {mat('#EDEAE3', '#777', 0.4, 0.5)}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'europa-clipper') {
+      // Tall body with the largest solar wings of any planetary probe:
+      // long multi-segment arrays with cross panels at the tips.
+      return (
+        <group>
+          {/* Propulsion cylinder + avionics vault */}
+          <mesh>
+            <cylinderGeometry args={[0.03, 0.03, 0.09, 12]} />
+            {mat('#CFCBC2', '#666', 0.5, 0.4)}
+          </mesh>
+          <mesh position={[0, -0.015, 0]}>
+            <boxGeometry args={[0.052, 0.05, 0.052]} />
+            {mat('#AFAAA0', '#555', 0.5, 0.4)}
+          </mesh>
+          {/* High-gain antenna dish on top */}
+          <mesh position={[0, 0.062, 0]}>
+            <cylinderGeometry args={[0.04, 0.014, 0.02, 16]} />
+            {mat('#DAD7D0', '#666', 0.8, 0.2)}
+          </mesh>
+          {/* Giant segmented solar wings with cross tips */}
+          {[1, -1].map((s) => (
+            <group key={s}>
+              <mesh position={[s * 0.095, 0, 0]}>
+                <boxGeometry args={[0.1, 0.007, 0.075]} />
+                {panelMat()}
+              </mesh>
+              <mesh position={[s * 0.2, 0, 0]}>
+                <boxGeometry args={[0.09, 0.007, 0.075]} />
+                {panelMat()}
+              </mesh>
+              <mesh position={[s * 0.258, 0, 0]}>
+                <boxGeometry args={[0.022, 0.007, 0.115]} />
+                {panelMat()}
+              </mesh>
+            </group>
+          ))}
+          {/* Magnetometer boom */}
+          <mesh position={[0, 0, 0.09]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.0025, 0.0025, 0.12, 6]} />
+            {mat('#8F8B83', '#555', 0.6, 0.4)}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'lucy') {
+      // Unmistakable: two giant circular solar arrays flanking a small body.
+      return (
+        <group>
+          {/* Body */}
+          <mesh>
+            <cylinderGeometry args={[0.026, 0.032, 0.055, 12]} />
+            {mat('#B8B4AB', '#666', 0.5, 0.4)}
+          </mesh>
+          {/* High-gain antenna dish */}
+          <mesh position={[0, 0, 0.035]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.03, 0.012, 0.014, 16]} />
+            {mat('#DAD7D0', '#666', 0.8, 0.2)}
+          </mesh>
+          {/* Twin round solar arrays */}
+          {[1, -1].map((s) => (
+            <group key={s}>
+              <mesh position={[s * 0.1, 0, -0.005]} rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.068, 0.068, 0.006, 24]} />
+                {panelMat()}
+              </mesh>
+              {/* Array hub */}
+              <mesh position={[s * 0.1, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.012, 0.012, 0.012, 10]} />
+                {mat('#8F8B83', '#555', 0.6, 0.4)}
+              </mesh>
+            </group>
+          ))}
+        </group>
+      );
+    }
+    if (id === 'new-horizons') {
+      // Compact gold-foiled body dominated by its big dish; RTG on a side
+      // strut, no solar panels this far out.
+      return (
+        <group>
+          {/* Body (grand-piano silhouette, simplified hex) */}
+          <mesh>
+            <cylinderGeometry args={[0.045, 0.045, 0.035, 6]} />
+            {mat('#C7A55A', '#6b5420', 0.55, 0.4)}
+          </mesh>
+          {/* High-gain antenna dish */}
+          <mesh position={[0, 0.032, 0]}>
+            <cylinderGeometry args={[0.055, 0.016, 0.026, 20]} />
+            {mat('#E5E2DB', '#777', 0.75, 0.25)}
+          </mesh>
+          {/* Dish feed */}
+          <mesh position={[0, 0.055, 0]}>
+            <cylinderGeometry args={[0.004, 0.004, 0.025, 6]} />
+            {mat('#8F8B83', '#555', 0.6, 0.4)}
+          </mesh>
+          {/* RTG on side strut */}
+          <mesh position={[0.075, -0.012, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.06, 8]} />
+            {mat('#3a3a3a', '#1a1a1a', 0.6, 0.5)}
+          </mesh>
+        </group>
+      );
+    }
+    if (id === 'psyche') {
+      // Tall chassis with two cross-shaped (plus-sign) solar arrays.
+      return (
+        <group>
+          {/* Chassis */}
+          <mesh>
+            <boxGeometry args={[0.05, 0.085, 0.05]} />
+            {mat('#CFCBC4', '#666', 0.5, 0.4)}
+          </mesh>
+          {/* High-gain antenna dish */}
+          <mesh position={[0, 0.02, 0.038]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.026, 0.01, 0.014, 16]} />
+            {mat('#DAD7D0', '#666', 0.8, 0.2)}
+          </mesh>
+          {/* Cross-shaped solar wings */}
+          {[1, -1].map((s) => (
+            <group key={s}>
+              <mesh position={[s * 0.115, 0, 0]}>
+                <boxGeometry args={[0.13, 0.007, 0.048]} />
+                {panelMat()}
+              </mesh>
+              <mesh position={[s * 0.115, 0, 0]}>
+                <boxGeometry args={[0.048, 0.007, 0.13]} />
+                {panelMat()}
+              </mesh>
+            </group>
+          ))}
+        </group>
+      );
+    }
+
+    // ---- Satellites (navigation / comms) ----
+    if (id === 'gps') {
+      // GPS III: boxy bus, nadir antenna farm, two segmented solar wings.
+      return (
+        <group>
+          {/* Bus */}
+          <mesh>
+            <boxGeometry args={[0.055, 0.06, 0.055]} />
+            {mat('#9A948A', '#555', 0.5, 0.4)}
+          </mesh>
+          {/* Nadir-pointing antenna array */}
+          <mesh position={[0, -0.042, 0]}>
+            <cylinderGeometry args={[0.012, 0.03, 0.028, 10]} />
+            {mat('#6F6B63', '#3a3a3a', 0.6, 0.4)}
+          </mesh>
+          <mesh position={[0.018, -0.038, 0.018]}>
+            <cylinderGeometry args={[0.006, 0.006, 0.02, 6]} />
+            {mat('#6F6B63', '#3a3a3a', 0.6, 0.4)}
+          </mesh>
+          {/* Segmented solar wings with booms */}
+          {[1, -1].map((s) => (
+            <group key={s}>
+              <mesh position={[s * 0.04, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+                <cylinderGeometry args={[0.004, 0.004, 0.025, 6]} />
+                {mat('#8F8B83', '#555', 0.6, 0.4)}
+              </mesh>
+              <mesh position={[s * 0.09, 0, 0]}>
+                <boxGeometry args={[0.07, 0.007, 0.052]} />
+                {panelMat()}
+              </mesh>
+              <mesh position={[s * 0.165, 0, 0]}>
+                <boxGeometry args={[0.07, 0.007, 0.052]} />
+                {panelMat()}
+              </mesh>
+            </group>
+          ))}
+        </group>
+      );
+    }
+    if (id === 'starlink') {
+      // Flat-sat chassis with phased-array face and one big solar sail
+      // hinged upward.
+      return (
+        <group>
+          {/* Flat chassis */}
+          <mesh>
+            <boxGeometry args={[0.095, 0.008, 0.05]} />
+            {mat('#4a4d52', '#26282c', 0.6, 0.4)}
+          </mesh>
+          {/* Phased-array antennas on the earth-facing side */}
+          {[-0.028, 0, 0.028].map((x) => (
+            <mesh key={x} position={[x, -0.007, 0]}>
+              <cylinderGeometry args={[0.011, 0.011, 0.005, 12]} />
+              {mat('#8F8B83', '#555', 0.7, 0.3)}
+            </mesh>
+          ))}
+          {/* Single solar sail hinged up from one edge */}
+          <group position={[0, 0.006, -0.024]} rotation={[-0.5, 0, 0]}>
+            <mesh position={[0, 0.07, 0]}>
+              <boxGeometry args={[0.08, 0.135, 0.005]} />
+              {panelMat()}
+            </mesh>
+            {/* Hinge boom */}
+            <mesh position={[0, 0.004, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <cylinderGeometry args={[0.003, 0.003, 0.075, 6]} />
+              {mat('#8F8B83', '#555', 0.6, 0.4)}
+            </mesh>
+          </group>
         </group>
       );
     }

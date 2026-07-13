@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Loader } from '@react-three/drei';
+import { Loader, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
 import { SolarSystem } from '@/components/SolarSystem';
 import { ControlPanel } from '@/components/ControlPanel';
@@ -24,6 +24,14 @@ function App() {
   const [selectedMoon, setSelectedMoon] = useState<MoonData | null>(null);
   const [isCameraInteracting, setIsCameraInteracting] = useState(false);
   const [resumeWhileSelected, setResumeWhileSelected] = useState(false);
+
+  // Show the full-screen loading overlay only for the initial load; GLBs that
+  // stream in later (idle-deferred satellite models) must not bring it back.
+  const progressActive = useProgress((state) => state.active);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  useEffect(() => {
+    if (!progressActive) setInitialLoadDone(true);
+  }, [progressActive]);
 
   const isObjectSelected =
     selectedPlanet !== null || selectedSatellite !== null || selectedMoon !== null;
@@ -118,24 +126,26 @@ function App() {
         </Suspense>
       </Canvas>
 
-      {/* Loading Screen */}
-      <Loader
-        containerStyles={{
-          background: 'rgba(0, 0, 0, 0.9)',
-          backdropFilter: 'blur(10px)',
-        }}
-        innerStyles={{
-          color: '#4A90D9',
-        }}
-        barStyles={{
-          background: '#4A90D9',
-        }}
-        dataStyles={{
-          color: '#fff',
-        }}
-        dataInterpolation={(p) => `Loading Solar System... ${p.toFixed(0)}%`}
-        initialState={(active) => active}
-      />
+      {/* Loading Screen (initial load only) */}
+      {!initialLoadDone && (
+        <Loader
+          containerStyles={{
+            background: 'rgba(0, 0, 0, 0.9)',
+            backdropFilter: 'blur(10px)',
+          }}
+          innerStyles={{
+            color: '#4A90D9',
+          }}
+          barStyles={{
+            background: '#4A90D9',
+          }}
+          dataStyles={{
+            color: '#fff',
+          }}
+          dataInterpolation={(p) => `Loading Solar System... ${p.toFixed(0)}%`}
+          initialState={(active) => active}
+        />
+      )}
 
       {/* Object List */}
       <ObjectList
