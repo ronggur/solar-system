@@ -158,10 +158,14 @@ Progress:
 Capture a baseline before Phase A and re-measure after each phase.
 
 1. **Frame time:** Chrome DevTools Performance for 30 s at the default overview, then again with
-   an object selected and `showMoons`/`showSatellites` on. Note scripting vs. rendering time.
-2. **Three.js counters:** log `renderer.info` (`memory.geometries`, `memory.textures`,
-   `render.calls`, `render.triangles`) at start and after 5 minutes. Growth in `geometries` confirms
-   P2.
+   an object selected and `showMoons`/`showSatellites` on. Note scripting vs. rendering time. For
+   repeatable numbers on the production build, paste `scripts/perf-sampler.js` into the console: it
+   returns frame-interval p50/p95/max, frames over 33 ms and long-task totals (usage in
+   [TECHNICAL.md](TECHNICAL.md#performance-measurement)).
+2. **Three.js counters:** read `renderer.info` (`memory.geometries`, `memory.textures`,
+   `render.calls`, `render.triangles`) at start and after 5 minutes. In `npm run dev` it is exposed
+   as `window.__SOLAR_DEBUG__.info`; growth in `geometries` confirms P2. Use the dev server for
+   growth only, not absolute numbers.
 3. **React:** React DevTools Profiler, "highlight updates". A steady flicker on every planet confirms
    P1.
 4. **GPU memory:** Chrome Task Manager (GPU process) at idle after load. Use it to validate P6/P7.
