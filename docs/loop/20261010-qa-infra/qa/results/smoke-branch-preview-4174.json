@@ -1,0 +1,77 @@
+{
+  "url": "http://localhost:4174/solar-system/",
+  "steps": [
+    {
+      "name": "typeof window.__SOLAR_DEBUG__ on port 4174",
+      "pass": true,
+      "extra": "undefined"
+    },
+    {
+      "name": "canvas present, sized to viewport",
+      "pass": true,
+      "extra": "[1440,900]"
+    },
+    {
+      "name": "selection pauses motion (label Resume)",
+      "pass": true,
+      "extra": ""
+    },
+    {
+      "name": "Jupiter info/list visible after selection",
+      "pass": true,
+      "extra": "matches=12"
+    },
+    {
+      "name": "Reset View click",
+      "pass": true,
+      "extra": ""
+    },
+    {
+      "name": "search \"mars\" narrows the list (Mars, its moons and probes)",
+      "pass": true,
+      "extra": "rows=6"
+    },
+    {
+      "name": "four switches present",
+      "pass": true,
+      "extra": "n=4"
+    },
+    {
+      "name": "switch #0 toggles",
+      "pass": true,
+      "extra": "true->false"
+    },
+    {
+      "name": "switch #1 toggles",
+      "pass": true,
+      "extra": "true->false"
+    },
+    {
+      "name": "switch #2 toggles",
+      "pass": true,
+      "extra": "true->false"
+    },
+    {
+      "name": "switch #3 toggles",
+      "pass": true,
+      "extra": "false->true"
+    },
+    {
+      "name": "Space toggles pause/resume",
+      "pass": true,
+      "extra": "Pause->Resume"
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/sun.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_day.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_night.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:4174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: GSAP target  not found. https://gsap.com"
+  ]
+}

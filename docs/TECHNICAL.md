@@ -1,626 +1,307 @@
-# Technical Documentation
+# Developer Guide
 
-This document contains detailed technical information about the 3D Solar System Explorer project.
+Practical information for working on the project: setup, scripts, configuration, the asset pipeline,
+how to add content, CI/CD and troubleshooting. For how the app works internally see
+[ARCHITECTURE.md](ARCHITECTURE.md); for known performance issues see
+[PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md).
 
-## 📁 Project Structure
+## 1. Setup and commands
+
+**Prerequisites:** Node.js **20.19+** (or 22.12+), required by Vite 7. CI uses Node 20. npm is the
+package manager (a `package-lock.json` is committed).
+
+```bash
+npm install
+npm run dev      # http://localhost:5173/solar-system/
+```
+
+The dev server honours the `/solar-system/` base path, so open the URL Vite prints.
+
+| Script                             | What it does                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run dev`                      | Vite dev server with HMR (adds the `inspectAttr` plugin)                                             |
+| `npm run build`                    | `tsc -b` then `vite build` into `dist/`                                                              |
+| `npm run preview`                  | Serve `dist/` locally                                                                                |
+| `npm run lint`                     | ESLint over the repo (`dist` ignored)                                                                |
+| `npm test`                         | Vitest (`vitest run`, Node environment): data-integrity and documentation-count tests in `tests/`    |
+| `npm run download-satellite-images`| Fetch the 11 reference images listed in the script from Wikimedia into `public/satellites/`          |
+| `npm run optimize-satellite-images`| ImageMagick: resize to ≤ 960 px, strip metadata, WebP q85; **deletes the originals**                 |
+| `npm run optimize-planet-textures` | ImageMagick: shrink only the six listed dwarf-planet/Moon/Mercury textures in place                  |
+| `npm run compress-satellite-glbs`  | `gltf-transform optimize` (meshopt + WebP textures ≤ 1024) on every GLB in `public/3d-objects/satellites/` |
+
+ImageMagick 7 (`magick` on `PATH`) is needed for the two image scripts: `brew install imagemagick`.
+
+### One-off scripts (not in `package.json`)
+
+| Script                                | Notes                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/download-earth-texture.mjs`  | Downloads 2k Earth day/night maps from solarsystemscope.com as **`.jpg`**. The app expects WebP, so convert manually (and resize) before use.                  |
+| `scripts/prune-unused-textures.mjs`   | Deletes everything in `public/textures/` not in a **hardcoded keep-list**. Update `keepNames` whenever you add a texture, or the script will delete it.        |
+| `scripts/simplify-glb-sloppy.mjs`     | Used once for `maven.glb` (4.2 M-vertex triangle soup). Imports `meshoptimizer` and `draco3dgltf`, which are only available transitively via `@gltf-transform/cli`. Usage is `node scripts/simplify-glb-sloppy.mjs <in.glb> <out.glb> [ratio]` (its header comment names the wrong file). |
+
+## 2. Project structure
 
 ```
 solar-system/
+├── .github/workflows/        quality.yml (PR checks), deploy.yml (release → Vultr)
+├── docs/                     this documentation
+├── public/
+│   ├── textures/             planet, Sun, Moon, belt textures (WebP) + saturn_ring_alpha.png
+│   ├── satellites/           mission images for the info panel (WebP)
+│   ├── 3d-objects/satellites/  GLB models (meshopt-compressed)
+│   └── favicon/
+├── scripts/                  asset pipeline (see §4) and `perf-sampler.js` (see §9)
+├── tests/                    Vitest tests (data integrity, README/index.html counts); not bundled
 ├── src/
-│   ├── components/          # React components
-│   │   ├── ui/           # Radix UI components
-│   │   ├── Moon.tsx       # Natural moon 3D component with hover glow
-│   │   ├── MoonInfo.tsx   # Moon details panel (z-index: 100)
-│   │   ├── ObjectList.tsx  # Searchable object list
-│   │   ├── Planet.tsx     # Planet 3D component with textures and hover glow
-│   │   ├── PlanetInfo.tsx # Planet details panel (z-index: 100)
-│   │   ├── Satellite.tsx  # Satellite 3D component with hover glow
-│   │   ├── SatelliteInfo.tsx # Satellite details panel (z-index: 100)
-│   │   ├── SolarSystem.tsx # Main 3D scene with camera interaction pause
-│   │   ├── Starfield.tsx  # Background stars
-│   │   ├── Sun.tsx        # Sun 3D component with lighting
-│   │   ├── ControlPanel.tsx # UI controls (speed 0.1x-10x)
-│   │   └── Header.tsx     # App header
-│   ├── data/               # Celestial body data
-│   │   ├── moons.ts       # Natural moon data
-│   │   ├── planets.ts     # Planet data with texture support
-│   │   └── satellites.ts  # Satellite data
-│   ├── types/             # TypeScript definitions
-│   │   └── index.ts
-│   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utility functions
-│   ├── App.tsx            # Main application with camera interaction state
-│   ├── App.css            # App-specific styles
-│   ├── index.css          # Global styles
-│   └── main.tsx           # Entry point
-├── public/               # Static assets
-│   ├── textures/         # Planet / belt textures (WebP; Saturn ring PNG)
-│   ├── satellites/       # Spacecraft panel images (WebP)
-│   └── 3d-objects/
-│       └── satellites/   # GLB models (optional per satellite `modelPath`)
-├── dist/                 # Production build
-├── index.html            # HTML entry
-├── package.json         # Dependencies
-├── vite.config.ts       # Vite config
-├── tailwind.config.js   # Tailwind config
-├── tsconfig.json        # TypeScript config
-└── README.md            # Main documentation
+│   ├── components/           Planet, Moon, Satellite, Sun, Starfield, SolarSystem, panels, lists
+│   │   └── ui/               shadcn-style primitives: button, dialog, input, slider, switch
+│   ├── data/                 planets.ts, moons.ts, satellites.ts
+│   ├── lib/                  utils.ts (cn), textureGenerator.ts (procedural moon textures),
+│   │                         debugHook.ts (dev-only `window.__SOLAR_DEBUG__`)
+│   ├── types/index.ts        data interfaces (source of truth)
+│   ├── App.tsx / App.css     root component and app styles
+│   ├── index.css             Tailwind layers, theme variables, glow utilities
+│   ├── main.tsx
+│   └── vite-env.d.ts         env + `window.resetSolarSystemCamera` / `__SOLAR_DEBUG__` typing
+├── index.html                meta tags and texture preloads
+├── vite.config.ts, vitest.config.ts, tailwind.config.js, postcss.config.js, eslint.config.js
+├── tsconfig.json (+ tsconfig.app.json, tsconfig.node.json, tsconfig.test.json)
+└── components.json           shadcn configuration
 ```
 
-## 🔧 Technology Stack
+## 3. Stack and configuration
 
-### Core Technologies
+### Stack
 
-- **React 19.2.0**
-  - Hooks for state management
-  - Concurrent features for performance
-  - JSX for UI rendering
+Versions are ranges from `package.json`; the lockfile pins exact versions.
 
-- **TypeScript 5.9.3**
-  - Type safety across codebase
-  - Interface definitions for data structures
-  - Compile-time error checking
+| Area      | Packages                                                                                           |
+| --------- | -------------------------------------------------------------------------------------------------- |
+| App       | React 19.2, TypeScript ~5.9, Vite ^7.2                                                             |
+| 3D        | three ^0.182, @react-three/fiber ^9.5, @react-three/drei ^10.7                                     |
+| Animation | gsap ^3.14 (camera tweens and info-panel slides)                                                   |
+| UI        | Radix (dialog, slider, switch, slot), Tailwind CSS ^3.4 + tailwindcss-animate, lucide-react, cva   |
+| Tooling   | ESLint 9 + typescript-eslint 8 + react-hooks plugin, Vitest ^4.1, `@gltf-transform/cli`, `kimi-plugin-inspect-react` |
 
-- **Vite 7.2.4**
-  - Fast development server with HMR
-  - Optimized production builds
-  - ES module support
+### Vite (`vite.config.ts`)
 
-### 3D Graphics
+- `base: '/solar-system/'`; build the app under that path. Public assets must go through
+  `import.meta.env.BASE_URL` (see [ARCHITECTURE.md](ARCHITECTURE.md#path-conventions)).
+- `inspectAttr()` (kimi-plugin-inspect-react) is applied **only** for `vite serve`; it is excluded
+  from production builds.
+- `manualChunks` splits `vendor-three` and `vendor-react`; `chunkSizeWarningLimit` is 1200 kB.
+- Alias `@` → `./src` (mirrored in `tsconfig.json`/`tsconfig.app.json`).
 
-- **Three.js 0.182.0**
-  - WebGL abstraction layer
-  - Scene graph management
-  - Material and geometry handling
+### TypeScript
 
-- **@react-three/fiber 9.5.0**
-  - React renderer for Three.js
-  - useFrame hook for animations
-  - declarative component syntax
+Project references: `tsconfig.app.json` (the app, `strict`, `noUnusedLocals`/`noUnusedParameters`,
+bundler resolution, `verbatimModuleSyntax`, `erasableSyntaxOnly`, target ES2022),
+`tsconfig.node.json` (only `vite.config.ts`) and `tsconfig.test.json` (`tests/` and
+`vitest.config.ts`, Node types, same `@` alias). `npm run build` type-checks all three with
+`tsc -b`; tests live outside `src/` so they are never part of the app bundle.
 
-- **@react-three/drei 10.7.7**
-  - OrbitControls for camera
-  - PerspectiveCamera component
-  - Html for 3D labels
-  - Loader for 3D assets
-  - `TextureLoader` via `useLoader` for planet/sun/moon/belt textures; `useGLTF` for satellite GLBs
+### Vitest (`vitest.config.ts`)
 
-- **GSAP 3.14.2**
-  - Camera animation transitions
-  - Smooth easing functions
-  - Timeline-based animations
+A standalone config rather than a merge of `vite.config.ts`, so tests never load the dev-only
+`inspectAttr` plugin or the production chunk rules. Environment is plain Node (no jsdom, no
+browser), tests are `tests/**/*.test.ts`, and `@` resolves to `./src` like in the app. **Vitest is
+pinned to `^4.1`:** Vitest 5 needs Node ≥ 22.12, while CI and the documented minimum use Node 20.
 
-### UI Components
+### ESLint (`eslint.config.js`)
 
-- **Radix UI**
-  - Accessible component primitives
-  - Dialog, Slider, Switch, Button
-  - Unstyled with Tailwind styling
+`@eslint/js` + `typescript-eslint` recommended, plus the react-hooks recommended rules with
+`exhaustive-deps` and `rules-of-hooks` as warnings, `react-hooks/set-state-in-effect` **off**, and
+`react-refresh/only-export-components` off. Three selection effects in `SolarSystem.tsx` carry an
+`eslint-disable` for `exhaustive-deps` on purpose.
 
-- **Tailwind CSS 3.4.19**
-  - Utility-first CSS framework
-  - Responsive design
-  - Dark mode support
+### Styling
 
-- **Lucide React**
-  - Icon library
-  - Consistent icon style
-  - Tree-shakeable
+Tailwind 3 with shadcn "new-york" style. Theme colours are HSL CSS variables in `src/index.css`
+(`--background`, `--primary`, …) mapped in `tailwind.config.js`. `App.css` holds a few app-level
+rules (panel transitions, the `.planet-label` style). Prefer the existing `bg-black/60
+backdrop-blur-xl border-white/10` panel look for new UI.
 
-## 🏗️ Architecture
+### Environment
 
-### Component Hierarchy
+`VITE_APP_VERSION` (optional) is shown in the header; the deploy workflow sets it from the release
+tag. There are no other environment variables.
 
-```
-App
-├── Header
-├── Canvas (React Three Fiber)
-│   ├── PerspectiveCamera
-│   ├── OrbitControls (with onStart/onEnd callbacks)
-│   ├── SolarSystem
-│   │   ├── Starfield
-│   │   ├── Sun (with point light)
-│   │   ├── Planet × 13 (8 planets + 5 dwarf planets; textures and hover glow)
-│   │   │   ├── Orbit Path
-│   │   │   ├── Planet Mesh (with emissive glow)
-│   │   │   ├── Atmosphere Glow
-│   │   │   ├── Saturn Rings
-│   │   │   ├── Uranus Rings
-│   │   │   └── HTML Label
-│   │   ├── Satellite × 24 (GLB or procedural; staggered GLB load; escape trajectory for Voyager/New Horizons)
-│   │   │   ├── Orbit Path
-│   │   │   └── Satellite Model
-│   │   └── Moon × 27 (with hover glow)
-│   │       ├── Orbit Path
-│   │       └── Moon Mesh
-│   ├── AsteroidBelt (InstancedMesh + texture; frustumCulled: false)
-│   └── KuiperBelt (InstancedMesh + texture; frustumCulled: false)
-├── ControlPanel (shows pause state during camera interaction)
-├── ObjectList
-├── PlanetInfo (z-index: 100)
-├── SatelliteInfo (z-index: 100)
-└── MoonInfo (z-index: 100)
-```
+## 4. Asset pipeline
 
-### State Management
+| Asset                  | Format / limit                                              | How to produce                                   |
+| ---------------------- | ----------------------------------------------------------- | ------------------------------------------------ |
+| Planet/Sun textures    | WebP, equirectangular, ≤ 1920×960                           | Convert manually                                 |
+| Dwarf planets          | WebP 1024×512, q78                                          | `optimize-planet-textures`                       |
+| Moon, Mercury          | WebP 1280×640, q80                                          | `optimize-planet-textures`                       |
+| Saturn rings           | `saturn_ring_alpha.png` (1920×117, alpha strip)             | Manual                                           |
+| Satellite images       | WebP ≤ 960 px, q85                                          | `download-satellite-images` + `optimize-satellite-images` |
+| Satellite models       | GLB, meshopt, embedded textures WebP ≤ 1024 px              | `compress-satellite-glbs`                        |
 
-- **Local State**: Component-level useState hooks
-- **Prop Drilling**: State passed down from App
-- **No Redux/Zustand**: Simple app doesn't need global state
-- **Ref Pattern**: useRef for Three.js objects
-- **Camera Interaction State**: Tracked in App.tsx and passed to ControlPanel
+Current weight: `public/` ≈ 8 MB (textures 1.9 MB, GLBs 4.3 MB, images 1.8 MB). The v1.6.0 work cut
+the startup payload from ~25 MB to ~3.5 MB; keep it that way:
 
-### Animation System
+- Don't commit source-resolution assets. Resize first.
+- Prefer meshopt over Draco: Draco's decoder is fetched from gstatic at runtime, while drei decodes
+  meshopt with its bundled decoder.
+- Remember that **GPU memory** is `width × height × 4 B × 1.33`, regardless of file size. A 1920×960
+  texture costs ~10 MB on the GPU. See the performance doc.
 
-```typescript
-// Per-frame animation using useFrame
-useFrame((_, delta) => {
-  // Update orbit position
-  if (!isPaused) {
-    const newAngle = angle + orbitalSpeed * speedMultiplier * delta * 0.1;
-    setAngle(newAngle);
-  }
+Details for models are in [SATELLITE_3D_MODELS.md](SATELLITE_3D_MODELS.md).
 
-  // Update object position
-  const position = getOrbitalPosition(newAngle);
-  object.position.set(position.x, position.y, position.z);
+## 5. Adding content
 
-  // Rotate on axis
-  object.rotation.y += rotationSpeed;
-});
+Everything is data-driven; bodies appear automatically once added to the arrays. The authoritative
+field lists are in [`src/types/index.ts`](../src/types/index.ts).
 
-// Hover glow animation (sine wave)
-const glowIntensity = baseIntensity + Math.sin(time * pulseSpeed) * 0.3;
-```
+### A planet or dwarf planet (`src/data/planets.ts`)
 
-### Camera Animation (GSAP)
+1. Add a `PlanetData` entry. Use `type: 'dwarf-planet'` for dwarf planets.
+2. Put the texture at `public/textures/<id>.webp` and set `texture: '/textures/<id>.webp'`; add the
+   file name to `keepNames` in `scripts/prune-unused-textures.mjs`.
+3. Pick a `distance` that doesn't collide with an existing orbit or belt (asteroid belt 42-48,
+   Kuiper belt 155-220).
+4. Rings, Earth's night map and Pluto's elliptical orbit are hard-coded by `id` in `Planet.tsx`.
+   `moons` is a display number only; actual moons come from `moons.ts`.
 
-```typescript
-// Smooth transition to selected object
-gsap.to(camera.position, {
-  x: targetPosition.x,
-  y: targetPosition.y,
-  z: targetPosition.z,
-  duration: 1.5,
-  ease: 'power2.inOut',
-});
+### A moon (`src/data/moons.ts`)
 
-gsap.to(controlsRef.current.target, {
-  x: targetPosition.x,
-  y: targetPosition.y,
-  z: targetPosition.z,
-  duration: 1.5,
-  ease: 'power2.inOut',
-});
-```
+1. Add a `MoonData` with `parentPlanet` set to the planet's `id`.
+2. `orbitDistance` must exceed the parent's `radius` plus the moon's `radius`, or the moon
+   intersects the planet (see the Miranda comment in the file).
+3. Without `texture`, a procedural texture is generated from `color` and `surfaceType`
+   (`rocky`, `icy`, `volcanic`, `mixed`). Only set `texture` if you have a real map.
+4. `orbitInclination` is in degrees; use > 90 for retrograde (Triton is 157).
 
-### Camera Interaction Pause
+### A satellite or probe (`src/data/satellites.ts`)
 
-```typescript
-// In SolarSystem.tsx
-<DreiOrbitControls
-  onStart={() => setIsCameraInteracting(true)}
-  onEnd={() => setIsCameraInteracting(false)}
-/>
+1. Add a `SatelliteData`. `parentPlanet` is a planet `id`, `'sun'` (L1/L2 telescopes and deep-space
+   probes) or `'moon'` (only Earth's Moon is supported as a satellite parent).
+2. `type` drives the Object List category and colours: `space-station`, `telescope`, `probe` or
+   `satellite` (shown as "Navigation").
+3. `escapeTrajectory: true` makes the probe static with a dashed line instead of orbiting.
+4. `imageUrl` is `satellites/<name>.webp` (no leading slash), `modelPath` is
+   `3d-objects/satellites/<name>.glb`.
+5. **Model precedence:** GLB (`modelPath` + `modelScale`) → id-specific procedural model in
+   `renderSatelliteModel()` → type fallback. Tune `modelScale` by eye; units differ per model.
 
-// Pass to all moving objects
-isPaused={isPaused || isCameraInteracting}
+## 6. Keep in sync
 
-// Notify parent component
-useEffect(() => {
-  onCameraInteractionChange?.(isCameraInteracting);
-}, [isCameraInteracting, onCameraInteractionChange]);
-```
+When you add or remove bodies, update:
 
-## 🎨 Styling System
+- [ ] Counts in `README.md` (moons, spacecraft, planets) and `docs/ARCHITECTURE.md`
+- [ ] `index.html` meta description and `twitter:` description (currently 26 moons, 24 spacecraft)
+- [ ] `keepNames` in `scripts/prune-unused-textures.mjs` for new textures
+- [ ] The status table in `docs/SATELLITE_3D_MODELS.md` for new GLBs
+- [ ] `RELEASE_NOTES.md`
 
-### Tailwind CSS Configuration
+## 7. CI/CD
 
-```javascript
-// tailwind.config.js
-module.exports = {
-  darkMode: ['class'],
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        space: {
-          900: '#0a0a0a',
-          800: '#1a1a1a',
-          700: '#2a2a2a',
-        },
-      },
-      animation: {
-        glow: 'glow 3s ease-in-out infinite',
-      },
-      keyframes: {
-        glow: {
-          '0%, 100%': { opacity: 0.5 },
-          '50%': { opacity: 1 },
-        },
-      },
-    },
-  },
-  plugins: [require('tailwindcss-animate')],
-};
+### `quality.yml`: pull requests to `main`
+
+Node 20. Jobs: **lint**, **audit** (`npm audit --audit-level=moderate`), then **build** (needs both).
+The workflow does **not** run `npm test` yet; run it locally before opening a PR (see
+[§9](#9-debugging-tips)). Adding it as a job is a pending owner decision.
+
+### `deploy.yml`: GitHub Release published
+
+1. **lint**, then **build** with `VITE_APP_VERSION` set from the tag (leading `v` stripped).
+2. **deploy** (environment `production`): `scp` the archive to the Vultr VPS, extract to
+   `…/releases/<timestamp>`, back up the current release with hard links, atomically repoint the
+   `current` symlink, keep the last 5 releases and 3 backups.
+3. **verify**: checks the symlink and, if the `DEPLOY_URL` repository variable is set, requests it
+   (a non-200/301/302 only warns).
+
+Required secrets: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`; optional `SSH_PORT`.
+
+> **Publishing a release deploys to production.** Do not create a release casually. Tags `v0.0.1`
+> to `v1.6.0` exist; the next release should follow semver and have notes in `RELEASE_NOTES.md`.
+
+## 8. Troubleshooting
+
+| Symptom                                           | Likely cause / fix                                                                                                     |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Textures/GLBs 404 in preview or production        | The app is built for `/solar-system/`; serve it at that path. Never hard-code `/textures/...` in new components; go through `BASE_URL`. |
+| Request URL contains `//`                         | A path was joined without collapsing the double slash. Use the `.replace(/\/\//g, '/')` pattern used elsewhere.          |
+| A satellite stays a glowing sphere                | The GLB is deferred until idle (plus a stagger). Select it for an immediate load, or check the `modelPath` file name and that both `modelPath` and `modelScale` are set. |
+| Satellite GLBs never load in Safari               | Safari has no `requestIdleCallback`; the fallback waits 3 s, then staggers. Look for a 404, not a missing API.          |
+| Model is huge, tiny or off-centre                 | Adjust `modelScale`; large bounding spheres (LRO needed 0.0015) also affect click targets and camera framing.           |
+| Texture "disappears" after adding one             | `prune-unused-textures.mjs` deleted it because it is not in `keepNames`.                                                |
+| Belts vanish when panning                         | `frustumCulled={false}` was removed from the `instancedMesh`.                                                           |
+| Labels cover the info panel                       | Info panels are `z-[100]`; drei `<Html>` labels use `zIndexRange={[90, 0]}`. Keep that ordering.                        |
+| Pause button doesn't reflect camera drags         | `onCameraInteractionChange` must be wired from `SolarSystem` to `App`; pause state is `effectivePaused` in `App.tsx`.   |
+| Typecheck passes in dev but `npm run build` fails | `npm run build` uses `tsc -b` with `noUnusedLocals`; unused imports/vars fail the build.                                |
+
+## 9. Debugging tips
+
+- **Renderer counters:** in dev, read `window.__SOLAR_DEBUG__.info` (see
+  [Performance measurement](#performance-measurement)) to watch `memory.geometries`,
+  `memory.textures`, `render.calls` and `render.triangles`. Steadily growing `geometries`
+  indicates the trail leak described in the performance doc.
+- **React re-renders:** React DevTools Profiler with "Highlight updates"; planets, moons and
+  satellites currently re-render every frame.
+- **GPU memory:** Chrome Task Manager (GPU process) after the initial load.
+- **Element lookup:** every scene object is addressable with `scene.getObjectByName('planet-earth')`,
+  `moon-io`, `satellite-iss`; useful from the console via the R3F devtools.
+
+### Performance measurement
+
+Three small tools support measuring and regression-proofing. None of them changes runtime behaviour.
+
+**Debug hook: `window.__SOLAR_DEBUG__` (dev only).** Installed from the R3F `Canvas` `onCreated`
+callback by `installDebugHook()` in `src/lib/debugHook.ts`, and typed in `src/vite-env.d.ts`. It
+exists only under `npm run dev` (`import.meta.env.DEV`); production builds and `vite preview`
+contain no trace of it (`grep -r __SOLAR_DEBUG__ dist/` is empty).
+
+| Property | Value                                                                  |
+| -------- | ---------------------------------------------------------------------- |
+| `info`   | the live `WebGLRenderer.info` (`memory`, `render`, `programs`)         |
+| `gl`     | the `WebGLRenderer`                                                    |
+| `scene`  | the R3F scene (objects are named `planet-<id>`, `moon-<id>`, …)        |
+| `camera` | the active `PerspectiveCamera`                                         |
+
+```js
+const { info } = window.__SOLAR_DEBUG__;
+({ geometries: info.memory.geometries, textures: info.memory.textures,
+   calls: info.render.calls, triangles: info.render.triangles });
 ```
 
-### Custom Classes
+`info.render` is reset every frame, so read it from the console between frames. The dev server runs
+React `StrictMode` and the `inspectAttr` plugin: use it for **growth** of the counters over time,
+never for absolute frame time.
 
-```css
-/* App.css */
-.glow-box {
-  box-shadow: 0 0 20px rgba(74, 144, 217, 0.1);
-  backdrop-filter: blur(20px);
-}
+**Frame-time sampler: `scripts/perf-sampler.js`.** A dependency-free snippet to paste into the
+browser console (or evaluate through Playwright / a browser automation tool). It samples
+`requestAnimationFrame` intervals and `longtask` entries for a configurable time, then cleans up
+after itself and resolves with a JSON-serialisable object:
 
-.planet-label {
-  text-shadow: 0 0 10px currentColor;
-  pointer-events: none;
-}
-
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
+```js
+window.__PERF_SAMPLER_MS__ = 30000;   // optional, default 30000
+// paste scripts/perf-sampler.js; it evaluates to a Promise
 ```
 
-## 📊 Data Structures
-
-### PlanetData Interface
-
-```typescript
-interface PlanetData {
-  id: string; // Unique identifier
-  name: string; // Display name
-  radius: number; // Relative size
-  distance: number; // Distance from sun
-  orbitalSpeed: number; // Orbit speed multiplier
-  rotationSpeed: number; // Rotation speed
-  color: string; // Base hex color
-  emissive?: string; // Glow color
-  emissiveIntensity?: number; // Glow strength
-  texture?: string; // Texture URL (WebP format)
-  description: string;
-  facts: string[];
-  moons?: number;
-  temperature?: string;
-  dayLength?: string;
-  yearLength?: string;
-}
-```
-
-### MoonData Interface
-
-```typescript
-interface MoonData {
-  id: string;
-  name: string;
-  radius: number;
-  parentPlanet: string;
-  orbitDistance: number;
-  orbitalSpeed: number;
-  orbitInclination?: number; // Orbital tilt in degrees
-  color: string;
-  emissive: string;
-  emissiveIntensity?: number;
-  description: string;
-  facts: string[];
-  diameter?: string;
-  discoveryYear?: string;
-  discoveredBy?: string;
-}
-```
-
-### SatelliteData Interface
-
-```typescript
-interface SatelliteData {
-  id: string;
-  name: string;
-  radius: number;
-  parentPlanet: string;  // Planet id, 'sun', or 'moon' (for LRO)
-  orbitDistance: number;
-  orbitalSpeed: number;
-  color: string;
-  emissive: string;
-  description: string;
-  launchDate: string;
-  operator: string;
-  facts: string[];
-  type: 'space-station' | 'telescope' | 'satellite' | 'probe';
-  imageUrl?: string;
-  missionStatus?: 'active' | 'ended' | 'extended';
-  altitude?: string;
-  url?: string;
-  escapeTrajectory?: boolean;  // If true, no closed orbit; dashed trail (Voyager, New Horizons)
-}
-```
-
-- **parentPlanet**: Use `'sun'` for L2 telescopes (JWST, Gaia), deep-space probes (Voyager, Parker, Europa Clipper), or `'moon'` for LRO. Use planet id (e.g. `'earth'`, `'mars'`) for orbiters.
-- **escapeTrajectory**: When true, the probe is shown with a dashed line (escape path) and no orbital motion.
-
-## 🚀 Performance Optimizations
-
-### Rendering Optimizations
-
-1. **Instanced Rendering**
-   - Asteroid / Kuiper belts: instanced meshes with shared textures (Ceres / Pluto); 200 + 400 instances
-   - Satellite GLBs: staggered requests; selected satellite loads immediately
-   - Kuiper belt: 400+ objects in single draw call
-   - Both use `frustumCulled: false` to prevent disappearing when panning
-
-2. **Point Rendering**
-   - Starfield: 5000+ stars using point geometry
-   - No per-star draw overhead
-
-3. **Efficient Geometry**
-   - Low-poly spheres (32 segments)
-   - Shared geometries where possible
-   - Minimal material variants
-
-4. **Pixel Ratio Capping**
-
-   ```typescript
-   gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-   ```
-
-5. **Z-Index Optimization**
-   - Info panels use `z-[100]` to stay above 3D labels
-   - Prevents UI layering issues
-
-### Animation Optimizations
-
-1. **useFrame Hook**
-   - Single animation loop for all objects
-   - Delta-time based for frame-rate independence
-
-2. **GSAP for Camera**
-   - Hardware-accelerated transitions
-   - Efficient tweening
-
-3. **Conditional Updates**
-
-   ```typescript
-   if (!isPaused && !isCameraInteracting) {
-     // Only update when not paused and not interacting
-   }
-   ```
-
-4. **Hover Glow Animation**
-   - Uses sine wave for smooth pulsing
-   - Different pulse speeds for different object types
-   - No performance impact
-
-### Memory Management
-
-1. **useMemo for Computed Values**
-   - Orbit geometries
-   - Filtered object lists
-   - Color calculations
-
-2. **Cleanup on Unmount**
-
-   ```typescript
-   useEffect(() => {
-     // Setup
-     return () => {
-       // Cleanup
-     };
-   }, []);
-   ```
-
-3. **Ref Pattern**
-   ```typescript
-   const objectRef = useRef<THREE.Mesh>(null);
-   // Prevents recreation on each render
-   ```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-No environment variables required. The application runs standalone.
-
-### Build Configuration
-
-```typescript
-// vite.config.ts (simplified; see repo for imports)
-export default defineConfig({
-  base: '/solar-system/',
-  plugins: [inspectAttr(), react()], // inspectAttr from kimi-plugin-inspect-react (dev)
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-});
-```
-
-Use `import.meta.env.BASE_URL` when building paths to files under `public/` (textures, GLBs, satellite images).
-
-### NPM scripts (assets)
-
-| Script | Purpose |
-|--------|---------|
-| `download-satellite-images` | Fetch Wikimedia images into `public/satellites/` |
-| `optimize-satellite-images` | WebP resize/compress for panel thumbnails (ImageMagick) |
-| `compress-satellite-glbs` | `gltf-transform optimize` on `public/3d-objects/satellites/*.glb` |
-
-### TypeScript Configuration
-
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
-  }
-}
-```
-
-## 🧪 Adding New Features
-
-### Adding a New Planet
-
-1. Add to `src/data/planets.ts`:
-
-```typescript
-{
-  id: 'new-planet',
-  name: 'New Planet',
-  radius: 1,
-  distance: 100,
-  orbitalSpeed: 0.01,
-  rotationSpeed: 0.02,
-  color: '#FFFFFF',
-  emissive: '#CCCCCC',
-  texture: '/textures/new-planet.webp',  // Optional
-  description: '...',
-  facts: ['...'],
-  moons: 0,
-  temperature: '-200°C',
-  dayLength: '24 hours',
-  yearLength: '100 Earth years'
-}
-```
-
-2. Planet automatically renders in `SolarSystem.tsx`
-
-### Adding a New Moon
-
-1. Add to `src/data/moons.ts`:
-
-```typescript
-{
-  id: 'new-moon',
-  name: 'New Moon',
-  radius: 0.1,
-  parentPlanet: 'earth',
-  orbitDistance: 2,
-  orbitalSpeed: 2,
-  orbitInclination: 5,
-  color: '#CCCCCC',
-  emissive: '#888888',
-  description: '...',
-  facts: ['...'],
-  diameter: '100 km',
-  discoveryYear: '2024',
-  discoveredBy: 'Astronomer'
-}
-```
-
-2. Moon automatically renders in `SolarSystem.tsx`
-
-### Adding a New Satellite
-
-1. Add to `src/data/satellites.ts`:
-
-```typescript
-{
-  id: 'new-satellite',
-  name: 'New Satellite',
-  radius: 0.05,
-  parentPlanet: 'earth',  // or 'sun', 'moon', 'mars', etc.
-  orbitDistance: 2,
-  orbitalSpeed: 5,
-  color: '#FFFFFF',
-  emissive: '#FFFFFF',
-  description: '...',
-  launchDate: '2024-01-01',
-  operator: 'Space Agency',
-  facts: ['...'],
-  type: 'space-station' | 'telescope' | 'satellite' | 'probe',
-  missionStatus: 'active',
-  altitude: '400 km',
-  escapeTrajectory: false,  // set true for escape-trajectory probes (e.g. Voyager)
-  url: 'https://...'
-}
-```
-
-- Use **parentPlanet: 'sun'** for L2 telescopes (JWST, Gaia) or deep-space probes; **parentPlanet: 'moon'** for lunar orbiters (LRO).
-- Set **escapeTrajectory: true** for probes on escape trajectories (Voyager 1/2, New Horizons).
-
-2. Prefer **`modelPath`** + **`modelScale`** in `satellites.ts` pointing to `public/3d-objects/satellites/your.glb` (URLs resolve with Vite `base`). Optionally extend `renderSatelliteModel()` for procedural-only craft. Run `npm run compress-satellite-glbs` after adding GLBs to shrink files.
-
-### Custom 3D Models
-
-Replace geometric primitives with imported models:
-
-```typescript
-import { useGLTF } from '@react-three/drei';
-
-function CustomModel({ url }) {
-  const { scene } = useGLTF(url);
-  return <primitive object={scene} />;
-}
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Issue: Objects not rendering**
-
-- Check browser WebGL support
-- Verify Three.js version compatibility
-- Check console for errors
-
-**Issue: Performance problems**
-
-- Reduce star count in `Starfield.tsx`
-- Lower pixel ratio in `App.tsx`
-- Disable antialiasing in Canvas
-
-**Issue: Camera animations not smooth**
-
-- Check GSAP version
-- Verify transition duration
-- Check for conflicts with OrbitControls
-
-**Issue: TypeScript errors**
-
-- Run `npm install` to ensure dependencies
-- Clear `node_modules` and reinstall
-- Check tsconfig.json paths
-
-**Issue: Asteroid/Kuiper belt disappears when panning**
-
-- Ensure `frustumCulled={false}` is set on InstancedMesh
-- Check if belts are properly positioned in scene
-
-**Issue: Info panels appear behind 3D labels**
-
-- Verify z-index is set to `z-[100]` in info panel components
-- Check CSS stacking context
-
-**Issue: Pause button doesn't show camera interaction**
-
-- Verify `onCameraInteractionChange` callback is passed from App to SolarSystem
-- Check that `isPaused || isCameraInteracting` is used in ControlPanel
-
-## 📚 References
-
-- [Three.js Documentation](https://threejs.org/docs/)
-- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/)
-- [Vite Guide](https://vitejs.dev/guide/)
-- [React Documentation](https://react.dev/)
-- [GSAP Documentation](https://greensock.com/docs/)
-
----
-
-For user-facing documentation, see [README.md](README.md)
+| Field | Meaning |
+| ----- | ------- |
+| `frames`, `durationMs`, `fpsAvg` | measured frame intervals, time they span, average fps |
+| `p50Ms`, `p95Ms`, `maxMs` | frame-interval percentiles and maximum |
+| `over33ms` | `{ count, pct }` intervals longer than 33 ms (dropped 60 Hz frames) |
+| `longTasks` | `{ supported, count, totalMs, maxMs }` main-thread tasks over 50 ms |
+| `visibility`, `visibilityAtStart`, `hiddenDuringRun` | a hidden tab throttles rAF; discard such runs |
+
+Measure the **production build** (`npm run build && npx vite preview --port 4174`, then open
+`http://localhost:4174/solar-system/`) with a fixed viewport and device pixel ratio, one tab, and
+the same machine and browser for every comparison. Run each scenario several times and report the
+median.
+
+**Tests: `npm test`.** Runs Vitest once in Node. The suites in `tests/` check that:
+
+- ids are unique in planets (including the Sun), moons and satellites;
+- every moon's `parentPlanet` is a planet id and every satellite's is a planet id, `'sun'` or
+  `'moon'`;
+- every `texture`, `imageUrl` and `modelPath` resolves to a file under `public/`, `modelPath` and
+  `modelScale` come in pairs, and texture paths hard-coded in components and `index.html` exist;
+- `orbitDistance` exceeds parent radius plus body radius (escape-trajectory probes are exempt);
+- the moon and spacecraft counts quoted in `README.md` and `index.html` equal `moons.length` and
+  `satellites.length`.
+
+Failure messages name the offending id or file. When you add or remove a body, a red count test is
+the reminder to update the docs (see [§6](#6-keep-in-sync)).

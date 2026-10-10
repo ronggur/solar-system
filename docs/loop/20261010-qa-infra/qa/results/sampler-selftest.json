@@ -1,0 +1,60 @@
+{
+  "allPass": true,
+  "checks": [
+    {
+      "name": "T1 idle: ~60 fps frame cadence",
+      "pass": true,
+      "detail": "p50=16.7 fps=60 frames=181"
+    },
+    {
+      "name": "T1 idle: endedBy complete, visible, longTasks supported",
+      "pass": true,
+      "detail": "{\"e\":\"complete\",\"v\":\"visible\",\"l\":{\"supported\":true,\"count\":0,\"totalMs\":0,\"maxMs\":0}}"
+    },
+    {
+      "name": "T1 durationMs close to requested",
+      "pass": true,
+      "detail": "durationMs=3016.6"
+    },
+    {
+      "name": "T1 window key count unchanged (only __PERF_SAMPLER_MS__ added by the caller)",
+      "pass": true,
+      "detail": "before=224 after=225"
+    },
+    {
+      "name": "T1 result is JSON-serialisable with the documented fields",
+      "pass": true,
+      "detail": "frames,durationMs,fpsAvg,p50Ms,p95Ms,maxMs,over33ms,longTasks,visibility,visibilityAtStart,hiddenDuringRun,requestedMs,endedBy,startedAt,userAgent"
+    },
+    {
+      "name": "T2 busy loop: exactly 1 long task of >=190 ms",
+      "pass": true,
+      "detail": "{\"supported\":true,\"count\":1,\"totalMs\":200,\"maxMs\":200}"
+    },
+    {
+      "name": "T2 busy loop: a frame interval >= 150 ms and over33ms.count >= 1",
+      "pass": true,
+      "detail": "maxMs=183.3 over33={\"count\":1,\"pct\":0.58}"
+    },
+    {
+      "name": "T3 pre-window long task not counted",
+      "pass": true,
+      "detail": "{\"supported\":true,\"count\":0,\"totalMs\":0,\"maxMs\":0}"
+    },
+    {
+      "name": "T4 back-to-back runs both complete with sane frame counts",
+      "pass": true,
+      "detail": "61 vs 60"
+    },
+    {
+      "name": "T5 hidden tab recorded (hiddenDuringRun + visibility)",
+      "pass": true,
+      "detail": "hiddenDuringRun=true visibility=hidden"
+    },
+    {
+      "name": "T6 rAF stall: resolves via safety timer (endedBy timeout, ~6 s)",
+      "pass": true,
+      "detail": "endedBy=timeout elapsed=6025ms frames=0"
+    }
+  ]
+}

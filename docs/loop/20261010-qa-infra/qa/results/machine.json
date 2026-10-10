@@ -1,0 +1,14 @@
+{
+  "chrome": "154.0.8037.98",
+  "playwright": "1.64.0",
+  "headless": true,
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+  "vendor": "Google Inc. (Apple)",
+  "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+  "dpr": 1,
+  "inner": [
+    1440,
+    900
+  ],
+  "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+}

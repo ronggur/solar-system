@@ -6,7 +6,7 @@ Thank you for your interest in contributing! We welcome contributions from every
 
 ### Prerequisites
 
-- Node.js 18+ installed
+- Node.js 20.19+ (or 22.12+) installed (required by Vite 7)
 - Git installed and configured
 - Familiarity with React and TypeScript
 - Basic understanding of Three.js concepts (optional but helpful)
@@ -78,7 +78,9 @@ Fixes #15
 
 - **Bug Fixes**: Help squash bugs reported in Issues
 - **Documentation**: Improve guides and add examples
-- **Performance**: Optimize rendering for mobile devices
+- **Performance**: Optimize rendering for mobile devices. See the prioritized findings and plan in
+  [PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md)
+- **Data accuracy**: Fix incorrect facts or figures; see [INACCURACIES.md](INACCURACIES.md)
 
 ### Medium Priority
 
@@ -89,7 +91,7 @@ Fixes #15
 ### Low Priority
 
 - **Code Cleanup**: Refactor and improve code quality
-- **Tests**: Add unit and integration tests
+- **Tests**: Extend `npm test` beyond data integrity (component and interaction tests)
 
 ## 📦 What to Contribute
 
@@ -113,7 +115,7 @@ Create new UI/3D components:
 Improve project documentation:
 - README.md updates
 - Code comments
-- API documentation
+- Architecture and developer guides in `docs/`
 - Tutorials
 
 ### Design
@@ -126,6 +128,12 @@ Improve visual appearance:
 
 ## 🧪 Testing
 
+`npm test` runs Vitest data-integrity tests in Node: unique ids, valid `parentPlanet` references,
+asset files that exist under `public/`, orbit distances that clear the parent body, and the moon and
+spacecraft counts quoted in `README.md` and `index.html`. There are no component or rendering tests,
+so UI and 3D changes are still verified manually. CI on pull requests runs lint, `npm audit` and a
+production build but not `npm test` yet (see [TECHNICAL.md](TECHNICAL.md#7-cicd)), so run it yourself.
+
 Before submitting a PR:
 
 1. Run development server: `npm run dev`
@@ -133,7 +141,11 @@ Before submitting a PR:
 3. Test on multiple browsers (Chrome, Firefox, Safari)
 4. Check console for errors
 5. Run linter: `npm run lint`
-6. Build production version: `npm run build`
+6. Run tests: `npm test`
+7. Build production version: `npm run build`
+
+To measure performance, see
+[Performance measurement](TECHNICAL.md#performance-measurement).
 
 ## 📤 Submitting Changes
 
@@ -155,6 +167,8 @@ Before submitting a PR:
 - [ ] Tested thoroughly
 - [ ] No console errors
 - [ ] Updated documentation
+- [ ] Updated counts in README/docs (and `index.html` meta) if bodies were added or removed
+- [ ] `npm run lint`, `npm test` and `npm run build` pass
 - [ ] Added comments where needed
 - [ ] Commit messages are clear
 

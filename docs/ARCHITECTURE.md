@@ -1,750 +1,305 @@
-# Architecture Documentation
+# Architecture
 
-## Overview
+How the 3D Solar System Explorer is put together: runtime tree, state flow, camera and selection
+mechanics, how each kind of body is rendered, and how assets load. For day-to-day developer tasks
+(scripts, adding data, CI) see [TECHNICAL.md](TECHNICAL.md). For known performance and visual
+problems and the plan to fix them see
+[PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md).
 
-This document describes the architectural decisions, component hierarchy, data flow, and technical implementation details of the 3D Solar System Explorer.
+The TypeScript interfaces in [`src/types/index.ts`](../src/types/index.ts) are the single source of
+truth for data shapes (`SunData`, `PlanetData`, `MoonData`, `SatelliteData`); they are not repeated
+here.
 
-## Architecture Principles
+## 1. Principles
 
-### Component-Based Architecture
+- **No global store.** State lives in `App.tsx` and flows down as props; the 3D scene reports
+  events back up through callbacks. There is no Redux/Zustand and no router.
+- **Data-driven scene.** `src/data/{planets,moons,satellites}.ts` define everything; components are
+  generic and render one instance per data entry.
+- **Everything is selected by name.** The scene is queried with `scene.getObjectByName(...)` for
+  parent tracking, camera targeting and follow mode (see [§4](#4-scene-model)).
+- **Progressive loading.** A tiny set of textures blocks first paint; everything else streams in
+  behind per-mesh `Suspense` boundaries or idle callbacks (see [§8](#8-loading-strategy)).
 
-- **Separation of Concerns**: 3D rendering components separate from UI controls
-- **Reusability**: Generic components (Planet, Satellite, Moon) used for all instances
-- **Type Safety**: Comprehensive TypeScript interfaces for all data structures
-- **Performance**: Optimized rendering with React Three Fiber and instanced meshes
-- **User Experience**: Smooth animations, visual feedback, and intuitive interactions
-
-### State Management
-
-- **Local State**: React hooks (useState, useRef) for component-specific state
-- **Prop Drilling**: Simple parent-to-child data flow (no external state management needed)
-- **Event-Driven**: Callbacks for user interactions (planet selection, camera control)
-- **Camera Interaction State**: Tracked in App.tsx and passed down to ControlPanel for visual feedback
-
-## Component Hierarchy
-
-```
-App (Root)
-├── Header
-│   └── Title, branding
-├── Canvas (R3F)
-│   └── SolarSystem
-│       ├── PerspectiveCamera (Three.js camera)
-│       ├── OrbitControls (User camera control with onStart/onEnd callbacks)
-│       ├── Lighting
-│       │   ├── ambientLight (0.02 scene fill)
-│       │   └── Sun group: pointLight (intensity 200, decay 1) + ambientLight (0.15) for visibility
-│       ├── Starfield (5000 point particles)
-│       ├── Sun
-│       │   └── Sphere mesh with glow material
-│       ├── Planet (×13: 8 planets + 5 dwarf planets, textures and hover glow)
-│       │   ├── Orbit visualization (Line)
-│       │   ├── Planet mesh with emissive glow
-│       │   └── Hover glow animation
-│       ├── Satellite (×24; GLB models when modelPath set — staggered load + placeholder until ready)
-│       │   ├── Parent planet / sun / moon tracking
-│       │   └── Satellite mesh with glow
-│       ├── Moon (×27)
-│       │   ├── Parent planet tracking
-│       │   └── Moon mesh with glow
-│       ├── AsteroidBelt (InstancedMesh + Ceres texture; Suspense; frustumCulled: false)
-│       └── KuiperBelt (InstancedMesh + Pluto texture; Suspense; frustumCulled: false)
-├── Loader (R3F loading screen)
-├── ControlPanel
-│   ├── Speed slider (0.1x - 10x)
-│   ├── Pause/Play toggle (shows active during camera interaction)
-│   ├── Orbit visibility toggle
-│   ├── Satellite visibility toggle
-│   ├── Moon visibility toggle
-│   ├── Camera mode selector
-│   └── Reset button
-├── ObjectList
-│   ├── Search functionality
-│   ├── Filter by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation)
-│   ├── All / None category toggles
-│   └── Keyboard: ArrowUp/ArrowDown cycle filtered list (when search input not focused)
-├── PlanetInfo (z-index: 100)
-│   └── Sliding panel with planet details
-├── SatelliteInfo (z-index: 100)
-│   └── Sliding panel with satellite details
-└── MoonInfo (z-index: 100)
-    └── Sliding panel with moon details
-```
-
-## Data Flow
-
-### State Flow (Top to Bottom)
+## 2. Runtime tree
 
 ```
-App State
-  ├── speedMultiplier (number) → SolarSystem → Planet/Satellite/Moon
-  ├── isPaused (boolean) → SolarSystem → Planet/Satellite/Moon/Belts
-  ├── isCameraInteracting (boolean) → ControlPanel (visual feedback)
-  ├── showOrbits (boolean) → SolarSystem → Planet
-  ├── showSatellites (boolean) → SolarSystem (conditional rendering)
-  ├── showMoons (boolean) → SolarSystem (conditional rendering)
-  ├── cameraMode ('free'|'follow') → SolarSystem
-  ├── selectedPlanet (PlanetData|null) → PlanetInfo
-  ├── selectedSatellite (SatelliteData|null) → SatelliteInfo
-  └── selectedMoon (MoonData|null) → MoonInfo
+main.tsx → <StrictMode><App/></StrictMode>
+
+App
+├── Header                        title, help <Dialog>, GitHub link, VITE_APP_VERSION
+├── Canvas (R3F)                  antialias, alpha, stencil off, DPR capped at 2
+│   └── Suspense
+│       └── SolarSystem
+│           ├── PerspectiveCamera (fov 60, near 0.1, far 1000) + drei OrbitControls
+│           ├── ambientLight 0.02
+│           ├── Starfield (5000 points, radius 600)
+│           ├── Sun                       group "planet-sun": mesh + pointLight + ambientLight
+│           ├── Planet × 13               8 planets + 5 dwarf planets
+│           ├── Satellite × 24            if showSatellites
+│           ├── Moon × 26                 if showMoons
+│           ├── AsteroidBelt              own Suspense (Ceres texture)
+│           └── KuiperBelt                own Suspense (Pluto texture)
+├── Loader (drei)                 first load only
+├── ObjectList                    search, 6 category filters, ↑/↓ navigation
+├── ControlPanel                  pause, reset, speed, toggles, Space/←/→ keys
+├── PlanetInfo / SatelliteInfo / MoonInfo   slide-in panels, z-[100]
+└── "Tip" hint                    only when nothing is selected
 ```
 
-### Event Flow (Bottom to Top)
+## 3. State and data flow
 
-```
-User Interactions
-  ├── Planet click → handlePlanetClick → onPlanetSelect → setSelectedPlanet
-  ├── Satellite click → handleSatelliteClick → onSatelliteSelect → setSelectedSatellite
-  ├── Moon click → handleMoonClick → onMoonSelect → setSelectedMoon
-  ├── Control panel changes → setState callbacks → App state update
-  ├── Camera interaction → onStart/onEnd → setIsCameraInteracting → ControlPanel
-  └── Camera reset → resetCamera → GSAP animation + state reset
-```
+### 3.1 App state
 
-## Core Components
+| State                                         | Purpose                                                                 |
+| --------------------------------------------- | ----------------------------------------------------------------------- |
+| `speedMultiplier` (0.1-10, default 1)         | Scales orbital motion                                                   |
+| `isPaused`                                    | User-requested pause                                                    |
+| `isCameraInteracting`                         | Set by OrbitControls `onStart`/`onEnd`, reported up from `SolarSystem`  |
+| `resumeWhileSelected`                         | Lets the user resume motion while an object stays selected              |
+| `showOrbits`, `showSatellites`, `showMoons`   | Visibility toggles                                                      |
+| `cameraMode` (`'free' \| 'follow'`)           | Follow mode lerps the orbit-controls target to the selected object      |
+| `selectedPlanet` / `selectedSatellite` / `selectedMoon` | **Mutually exclusive** selection (the Sun is a `PlanetData` with id `sun`) |
+| `initialLoadDone`                             | Hides the drei `Loader` after the first `useProgress().active` → false  |
 
-### App.tsx (Root Component)
+### 3.2 Effective pause
 
-**Responsibilities:**
-
-- Application state management
-- Coordinating interactions between 3D scene and UI
-- Managing Canvas lifecycle
-- Tracking camera interaction state
-
-**Key State:**
-
-```typescript
-const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
-const [isPaused, setIsPaused] = useState<boolean>(false);
-const [isCameraInteracting, setIsCameraInteracting] = useState<boolean>(false);
-const [showOrbits, setShowOrbits] = useState<boolean>(true);
-const [showSatellites, setShowSatellites] = useState<boolean>(true);
-const [showMoons, setShowMoons] = useState<boolean>(true);
-const [cameraMode, setCameraMode] = useState<'free' | 'follow'>('free');
-const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null);
-const [selectedSatellite, setSelectedSatellite] = useState<SatelliteData | null>(null);
-const [selectedMoon, setSelectedMoon] = useState<MoonData | null>(null);
+```ts
+effectivePaused = isPaused || isCameraInteracting || (isObjectSelected && !resumeWhileSelected);
 ```
 
-**Canvas Configuration:**
+- Selecting an object freezes motion so the camera can settle on it.
+- The pause button inverts `effectivePaused`: if paused it sets `isPaused=false` and
+  `resumeWhileSelected=true`; if running it sets `isPaused=true` and `resumeWhileSelected=false`.
+- `resumeWhileSelected` resets to `false` when the selection clears.
+- `SolarSystem` further passes `isPaused || isCameraInteracting || isTransitioning` to every body
+  (its own `isCameraInteracting` and an `isTransitioning` flag for GSAP tweens).
 
-- Antialiasing enabled for smooth edges
-- High-performance power preference
-- Pixel ratio capped at 2x for performance
-- Black background (#000000)
-
-### SolarSystem.tsx (3D Scene Manager)
-
-**Responsibilities:**
-
-- Managing 3D scene objects
-- Camera animations and transitions
-- Planet/satellite/moon interaction handling
-- Following selected objects
-- Asteroid and Kuiper belt rendering
-- Camera interaction pause logic
-
-**Key Features:**
-
-- GSAP-powered camera animations (1.5s duration, power2.inOut easing)
-- Dynamic satellite positioning based on parent planet location
-- Smooth camera following in 'follow' mode using lerp interpolation
-- Transition state management to prevent animation conflicts
-- Camera interaction detection via OrbitControls onStart/onEnd
-- Automatic pause of all movement during camera interaction
-
-**Animation Logic:**
-
-```typescript
-// Camera animation on planet selection
-gsap.to(camera.position, {
-  x: targetPosition.x,
-  y: targetPosition.y,
-  z: targetPosition.z,
-  duration: 1.5,
-  ease: 'power2.inOut',
-  onComplete: () => setIsTransitioning(false),
-});
-
-// Camera interaction pause
-<DreiOrbitControls
-  onStart={() => setIsCameraInteracting(true)}
-  onEnd={() => setIsCameraInteracting(false)}
-/>
-```
-
-### Planet.tsx (Planet Rendering)
-
-**Responsibilities:**
-
-- Rendering individual planet meshes with textures
-- Orbital motion calculation
-- Rotation animation
-- Orbit path visualization
-- Click interaction handling
-- Hover glow animation
-
-**Animation Frame Update:**
-
-```typescript
-useFrame((state, delta) => {
-  if (!isPaused && planetRef.current && orbitRef.current) {
-    // Update orbital position
-    angle.current += data.orbitalSpeed * speedMultiplier * delta * 0.1;
-    const x = Math.cos(angle.current) * data.distance;
-    const z = Math.sin(angle.current) * data.distance;
-    orbitRef.current.position.set(x, 0, z);
-
-    // Update rotation
-    planetRef.current.rotation.y += data.rotationSpeed * delta;
-  }
-
-  // Hover glow animation
-  if (isHovered) {
-    const time = state.clock.getElapsedTime();
-    const pulseSpeed = 3;
-    const baseIntensity = data.emissiveIntensity || 0.2;
-    const glowIntensity = baseIntensity + Math.sin(time * pulseSpeed) * 0.3;
-    materialRef.current.emissiveIntensity = glowIntensity;
-  }
-});
-```
-
-**Orbit Visualization:**
-
-- Uses THREE.EllipseCurve for circular orbits
-- Line material with transparency
-- Color matches planet's emissive color
-
-**Texture Support:**
-
-- Uses `useLoader(TextureLoader, …)` from React Three Fiber (WebP textures; Earth day/night; Saturn rings in inner `Suspense` with solid ring fallback)
-- Colored mesh fallback while textures load (`Suspense` + `ColoredPlanetMesh`)
-
-### Satellite.tsx (Satellite Rendering)
-
-**Responsibilities:**
-
-- Rendering satellite meshes (procedural shapes and/or GLB via `useGLTF`, resolved with Vite `base` URL)
-- Orbiting parent planet, sun, or moon
-- Tracking parent planet position
-- Click interaction handling
-- Hover glow animation
-
-**Key Logic:**
-
-- Receives parent body position from scene (`planet-*`, `moon-*`, etc.)
-- Calculates local orbit around parent
-- Position = parent position + orbital offset
-- Independent orbital speed control
-- Different 3D models based on satellite type
-
-### Moon.tsx (Natural Moon Rendering)
-
-**Responsibilities:**
-
-- Rendering natural moon meshes
-- Orbiting parent planet with inclination
-- Tracking parent planet position
-- Click interaction handling
-- Hover glow animation
-
-**Key Features:**
-
-- Supports orbital inclination
-- Different pulse speed for hover glow
-- Smaller scale than planets
-
-### Sun.tsx (Central Star)
-
-**Responsibilities:**
-
-- Rendering the Sun with glow effect
-- Point light source (intensity 200)
-- Click interaction
-
-**Visual Effects:**
-
-- Textured or colored sphere (`sunData.radius` = 6)
-- Emissive / texture-driven surface
-- Point light and fill ambient at center (see Lighting Strategy)
-
-### Starfield.tsx (Background Stars)
-
-**Responsibilities:**
-
-- Rendering background stars
-- Creating depth and space atmosphere
-
-**Implementation:**
-
-- Uses THREE.Points for efficient rendering
-- 5000 stars randomly distributed in 600-unit radius sphere
-- Point material with transparency
-- Static positions (no animation)
-
-### ControlPanel.tsx (UI Controls)
-
-**Responsibilities:**
-
-- User controls for simulation
-- Real-time parameter adjustment
-- Visual feedback for pause state
-
-**Controls:**
-
-1. **Speed Slider**: 0.1x to 10x (0.1 increments)
-2. **Pause/Play**: Toggle isPaused state (shows active during camera interaction)
-3. **Show Orbits**: Toggle orbit line visibility
-4. **Show Satellites**: Toggle satellite rendering
-5. **Show Moons**: Toggle moon rendering
-6. **Camera Mode**: Free vs Follow mode
-7. **Reset**: Return to default view
-
-### PlanetInfo.tsx, SatelliteInfo.tsx, MoonInfo.tsx (Information Panels)
-
-**Responsibilities:**
-
-- Display detailed information
-- Slide-in/out animation
-- Close functionality
-- Stay above 3D labels (z-index: 100)
-
-**Features:**
-
-- Conditional rendering based on selection
-- Smooth CSS transitions
-- Scroll support for overflow content
-- Radix UI Card components for structure
-- High z-index to prevent layering issues
-
-## Data Models
-
-### PlanetData Interface
-
-```typescript
-interface PlanetData {
-  id: string; // Unique identifier
-  name: string; // Display name
-  radius: number; // Relative size (Earth = 1)
-  distance: number; // Distance from sun
-  orbitalSpeed: number; // Orbit speed multiplier
-  rotationSpeed: number; // Self-rotation speed
-  color: string; // Base color (hex)
-  emissive?: string; // Glow color (hex)
-  emissiveIntensity?: number; // Glow strength
-  texture?: string; // Texture URL (WebP)
-  description: string; // Brief description
-  facts: string[]; // Array of facts
-  moons?: number; // Number of moons
-  temperature?: string; // Temperature range
-  dayLength?: string; // Length of day
-  yearLength?: string; // Orbital period
-}
-```
-
-### SatelliteData Interface
-
-```typescript
-interface SatelliteData {
-  id: string;
-  name: string;
-  radius: number;
-  parentPlanet: string;  // Planet id, 'sun' (L2/deep-space), or 'moon' (LRO)
-  orbitDistance: number;
-  orbitalSpeed: number;
-  color: string;
-  emissive: string;
-  description: string;
-  launchDate: string;
-  operator: string;
-  facts: string[];
-  type: 'space-station' | 'telescope' | 'satellite' | 'probe';
-  imageUrl?: string;
-  missionStatus?: 'active' | 'ended' | 'extended';
-  altitude?: string;
-  url?: string;
-  escapeTrajectory?: boolean;  // If true: dashed trail, no closed orbit (Voyager, New Horizons)
-  modelPath?: string;         // e.g. 3d-objects/satellites/iss.glb (under public/)
-  modelScale?: number;
-  modelCreditUrl?: string;
-}
-```
-
-### MoonData Interface
-
-```typescript
-interface MoonData {
-  id: string;
-  name: string;
-  radius: number;
-  parentPlanet: string;
-  orbitDistance: number;
-  orbitalSpeed: number;
-  orbitInclination?: number; // Orbital tilt
-  color: string;
-  emissive: string;
-  emissiveIntensity?: number;
-  description: string;
-  facts: string[];
-  diameter?: string;
-  discoveryYear?: string;
-  discoveredBy?: string;
-}
-```
-
-## Rendering Pipeline
-
-### Frame Rendering (60 FPS)
+### 3.3 Events (bottom to top)
 
 ```
-1. useFrame hook triggers (React Three Fiber)
-   ↓
-2. Check if paused or camera interacting
-   ↓
-3. Update planet orbital positions (if not paused)
-   - Calculate new angle based on orbitalSpeed * speedMultiplier * delta
-   - Apply trigonometry for circular motion
-   ↓
-4. Update planet rotations
-   - Increment rotation.y based on rotationSpeed * delta
-   ↓
-5. Update satellite positions
-   - Track parent planet world position
-   - Calculate local orbit
-   - Apply to satellite mesh
-   ↓
-6. Update moon positions
-   - Track parent planet world position
-   - Calculate local orbit with inclination
-   - Apply to moon mesh
-   ↓
-7. Update asteroid/Kuiper belt rotation (if not paused)
-   ↓
-8. Update hover glow animations
-   - Calculate sine wave based on time
-   - Apply to emissive intensity
-   ↓
-9. Update camera (if in follow mode)
-   - Lerp camera target to selected object
-   ↓
-10. Render frame
-    - Three.js renders all meshes
-    - Apply lighting and materials
-    - Output to WebGL canvas
+Canvas click on a body  → Planet/Moon/Satellite/Sun onClick → SolarSystem handle*Click
+                          → onPlanetSelect/onSatelliteSelect/onMoonSelect (others set to null)
+ObjectList click / ↑↓   → same App setters; SolarSystem effects react to the new selection (§5.2)
+Close button            → set selection null, then window.resetSolarSystemCamera()
+Reset button            → window.resetSolarSystemCamera()   (declared in src/vite-env.d.ts)
+OrbitControls start/end → setIsCameraInteracting → onCameraInteractionChange → App
 ```
 
-### Camera Animation Flow
+`window.resetSolarSystemCamera` is the only global the app itself relies on; `SolarSystem` assigns
+it in an effect. In `npm run dev` only, `Canvas` `onCreated` also installs the read-only inspection
+hook `window.__SOLAR_DEBUG__` (`src/lib/debugHook.ts`; see
+[TECHNICAL.md](TECHNICAL.md#performance-measurement)).
+
+## 4. Scene model
+
+### 4.1 Object naming
+
+Parent tracking and camera targeting rely on these names:
+
+| Object             | Name                                    | Set in         |
+| ------------------ | --------------------------------------- | -------------- |
+| Planet / dwarf     | `planet-<id>` (the orbiting group)      | `Planet.tsx`   |
+| Sun                | `planet-sun`                            | `Sun.tsx`      |
+| Moon               | `moon-<id>`                             | `Moon.tsx`     |
+| Satellite          | `satellite-<id>`                        | `Satellite.tsx`|
+
+- Moons look up `planet-<parentPlanet>` every frame and orbit its world position.
+- Satellites with `parentPlanet: 'sun'` orbit `planet-sun` (the origin); `'moon'` is hard-coded to
+  `moon-moon`, so only Earth's Moon can be a satellite parent.
+- `SolarSystem` wraps each planet in `<group name="planet-group-<id>">`, which is unused for lookups.
+
+### 4.2 Coordinates and scale
+
+- The Sun is at the origin; orbits lie in the XZ plane (`y = 0`) except Pluto (17° tilt) and moons
+  with `orbitInclination`.
+- Units are arbitrary and **not to scale**: planet distances are compressed (Earth 25, Neptune 140,
+  Pluto 170, Eris 200), and sizes are compressed (Earth radius 1, Sun 6, Jupiter 4). Gas giants are
+  drawn at roughly 35-65 % of true relative size. See [INACCURACIES.md](INACCURACIES.md).
+- Initial camera: `(0, 80, 180)`, animated in over 2 s. Orbit controls: `minDistance 1`,
+  `maxDistance 400`, `maxPolarAngle = π/1.5`, zoom 0.8 / rotate 0.6 / pan 0.8.
+
+### 4.3 Motion model
+
+All orbits are circular and constant-rate:
 
 ```
-1. User clicks planet/satellite/moon
-   ↓
-2. Check if transition in progress (prevent conflicts)
-   ↓
-3. Set isTransitioning = true
-   ↓
-4. Calculate target camera position
-   - Distance based on object size
-   - Offset for viewing angle
-   ↓
-5. GSAP animation
-   - Animate camera.position (1.5s)
-   - Animate controls.target (1.5s)
-   - Parallel animations for smooth movement
-   ↓
-6. onComplete callback
-   - Set isTransitioning = false
-   - Allow new interactions
+angle += orbitalSpeed * speedMultiplier * delta * 0.1
+position = parent + (cos(angle), 0, sin(angle)) * distance
 ```
 
-### Camera Interaction Pause Flow
-
-```
-1. User starts panning/rotating/zooming
-   ↓
-2. OrbitControls onStart callback fires
-   ↓
-3. setIsCameraInteracting(true) in SolarSystem
-   ↓
-4. useEffect notifies App via onCameraInteractionChange
-   ↓
-5. App updates isCameraInteracting state
-   ↓
-6. ControlPanel receives isPaused || isCameraInteracting
-   ↓
-7. Pause button shows active state
-   ↓
-8. All moving objects receive isPaused || isCameraInteracting
-   ↓
-9. Objects stop moving while user interacts
-   ↓
-10. User stops interacting
-    ↓
-11. OrbitControls onEnd callback fires
-    ↓
-12. setIsCameraInteracting(false)
-    ↓
-13. Objects resume movement (if not manually paused)
-```
-
-## Performance Optimizations
-
-### 1. Instanced Rendering
-
-**Asteroid Belt**: Uses THREE.InstancedMesh for 200 asteroids
-
-- Single geometry, single material
-- 200 transformation matrices
-- One draw call instead of 200
-- `frustumCulled: false` to prevent disappearing when panning
-
-**Kuiper Belt**: Uses THREE.InstancedMesh for 400 objects
-
-- Same optimization as asteroid belt
-- Different geometry (icosahedron vs dodecahedron)
-- Slower rotation speed for realism
-
-### 2. Conditional Rendering
-
-```typescript
-{showSatellites && satellites.map((satellite) => (
-  // Only render when enabled
-))}
-```
-
-### 3. Frame Rate Management
-
-- useFrame delta for frame-rate independent animation
-- Capped pixel ratio (max 2x) for high-DPI displays
-- Stencil buffer disabled (not needed)
-
-### 4. Lazy Computation
-
-- Planet positions calculated only when needed
-- Satellite positions depend on parent updates
-- Camera follow uses lerp (smooth interpolation, not recalculation)
-
-### 5. Efficient State Updates
-
-- useCallback for event handlers (prevent re-creation)
-- Minimal state updates (only what's necessary)
-- Ref usage for values that don't need re-renders
-
-### 6. Z-Index Management
-
-- Info panels use `z-[100]` to stay above 3D labels
-- Prevents UI layering issues
-- Consistent across all info panel components
-
-## Animation System
-
-### GSAP Integration
-
-**Why GSAP?**
-
-- Professional animation library
-- Better easing functions than CSS
-- Precise control over timing
-- Can animate Three.js objects directly
-
-**Usage Patterns:**
-
-```typescript
-// Camera position animation
-gsap.to(camera.position, {
-  x: targetX,
-  y: targetY,
-  z: targetZ,
-  duration: 1.5,
-  ease: 'power2.inOut',
-  onComplete: callback,
-});
-
-// Camera target animation (parallel)
-gsap.to(controls.target, {
-  x: targetX,
-  y: targetY,
-  z: targetZ,
-  duration: 1.5,
-  ease: 'power2.inOut',
-});
-```
-
-### Hover Glow Animation
-
-**Implementation:**
-
-```typescript
-// Sine wave for smooth pulsing
-const glowIntensity = baseIntensity + Math.sin(time * pulseSpeed) * 0.3;
-
-// Different pulse speeds for different object types
-// Planets: 3
-// Moons: 4
-// Satellites: 5
-```
-
-### Orbital Animation
-
-**Math Behind Orbits:**
-
-```typescript
-// Circular orbit calculation
-angle += orbitalSpeed * speedMultiplier * delta * 0.1;
-x = cos(angle) * distance;
-z = sin(angle) * distance;
-position.set(x, 0, z); // y = 0 for flat orbits
-
-// With inclination (for moons)
-y = sin(angle) * distance * sin(inclination);
-```
-
-## Lighting Strategy
-
-### Scene Ambient (`SolarSystem`)
-
-- Intensity: **0.02** — minimal fill so unlit areas stay deep-space dark
-
-### Sun Group (`Sun.tsx`)
-
-- **Point light**: position (0, 0, 0), intensity **200**, **distance: 0** (unbounded), **decay: 1** (linear falloff)
-- **Ambient light**: intensity **0.15** on the Sun group for readable planet/moon shading
-- Purpose: Main “sunlight” plus fill so day sides and textures remain visible
-
-### Emissive Materials
-
-- Planets, moons, and satellites have emissive colors
-- Self-illumination for visibility
-- Glow effect without additional lights
-- Animated intensity on hover
-
-## Coordinate System
-
-### Space Units
-
-- 1 unit ≈ arbitrary space distance (not to real scale)
-- Sun at origin (0, 0, 0)
-- Planets orbit in XZ plane (y = 0)
-- Camera positioned at (0, 80, 180) initially (overview)
-
-### Scale Factors
-
-```typescript
-export const scaleFactors = {
-  distanceScale: 2, // Not used actively
-  sizeScale: 0.3, // Not used actively
-  orbitScale: 0.8, // Not used actively
-};
-```
-
-_Note: These are defined but not currently applied. Actual scaling is done directly in planet data._
-
-## Build Configuration
-
-### Vite Configuration (vite.config.ts)
-
-```typescript
-export default defineConfig({
-  base: '/solar-system/', // GitHub Pages / subpath; affects public asset URLs
-  plugins: [inspectAttr(), react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-});
-```
-
-Public assets (textures, GLBs, satellite images) are loaded with paths that include this `base` (see `import.meta.env.BASE_URL` in components).
-
-### TypeScript Configuration
-
-- **tsconfig.json**: Base configuration
-- **tsconfig.app.json**: App-specific settings (strict mode, JSX)
-- **tsconfig.node.json**: Node environment (for config files)
-
-### Tailwind Configuration
-
-- Custom colors for space theme
-- Animation utilities enabled
-- JIT mode for optimal CSS size
-- Radix UI color scheme integration
-
-## Browser Considerations
-
-### WebGL Requirements
-
-- WebGL 1.0 minimum (Three.js r148+ requirement)
-- Hardware acceleration recommended
-- Fallback to software rendering possible (slow)
-
-### Mobile Optimizations
-
-- Touch controls supported via OrbitControls
-- Responsive UI (mobile hook available)
-- Reduced particle count consideration (not implemented)
-
-### Performance Profiling
-
-```javascript
-// Enable Three.js stats
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-const stats = new Stats();
-document.body.appendChild(stats.dom);
-```
-
-## Future Architecture Improvements
-
-### Potential Enhancements
-
-1. **Texture System**: ✅ Implemented - Load planet textures dynamically
-2. **LOD System**: Level of Detail for distant objects
-3. **Worker Threads**: Offload calculations to Web Workers
-4. **State Management**: Redux/Zustand for complex state
-5. **Route System**: React Router for different views
-6. **Physics Engine**: Realistic gravitational interactions
-7. **Data Streaming**: Load satellite data on demand
-8. **Shader Effects**: Custom GLSL shaders for visual effects
-
-### Scalability Considerations
-
-- Current architecture supports ~20 planets + 50 satellites + 50 moons
-- Beyond that, consider object pooling
-- Spatial partitioning for click detection
-- Frustum culling for off-screen objects (Three.js handles this)
-
-## Testing Strategy (Not Implemented)
-
-### Recommended Tests
-
-1. **Unit Tests**: Component logic, utilities
-2. **Integration Tests**: Component interactions
-3. **E2E Tests**: User flows (Playwright/Cypress)
-4. **Visual Regression**: Screenshot comparisons
-5. **Performance Tests**: Frame rate monitoring
-
-### Test Tools
-
-- Vitest for unit tests
-- React Testing Library for component tests
-- Playwright for E2E tests
-- @testing-library/react-three-fiber for 3D components
-
----
-
-## Technical Debt & Known Issues
-
-1. **Scale Factors**: Defined but not used
-2. **Texture Support**: ✅ Implemented - WebP textures working
-3. **Mobile Performance**: Could be optimized further
-4. **Accessibility**: Limited keyboard navigation
-5. **Error Boundaries**: No error handling for 3D loading failures
-6. **Loading States**: Could show progressive loading
-
-## References
-
-- [Three.js Fundamentals](https://threejs.org/manual/)
-- [React Three Fiber Documentation](https://docs.pmnd.rs/react-three-fiber/)
-- [GSAP Documentation](https://greensock.com/docs/)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
+- Start angle is random per instance per page load.
+- **Pluto** uses a conic form `r = a(1-e²)/(1+e cos θ)` with `e = 0.25` and a 17° inclination, but
+  still advances θ at a constant rate (not Kepler's second law).
+- **Moons** apply inclination by rotating the orbit about X: `y = z·sin(i)`, `z' = z·cos(i)`.
+  Triton uses 157° (retrograde).
+- **Escape-trajectory probes** (Voyager 1/2, New Horizons) do not orbit; they sit at a fixed angle
+  derived from a hash of their id, offset from their parent, with a dashed line back to it.
+- Planet spin increments `rotation.y` by `rotationSpeed` per frame (not `delta`-scaled) and ignores
+  `speedMultiplier`; moon spin is `delta * 0.15 * speedMultiplier`. Each of `Planet`, `Moon` and
+  `Satellite` keeps its angle in React state (`setAngle` inside `useFrame`); this is a known
+  performance issue, see the performance doc.
+
+## 5. Camera and selection
+
+### 5.1 Direct click
+
+`SolarSystem` handlers (`handlePlanetClick`, `handleSatelliteClick`, `handleMoonClick`,
+`handleSunClick`) all follow the same pattern:
+
+1. Ignore the click if `isTransitioning`.
+2. Set the matching selection and clear the other two.
+3. GSAP-tween `camera.position` and `controls.target` for 1.5 s (`power2.inOut`); `onComplete`
+   clears `isTransitioning`.
+
+Camera offset is `(d, d/2, d)` from the target, where `d = radius × 8` for planets, `× 25` for
+satellites, `× 10` for moons. The Sun is special-cased: camera to `(20, 15, 20)`, target to origin.
+
+### 5.2 Selection from the Object List
+
+Clicking a list row or pressing ↑/↓ only calls the App setters (no position is known). Three
+effects in `SolarSystem` (planet, satellite, moon) watch the selected id, look the object up by name,
+read its world position and call the same click handler. Each uses a "previous id" ref plus an
+`isAnimating…FromListRef` flag cleared by a **1600 ms** `setTimeout`, so a selection that was
+already animated (for example by a direct click) is not animated twice. The Sun path adds a 100 ms
+delay first.
+
+### 5.3 Reset and follow
+
+- `resetCamera` clears all selections and tweens back to `(0, 80, 180)` / origin over 1.5 s.
+- Follow mode (`cameraMode === 'follow'`) runs in `useFrame`: when not transitioning it lerps
+  `controls.target` toward the selected object's world position at `0.05` per frame. The camera
+  position is not moved, so distance and angle drift as the object moves.
+
+## 6. Rendering each kind of body
+
+### 6.1 Planets (`Planet.tsx`)
+
+| Aspect       | Behaviour                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Mesh choice  | Earth → `EarthMesh`; any body with `texture` → `TexturedPlanetMesh`; otherwise `ColoredPlanetMesh`                 |
+| Fallback     | Each textured mesh sits in its own `Suspense` with `ColoredPlanetMesh` as fallback                                 |
+| Earth        | Day map plus night map as `emissiveMap` with white emissive 0.6; a 1.05× back-face sphere (`#4A90E2`, 15 %) as atmosphere |
+| Saturn       | `RingGeometry` 1.2×-2.2× radius, tilted 0.466 rad, radial UVs; inner `Suspense` with a flat translucent ring fallback |
+| Uranus       | Opaque ring 1.8×-2.0× radius, rotated 90°                                                                          |
+| Orbit / trail| 128-segment orbit line (opacity 0.15); trail is the last 100 per-frame positions (opacity 0.4)                     |
+| Hover        | Back-face additive sphere at 1.15× pulsing; cursor set to `pointer` through `document.body.style`                  |
+| Label        | drei `<Html>` with `zIndexRange=[90, 0]` so labels sit under info panels                                           |
+
+### 6.2 Sun (`Sun.tsx`)
+
+Textured emissive sphere (radius 6, emissive intensity 1.5) with a coloured fallback. It owns the
+scene's only real light: `pointLight` intensity 200, `distance 0`, `decay 1`, plus an
+`ambientLight` 0.15. There is no glow or corona effect.
+
+### 6.3 Moons (`Moon.tsx`)
+
+- Only Earth's Moon has a file texture (`/textures/moon.webp`). Every other moon uses
+  `ProceduralMoonMesh`, which builds a deterministic 512×512 canvas texture from the moon's id,
+  `color` and `surfaceType` (`rocky`, `icy`, `volcanic`, `mixed`) via
+  `getCachedMoonTexture` in `src/lib/textureGenerator.ts`. Iapetus is two-toned, Charon gets a red
+  polar cap, Triton a pink overlay.
+- Each moon has a subtle 1.2× back-face glow, an orbit line around the parent's current world
+  position, and a small label. **Moon orbit lines ignore `showOrbits`.**
+
+### 6.4 Satellites (`Satellite.tsx`)
+
+Model selection, first match wins:
+
+1. **GLB**: `modelPath` and `modelScale` both set. A glowing placeholder sphere renders until
+   loading is allowed, then `useGLTF` inside `Suspense` (the scene is cloned per instance).
+2. **Procedural by id**: hand-built primitive models for `iss`, `tianhe`, `hubble`, `jwst`,
+   `gaia`, `voyager1/2`, `cassini`, `juno`, `mars-reconnaissance`, `soho`, `bepicolombo`,
+   `europa-clipper`, `lucy`, `new-horizons`, `psyche`, `gps`, `starlink`. Blocks for ids that also
+   have a GLB are unreachable.
+3. **Type fallback**: generic `space-station`, `telescope`, `probe` or default shape.
+
+Each satellite also has a faint base glow, a hover glow and a label. Colours per type come from
+`satelliteTypeColors` in `src/data/satellites.ts`. Orbit lines are 64-segment circles (opacity
+0.2) following the parent. See [SATELLITE_3D_MODELS.md](SATELLITE_3D_MODELS.md).
+
+### 6.5 Starfield and belts
+
+- **Starfield:** 5000 `Points` between 0.5R and R (R = 600) with four colour tints, additive
+  blending, rotating about Y at 0.005 rad/s.
+- **Asteroid belt:** 200 dodecahedra, radius 42-48, vertical spread ±1, scale 0.1-0.4, Ceres map.
+- **Kuiper belt:** 400 icosahedra, radius 155-220, vertical spread ±4, scale 0.15-0.65, Pluto map.
+- Both are `instancedMesh` with `frustumCulled={false}`, each in its own `Suspense`, rotating
+  slowly (0.02 and 0.003 rad/s) only while unpaused. They ignore `speedMultiplier`.
+
+## 7. UI layer
+
+- **ControlPanel** (bottom-left): pause/resume, reset, speed slider, toggles for orbits,
+  satellites, moons and "Follow Object". Global key handler: **Space** toggles pause, **← / →**
+  change speed by 0.1 (clamped 0.1-10). Ignored when the event target is an `INPUT` or `TEXTAREA`.
+- **ObjectList** (above the controls): search over name, description and parent id; six category
+  filters with All / None; list sorted by name. While expanded, **↑ / ↓** cycle the filtered list
+  and select the next entry (ignored for editable targets, wraps around).
+- **Info panels** (top-right, `z-[100]`): `PlanetInfo`, `SatelliteInfo`, `MoonInfo`. Each slides in
+  and out with GSAP on a class selector (`.planet-info-panel`, `.satellite-info-panel`,
+  `.moon-info-panel`) and stays mounted until its exit tween completes. `SatelliteInfo` also loads
+  the mission image lazily with loading and error states.
+- **Header:** help dialog (Radix `Dialog`), GitHub link, version from `VITE_APP_VERSION`.
+- Styling is Tailwind with shadcn-style primitives in `src/components/ui`
+  (`button`, `dialog`, `input`, `slider`, `switch`) and HSL theme variables in `src/index.css`.
+
+## 8. Loading strategy
+
+1. **Blocking set.** `index.html` preloads `sun.webp`, `earth_day.webp` and `earth_night.webp`.
+   Everything else is lazy.
+2. **Per-mesh `Suspense`.** Planets, the Sun, textured moons, Saturn's rings and each belt suspend
+   independently with a visible fallback, so the canvas never blanks.
+3. **Loader.** The drei `Loader` is shown only until the first time `useProgress().active` becomes
+   false; later GLB streaming does not bring it back.
+4. **Satellite GLBs.** `requestIdleCallback` (timeout 5 s; `setTimeout` 3 s fallback for Safari),
+   then a stagger of `index × 250 ms`. Selecting a satellite loads its GLB immediately.
+5. **Chunks.** `vite.config.ts` splits `vendor-three` (three, three-stdlib, @react-three) and
+   `vendor-react`; `kimi-plugin-inspect-react` is applied only for `vite serve`.
+6. **Compression.** GLBs are meshopt-compressed (decoded by drei's bundled decoder, no network
+   fetch); textures and panel images are WebP. See [TECHNICAL.md](TECHNICAL.md#4-asset-pipeline).
+
+### Path conventions
+
+The Vite `base` is `/solar-system/`. Components resolve public assets with
+`${import.meta.env.BASE_URL}${path}` and collapse `//`. The data files are inconsistent about
+leading slashes, and both forms work:
+
+| Field                  | Example                              | Leading slash |
+| ---------------------- | ------------------------------------ | ------------- |
+| `texture` (planets, moons, Sun) | `/textures/earth_day.webp`  | yes           |
+| `imageUrl` (satellites)         | `satellites/iss.webp`       | no            |
+| `modelPath` (satellites)        | `3d-objects/satellites/iss.glb` | no        |
+
+## 9. Lighting
+
+| Light                     | Where          | Settings                                  |
+| ------------------------- | -------------- | ----------------------------------------- |
+| `ambientLight`            | `SolarSystem`  | intensity 0.02 (deep-space dark side)     |
+| `pointLight`              | Sun group      | intensity 200, `distance 0`, `decay 1`    |
+| `ambientLight`            | Sun group      | intensity 0.15 for readable day sides     |
+
+No shadows. Bodies add a small emissive term so night sides stay faintly visible.
+
+## 10. Build, CI and deploy
+
+- `npm run build` runs `tsc -b` then `vite build` (output in `dist/`).
+- **Pull requests to `main`** run `quality.yml`: lint, `npm audit --audit-level=moderate`, build.
+  `npm test` (Vitest data-integrity tests) is not part of CI yet.
+- **Publishing a GitHub Release** runs `deploy.yml`: lint, build with `VITE_APP_VERSION` taken from
+  the tag, upload, then SSH deploy to a Vultr VPS (timestamped release directory, `current`
+  symlink swap, last 5 releases and 3 backups kept) and a verification job.
+- Details, secrets and release practice are in [TECHNICAL.md](TECHNICAL.md#7-cicd).
+
+## 11. Known limitations
+
+Tracked, with fixes and a roadmap, in
+[PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md). The main ones:
+
+- Per-frame React state updates and per-render `THREE.Line` allocation in planets/moons/satellites.
+- Trails that are very short for slow planets and probably leak GPU buffers.
+- 63 always-on DOM labels, and GPU texture memory around 150 MB.
+- Unused code: `scaleFactors`, `getMoonsByPlanet`, the `OrbitTrail` type, most of
+  `src/lib/textureGenerator.ts`, and unreachable procedural satellite models.
+- No error boundaries or WebGL-support fallback.
+- Automated tests are limited to data and documentation integrity (`npm test`, Vitest in Node);
+  there are no component, interaction or rendering tests.

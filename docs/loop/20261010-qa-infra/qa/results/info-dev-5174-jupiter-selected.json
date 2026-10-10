@@ -1,0 +1,58 @@
+{
+  "url": "http://localhost:5174/solar-system/",
+  "note": "dev server (StrictMode): use growth, not absolute values",
+  "samples": [
+    {
+      "minute": 1,
+      "tSec": 60,
+      "geometries": 273,
+      "textures": 63,
+      "calls": 139,
+      "triangles": 262792,
+      "programs": 18
+    },
+    {
+      "minute": 2,
+      "tSec": 120,
+      "geometries": 273,
+      "textures": 63,
+      "calls": 201,
+      "triangles": 292557,
+      "programs": 18
+    },
+    {
+      "minute": 3,
+      "tSec": 180,
+      "geometries": 273,
+      "textures": 63,
+      "calls": 160,
+      "triangles": 441701,
+      "programs": 18
+    },
+    {
+      "minute": 4,
+      "tSec": 240,
+      "geometries": 273,
+      "textures": 63,
+      "calls": 179,
+      "triangles": 474174,
+      "programs": 18
+    },
+    {
+      "minute": 5,
+      "tSec": 300,
+      "geometries": 273,
+      "textures": 63,
+      "calls": 121,
+      "triangles": 255502,
+      "programs": 18
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com"
+  ]
+}

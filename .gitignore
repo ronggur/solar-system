@@ -60,3 +60,6 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# Dev-QA loop screenshots (kept local)
+docs/loop/*/shots/
