@@ -1,253 +1,132 @@
 # Release Notes
 
-## Latest – Docs sync (see README / docs for full detail)
+Changelog per release tag, newest first. Releases are tagged `vX.Y.Z` on GitHub; publishing a
+release also deploys it (see [docs/TECHNICAL.md](docs/TECHNICAL.md#7-cicd)). `package.json` stays at
+`0.1.0`; the displayed app version comes from the release tag at build time (`VITE_APP_VERSION`).
 
-### Counts & UX (current)
-
-- **24 spacecraft**, **27 natural moons**, **13** entries in `planets` (8 planets + 5 dwarf planets) plus **Sun** via `sunData`.
-- **Object list**: **All** / **None** for category filters; **↑** / **↓** to cycle the filtered list (control panel hints: Space, ←→, ↑↓).
-- **Belts**: Asteroid and Kuiper instanced meshes use **Ceres**-like and **Pluto**-like textures; **Saturn** ring texture loads inside inner `Suspense` with solid fallback.
-- **Satellite GLBs**: Loaded with Vite `base`-aware URLs; **staggered** fetch with immediate load when a satellite is selected; `npm run compress-satellite-glbs` for batch optimize.
+For what is planned next, see
+[docs/PERFORMANCE_AND_VISUALIZATION.md](docs/PERFORMANCE_AND_VISUALIZATION.md).
 
 ---
 
-## Previous – Data, spacecraft & filter categories
-
-### Spacecraft & data
-
-- **24 spacecraft** (grown from early 12): Includes Parker Solar Probe, New Horizons, Europa Clipper, SOHO, BepiColombo, OSIRIS-APEX, Lucy, Psyche, Chandra, LRO, Mars Odyssey, MAVEN, Tiangong, etc.
-- **Escape trajectory**: Voyager 1/2 and New Horizons use `escapeTrajectory: true` (dashed trail, no closed orbit).
-- **Orbital correctness**: JWST and Gaia at Sun–Earth L2 orbit the Sun (not Earth). LRO orbits the Moon (`parentPlanet: 'moon'`).
-- **Planet data**: Saturn 274 moons; Venus 465°C; Mercury sidereal day 58.6 Earth days; Europa Clipper launched Oct 2024; Deimos mission highlights (Viking orbiters 1976–1980).
-
-### Object list & categories
-
-- **Six filter categories**: Planets, Moons, **Space Stations**, **Telescopes**, **Probes**, **Navigation** (replacing a single “Satellites” toggle).
-- **Icons & colors** per spacecraft type (Stations, Telescopes, Probes, Navigation) in the object list.
+## Unreleased
 
 ### Documentation
 
-- **README.md**: Updated features, celestial bodies list, Object List, Configuration.
-- **docs/TECHNICAL.md**: SatelliteData (escapeTrajectory, parentPlanet sun/moon), “Adding a New Satellite”.
-- **docs/ARCHITECTURE.md**: Satellite count, filter categories, SatelliteData.
-- **docs/API.md**: SatelliteData interface and properties.
+- Added [docs/PERFORMANCE_AND_VISUALIZATION.md](docs/PERFORMANCE_AND_VISUALIZATION.md): measured
+  baseline, performance and visual findings, and a phased roadmap (no code changes yet).
+- Rewrote [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/TECHNICAL.md](docs/TECHNICAL.md) to
+  match the code, and removed the duplicated interface/props listings.
+- Rewrote [docs/SATELLITE_3D_MODELS.md](docs/SATELLITE_3D_MODELS.md) with the current GLB status.
+- Corrected facts across the docs: **26** natural moons (not 27), Node.js 20.19+ requirement,
+  gas-giant scale wording, Object List colours, and the Sun's description (no glow effect).
+- Added [docs/LOOP-DEV-QA.md](docs/LOOP-DEV-QA.md), a Dev ↔ QA agent-loop playbook.
+- Removed `docs/API.md` (duplicated `src/types` and documented props and guards that do not exist)
+  and `GITHUB_DESCRIPTION.md` (an unfilled template with stale counts).
+
+### Known data issues
+
+See "Known candidates to verify" in [docs/INACCURACIES.md](docs/INACCURACIES.md). In particular the
+`index.html` meta descriptions still say 23 moons and 12 satellites.
 
 ---
 
-## Version 1.0.0 - Enhanced 3D Solar System Explorer
+## v1.6.0: Loading performance and spacecraft models (2026-07-13)
 
-### Overview
+### Startup payload: ~25 MB → ~3.5 MB
 
-This release brings significant visual and interactive improvements to the 3D Solar System Explorer, including realistic planet textures, animated hover effects, improved lighting, and enhanced user experience with camera interaction feedback.
+- Converted every satellite GLB from Draco to **meshopt** (18.9 MB → 4.5 MB). This removes the
+  runtime Draco decoder fetch from gstatic.com; drei decodes meshopt with its bundled decoder.
+- Pre-simplified `maven.glb` (a 4.2 M-vertex disconnected triangle soup) with the new
+  `scripts/simplify-glb-sloppy.mjs`: 10.5 MB → ~40 KB.
+- Downsized dwarf-planet, Moon and Mercury textures with the new
+  `scripts/optimize-planet-textures.mjs` (4 MB → 1.8 MB).
+- The drei `Loader` is now one-shot, so idle-streamed GLBs no longer bring the overlay back.
+- Vite: `inspectAttr` is excluded from production builds, `vendor-three` and `vendor-react` chunks
+  are split, and the Sun and Earth textures are preloaded in `index.html`.
+- Removed 48 unused shadcn components and 35 unused dependencies (CSS 87 KB → 32 KB).
 
----
+### Spacecraft
 
-## 🎨 Visual Enhancements
-
-### Realistic Planet Textures
-
-- **WebP Format**: All planets now use high-quality WebP textures for better compression and faster loading
-- **Texture Sources**: Earth, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto feature realistic surface textures from NASA and scientific sources
-- **Fallback Support**: Graceful fallback to procedural colors if textures fail to load
-
-### Animated Hover Glow Effects
-
-- **Planets**: Smooth pulsing glow effect when hovered (sine wave animation, 3x pulse speed)
-- **Moons**: Subtle glow animation for natural moons (4x pulse speed)
-- **Satellites**: Energetic glow effect for artificial satellites (5x pulse speed)
-- **Visual Feedback**: Clear indication of interactive objects without jittering
-
-### Improved Lighting
-
-- **Scene ambient**: Very low (`SolarSystem`) for deep-space look; **Sun** group adds fill ambient + point light (intensity 200, linear decay)
-- **Earlier note**: Global ambient was raised to 0.15 before fill moved onto the Sun group
-- **Texture Visibility**: Mercury and Venus now clearly show surface details
+- Satellite GLBs are **deferred to browser idle time** (`requestIdleCallback`, `setTimeout`
+  fallback for Safari) and staggered; selecting a satellite still loads it immediately.
+- New or rebuilt procedural models: Tiangong (real T shape with twin solar wings), Gaia, SOHO,
+  BepiColombo, Europa Clipper, Lucy, New Horizons, Psyche, GPS III and Starlink.
+- LRO model scale reduced (0.004 → 0.0015).
 
 ---
 
-## 🚀 Interactive Features
+## v1.5.0: Asset optimization and object-list UX (2026-04-05)
 
-### Camera Interaction Pause
+- Asteroid and Kuiper belts use Ceres- and Pluto-like surface textures (each behind `Suspense`).
+- Satellite images moved to a WebP workflow (`optimize-satellite-images`); unused texture files
+  removed with the new `prune-unused-textures` helper.
+- **Object List:** ↑ / ↓ cycle through the filtered list; All / None toggles for categories; the
+  control panel documents the keys.
+- Satellite GLBs load on a stagger with Vite-`base`-aware URLs and a placeholder;
+  `compress-satellite-glbs` script added.
+- Saturn's ring texture loads in an inner `Suspense` with a solid fallback ring.
+- Miranda and LRO data tweaks.
 
-- **Automatic Pause**: All object movement pauses when user pans, rotates, or zooms camera
-- **Visual Feedback**: Control panel pause button shows active state during camera interaction
-- **Smooth Resume**: Objects resume movement immediately when interaction ends
-- **Manual Override**: Manual pause state is preserved and combined with camera interaction state
+## v1.4.0: Procedural moon textures and CI (2026-03-08)
 
-### Extended Speed Control
+- Moons without a texture file get a deterministic, procedurally generated surface based on real
+  appearance (`src/lib/textureGenerator.ts`); Mimas orbit updated.
+- Control layout fit improvements.
+- New `quality.yml` workflow on pull requests; `npm audit` added to CI.
 
-- **New Range**: Speed slider now supports 0.1x to 10x (previously 0.1x to 5x)
-- **Time-lapse Viewing**: Watch orbital mechanics at accelerated speeds
-- **Fine Control**: 0.1x increments for precise speed adjustment
+## v1.3.0: Spacecraft 3D models (2026-02-18)
 
-### Z-Index Layering Fix
+- GLB models for 14 spacecraft under `public/3d-objects/satellites/`, wired through `modelPath` /
+  `modelScale` data fields.
+- Deploy workflow updates.
 
-- **Info Panels**: All information panels (Planet, Moon, Satellite) now use `z-[100]`
-- **3D Labels**: HTML labels in 3D scene stay below info panels
-- **No Overlap**: Information panels always appear above 3D scene elements
+## v1.2.0: Spacecraft, escape trajectories and filters (2026-02-13)
 
----
+- **23 spacecraft** at the time (24 today; grown from an early 12), including Parker Solar Probe, New Horizons, Europa
+  Clipper, SOHO, BepiColombo, OSIRIS-APEX, Lucy, Psyche, Chandra, LRO, Mars Odyssey, MAVEN and
+  Tiangong.
+- **Escape trajectories:** Voyager 1/2 and New Horizons use `escapeTrajectory: true` (dashed trail,
+  no closed orbit).
+- **Orbital correctness:** JWST and Gaia orbit the Sun (L2); LRO orbits the Moon
+  (`parentPlanet: 'moon'`).
+- **Six filter categories** in the Object List: Planets, Moons, Space Stations, Telescopes, Probes,
+  Navigation, with icons and colours per type.
+- Data fixes (for example Saturn 274 moons, Venus 465 °C, Mercury sidereal day 58.6 Earth days).
+- Lint fixes.
 
-## 🌌 Celestial Body Improvements
+## v1.1.0: Moon textures and richer data (2026-02-12)
 
-### Asteroid & Kuiper Belt Visibility
+- Moon texture for Earth's Moon.
+- Keyboard shortcuts: **Space** pause, **← / →** speed.
+- Richer data and updated information panels.
+- Labels no longer render above the info panel (z-index fix).
 
-- **Frustum Culling Disabled**: Belts no longer disappear when panning camera
-- **Always Visible**: 200+ asteroids and 400+ Kuiper belt objects remain visible
-- **Performance**: Maintained through instanced mesh rendering
+## v1.0.0: Planet textures and interaction polish (2026-02-11)
 
-### Moon Data Expansion
+First feature-complete release.
 
-- **27 Natural Moons**: Includes dwarf-planet satellites (e.g. Haumea, Makemake, Eris) in addition to classical planet moons
-- **Detailed Information**: Discovery year, discoverer, diameter, and orbital inclination for each moon
-- **Interactive**: All moons clickable with detailed information panels
+- **Textures:** WebP surface maps for the planets and dwarf planets; Earth uses separate day and
+  night maps. Coloured spheres are used as a fallback while textures load.
+- **Hover feedback:** pulsing additive glow on planets, moons and satellites.
+- **Camera interaction pause:** all motion pauses while the user pans, rotates or zooms, and the
+  pause button reflects it. A manual pause is preserved.
+- **Speed range** extended to 0.1×-10× in 0.1 steps.
+- **Belts:** asteroid and Kuiper belts as instanced meshes with `frustumCulled={false}` so they
+  don't disappear when panning.
+- **Moons:** natural moons with discovery, diameter and inclination data, each clickable with its
+  own info panel; includes dwarf-planet moons.
+- **Layering:** info panels use `z-[100]`, with 3D labels below them.
+- **Lighting:** very low scene ambient; the Sun group supplies a point light and fill.
 
----
+## v0.0.1 - v0.0.3: Initial deployment (2026-02-01)
 
-## 🛠️ Technical Improvements
-
-### Performance Optimizations
-
-- **Instanced Rendering**: Efficient rendering for 600+ belt objects
-- **Texture Compression**: WebP format reduces file sizes by ~30% compared to JPEG
-- **Animation Efficiency**: Sine-wave based glow animations with no performance impact
-- **Memory Management**: Proper cleanup and ref usage for Three.js objects
-
-### Code Architecture
-
-- **Component Structure**: Added Moon component with consistent API to Planet and Satellite
-- **State Management**: Camera interaction state tracked in App and passed to ControlPanel
-- **Type Safety**: Full TypeScript coverage with updated interfaces
-- **Documentation**: Complete API documentation for all components
-
-### Bug Fixes
-
-- **Belt Visibility**: Fixed asteroid and Kuiper belt disappearing when panning camera
-- **Z-Index Issues**: Fixed info panels appearing behind 3D labels
-- **Lighting Balance**: Adjusted light intensities for better texture visibility
-- **Pause State**: Fixed pause button not reflecting camera interaction state
-
----
-
-## 📚 Documentation Updates
-
-### Updated Files
-
-- **README.md**: Added new features and updated feature descriptions
-- **docs/TECHNICAL.md**: Complete rewrite with new architecture details
-- **docs/ARCHITECTURE.md**: Updated component hierarchy and data flow
-- **docs/API.md**: Full API reference with MoonData and new props
-
-### New Sections
-
-- Camera interaction pause flow documentation
-- Hover glow animation implementation details
-- Texture loading and WebP format guide
-- Troubleshooting section for common issues
+- Project setup, deployment workflow, base-path and favicon fixes, control improvements.
 
 ---
 
-## 🎯 User Experience
+## Links
 
-### Control Panel
-
-- **Visual Feedback**: Pause button shows active during camera interaction
-- **Extended Range**: Speed slider goes up to 10x for time-lapse viewing
-- **Responsive**: All controls work smoothly with 60fps animation
-
-### Object Interaction
-
-- **Hover Effects**: Clear visual feedback on all interactive objects
-- **Click to Explore**: Smooth camera transitions to selected objects
-- **Information Panels**: Detailed facts and data for all celestial bodies
-
-### Navigation
-
-- **Free Camera**: Orbit, pan, and zoom with automatic pause
-- **Follow Mode**: Camera smoothly follows selected objects
-- **Reset View**: One-click return to overview position
-
----
-
-## 📦 Assets
-
-### Textures (see `public/textures/`)
-
-- **Earth**: `earth_day.webp`, `earth_night.webp` (separate day/night in scene)
-- **Other planets / dwarfs**: WebP maps (e.g. Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Ceres, etc.)
-- **Saturn rings**: `saturn_ring_alpha.png`
-
-### Scripts
-
-- `scripts/download-earth-texture.mjs` - Download Earth day/night sources (convert/optimize separately as needed)
-- `scripts/optimize-satellite-images.mjs`, `scripts/compress-satellite-glbs.mjs` - Optional asset pipelines (see README)
-
----
-
-## 🔧 Dependencies
-
-No new dependencies added. All improvements use existing:
-
-- React 19.2.0
-- Three.js 0.182.0
-- @react-three/fiber 9.5.0
-- @react-three/drei 10.7.7
-- GSAP 3.14.2
-
----
-
-## 🐛 Known Issues
-
-1. **Mobile Performance**: Could be optimized further for low-end devices
-2. **Accessibility**: Limited keyboard navigation support
-3. **Error Boundaries**: No error handling for 3D loading failures
-4. **Loading States**: Could show progressive loading for textures
-
----
-
-## 🗺️ Roadmap
-
-### Completed
-
-- [x] Planet surface textures
-- [x] Animated hover effects
-- [x] Camera interaction pause
-- [x] Extended speed range
-- [x] Moon information panels
-- [x] Z-index layering fix
-- [x] Belt visibility fix
-
-### Planned for Future
-
-- [ ] Day/night cycle with proper lighting
-- [ ] Comet and asteroid tracking
-- [ ] Audio narration and sound effects
-- [ ] Mobile VR/AR support
-- [ ] Solar system events calendar
-- [ ] Real-time position data integration
-
----
-
-## 🙏 Contributors
-
-This release includes improvements and bug fixes. Thank you to all contributors who helped make this release possible!
-
----
-
-## 📄 License
-
-This project remains open-source under the MIT License.
-
----
-
-**Full Changelog**: Compare with previous version to see all changes.
-
-**Download**: [GitHub Releases](https://github.com/ronggur/solar-system/releases)
-
-**Demo**: [Live Application](https://www.ronggur.com/solar-system/)
-
----
-
-_Released: 2024_
-
-_Built with curiosity and code. Explore the cosmos! 🚀✨_
+- **Releases:** <https://github.com/ronggur/solar-system/releases>
+- **Demo:** <https://www.ronggur.com/solar-system/>
+- **License:** MIT, see [LICENSE](LICENSE)

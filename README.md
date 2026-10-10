@@ -9,17 +9,17 @@ An interactive 3D visualization of our solar system built with React, Three.js, 
 [![Demo](https://img.shields.io/badge/demo-online-brightgreen)](https://www.ronggur.com/solar-system/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-![Solar System Explorer](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react)
-![Three.js](https://img.shields.io/badge/Three.js-0.182.0-000000?logo=three.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF?logo=vite)
+![Solar System Explorer](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)
+![Three.js](https://img.shields.io/badge/Three.js-0.182-000000?logo=three.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)
 
 ## 🌟 About
 
 A stunning, interactive 3D solar system explorer that brings the cosmos to your browser. Built with cutting-edge web technologies, this application lets you:
 
 - **Explore** the entire solar system from the Sun to dwarf planets (Pluto, Ceres, Haumea, Makemake, Eris) with realistic planet textures
-- **Discover** 27 major moons including Earth's Moon, Jupiter's Galilean moons, Saturn's Titan, Uranian moons, and dwarf-planet moons
+- **Discover** 26 major moons including Earth's Moon, Jupiter's Galilean moons, Saturn's Titan, Uranian moons, and dwarf-planet moons
 - **Track** 24 spacecraft in four categories: Space Stations, Telescopes, Probes, and Navigation (ISS, Hubble, JWST, Voyagers, Parker Solar Probe, New Horizons, LRO, and more)
 - **Learn** fascinating facts about each celestial body with detailed information panels
 - **Navigate** freely in 3D space with smooth camera controls and animated hover effects
@@ -41,12 +41,13 @@ Perfect for astronomy enthusiasts, students, educators, and anyone curious about
 
 If you find any inaccurate information, please:
 
-1. **Check INACCURACIES.md**: See detailed reporting guide
+1. **Check [docs/INACCURACIES.md](docs/INACCURACIES.md)**: reporting template, reliable sources, and known data to verify
 2. **Open an Issue**: [Report inaccuracy](https://github.com/ronggur/solar-system/issues)
 3. **Provide Sources**: Include reliable references (NASA, IAU, ESA, etc.)
 4. **Submit PR**: Fix the data directly in `src/data/` files
 
-For detailed accuracy reporting guide, see [INACCURACIES.md](docs/INACCURACIES.md).
+Sizes and distances are also intentionally compressed for visualization; see the FAQ below and
+[INACCURACIES.md](docs/INACCURACIES.md).
 
 We welcome corrections from astronomy enthusiasts, scientists, and educators to help make this project more accurate!
 
@@ -66,8 +67,8 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 
 - **Planets**: All 8 planets from Mercury to Neptune with accurate orbital characteristics
 - **Dwarf Planets**: Pluto, Ceres, Haumea, Makemake, Eris (with orbits and textures)
-- **The Sun**: Central star with realistic glow effects
-- **Natural Moons**: 27 major moons including:
+- **The Sun**: Central star rendered as a textured, emissive sphere that lights the whole scene
+- **Natural Moons**: 26 major moons including:
   - Earth: Moon
   - Mars: Phobos, Deimos
   - Jupiter: Galilean moons (Io, Europa, Ganymede, Callisto)
@@ -90,7 +91,7 @@ We welcome corrections from astronomy enthusiasts, scientists, and educators to 
 - **Visibility Toggles**: Show/hide satellites and moons independently
 - **Object Filtering**: Filter object list by category (Planets, Moons, Space Stations, Telescopes, Probes, Navigation); **All** / **None** toggles for categories
 - **Keyboard**: **Space** pause/resume, **←** / **→** adjust orbit speed when the object list is not focused; **↑** / **↓** move selection in the expanded object list
-- **Camera Modes**: Free exploration or follow selected planet
+- **Follow Object**: Toggle to keep the camera target on the selected planet, moon, or satellite as it orbits
 - **Click to Explore**: Click any planet, moon, or satellite for detailed information
 - **Search**: Search and filter objects by name, description, or parent planet
 - **Visual Feedback**: Control panel shows pause state during camera interaction
@@ -102,34 +103,35 @@ Each celestial body displays:
 - Detailed descriptions and overviews
 - Scientific facts and key characteristics
 - Physical properties (temperature, day length, year length, diameter)
-- For moons: Discovery year, discoverer, orbital inclination
-- For satellites: Mission details, launch date, operator
+- For moons: Orbital period, surface type, discovery year, discoverer, mission highlights
+- For satellites: Mission photo, status, altitude, launch date, operator, official mission link
 
 ## 🚀 Tech Stack
 
-- **React 19.2.0** - Modern UI framework
-- **TypeScript 5.9.3** - Type-safe development
-- **Vite 7.2.4** - Lightning-fast build tool
-- **Three.js 0.182.0** - WebGL 3D rendering
-- **@react-three/fiber 9.5.0** - React renderer for Three.js
-- **GSAP 3.14.2** - Smooth animations
+- **React 19.2** - UI framework
+- **TypeScript 5.9** - Type-safe development
+- **Vite 7** - Build tool and dev server
+- **Three.js 0.182** - WebGL 3D rendering
+- **@react-three/fiber 9.5** and **drei 10.7** - React renderer and helpers for Three.js
+- **GSAP 3.14** - Camera and panel animations
 - **Radix UI** - Accessible components
-- **Tailwind CSS 3.4.19** - Utility-first styling
+- **Tailwind CSS 3.4** - Utility-first styling
 
-For detailed technical information, see [TECHNICAL.md](docs/TECHNICAL.md)
+For how it fits together, see [ARCHITECTURE.md](docs/ARCHITECTURE.md); for setup and tooling, see
+[TECHNICAL.md](docs/TECHNICAL.md).
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ (recommended: 20.x or later)
-- npm, yarn, or pnpm
+- Node.js 20.19+ (or 22.12+), required by Vite 7
+- npm (a `package-lock.json` is committed)
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/ronggur/solar-system.git
 cd solar-system
 
 # Install dependencies
@@ -139,7 +141,8 @@ npm install
 npm run dev
 ```
 
-The application will start at `http://localhost:5173` (default Vite port).
+The application will start at `http://localhost:5173/solar-system/` (default Vite port; the app is
+built for the `/solar-system/` base path).
 
 ### Build for Production
 
@@ -158,16 +161,20 @@ The built files will be in the `dist` directory.
 ```
 solar-system/
 ├── src/
-│   ├── components/       # React UI and 3D components
-│   ├── data/           # Celestial body data
-│   ├── types/          # TypeScript definitions
-│   └── App.tsx         # Main application
-├── public/             # Static assets
-├── dist/               # Production build
+│   ├── components/       # React UI and 3D components (ui/ holds shadcn-style primitives)
+│   ├── data/             # Celestial body data (planets, moons, satellites)
+│   ├── lib/              # Utilities and procedural moon textures
+│   ├── types/            # TypeScript definitions
+│   └── App.tsx           # Main application and state
+├── public/               # Textures, satellite images, GLB models, favicons
+├── scripts/              # Asset optimization scripts
+├── docs/                 # Architecture, developer guide, performance review, ...
+├── .github/workflows/    # PR quality checks and release deploy
 └── configuration files
 ```
 
-For complete project structure and architecture, see [TECHNICAL.md](docs/TECHNICAL.md).
+For the full structure see [TECHNICAL.md](docs/TECHNICAL.md#2-project-structure) and for how it
+works see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Usage Guide
 
@@ -190,7 +197,7 @@ Located in the bottom-left corner:
 - **Show Orbits**: Toggle orbital path visibility
 - **Show Satellites**: Toggle artificial satellite visibility
 - **Show Moons**: Toggle natural moon visibility
-- **Camera Mode**: Switch between free exploration and follow mode
+- **Follow Object**: Keep the camera target on the selected object as it moves
 - **Reset View**: Return camera to default overview position
 
 ### Object List
@@ -201,7 +208,7 @@ Located in the bottom-left above the control panel:
 - **Filter by Category**: Toggle visibility of object types in the list:
   - **Planets** (blue): Sun and all planets (including dwarf planets)
   - **Moons** (amber): Natural satellites
-  - **Space Stations** (rose): ISS, Tiangong
+  - **Space Stations** (orange): ISS, Tiangong
   - **Telescopes** (violet): Hubble, JWST, Gaia, Chandra, SOHO
   - **Probes** (slate): Planetary and deep-space missions (Voyagers, Cassini, Juno, Parker, New Horizons, LRO, etc.)
   - **Navigation** (cyan): GPS, Starlink
@@ -216,18 +223,18 @@ Click any celestial body to open its information panel showing:
 - Name and description
 - Key facts and scientific data
 - Physical characteristics (temperature, day length, year length, diameter)
-- For moons: Discovery year, discoverer, unique orbital properties
-- For satellites: Mission details, launch date, operator
+- For moons: Orbital period, surface type, discovery year, discoverer, mission highlights
+- For satellites: Mission photo, status, altitude, launch date, operator, official mission link
 
 ## ⚙️ Configuration
 
 Data for all celestial bodies is in `src/data/`:
 
 - **planets.ts** – Sun, planets, dwarf planets (Ceres, Pluto, Haumea, Makemake, Eris)
-- **moons.ts** – Natural moons (27), including dwarf-planet moons
+- **moons.ts** – Natural moons (26), including dwarf-planet moons
 - **satellites.ts** – Spacecraft (24) with `type`: `space-station` | `telescope` | `probe` | `satellite` (navigation). Probes can use `escapeTrajectory: true` (Voyager, New Horizons) or `parentPlanet: 'sun'` (L2 telescopes, deep-space probes). LRO uses `parentPlanet: 'moon'`. Many probes use **`modelPath`** / **`modelScale`** for GLB models under `public/3d-objects/satellites/`.
 
-For detailed configuration guide, see [TECHNICAL.md](docs/TECHNICAL.md).
+For how to add a planet, moon, or satellite, see [TECHNICAL.md](docs/TECHNICAL.md#5-adding-content).
 
 ## Scripts
 
@@ -237,28 +244,31 @@ For detailed configuration guide, see [TECHNICAL.md](docs/TECHNICAL.md).
 - `npm run lint` - Run ESLint on codebase
 - `npm run download-satellite-images` - Download reference images into `public/satellites/` (see script header)
 - `npm run optimize-satellite-images` - Resize/compress panel images to WebP (requires ImageMagick `magick`)
-- `npm run compress-satellite-glbs` - Run `gltf-transform optimize` on each GLB in `public/3d-objects/satellites/` (requires devDependency install)
+- `npm run optimize-planet-textures` - Downsize the heaviest dwarf-planet/Moon/Mercury textures in place (requires ImageMagick)
+- `npm run compress-satellite-glbs` - Run `gltf-transform optimize` (meshopt + WebP textures) on each GLB in `public/3d-objects/satellites/`
+
+A few one-off helpers (`prune-unused-textures.mjs`, `download-earth-texture.mjs`,
+`simplify-glb-sloppy.mjs`) live in `scripts/` and are described in
+[TECHNICAL.md](docs/TECHNICAL.md#one-off-scripts-not-in-packagejson).
 
 ## Browser Support
 
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14.1+
-- Opera 76+
-
-Requires WebGL support. Mobile browsers are supported but may have reduced performance.
+Vite 7's default build target applies (roughly Chrome/Edge 107+, Firefox 104+, Safari 16+). Requires
+WebGL support. Mobile browsers are supported but may have reduced performance.
 
 ## ⚡ Performance
 
-The application is optimized for smooth 60fps performance:
+Startup is lean (about 3.5 MB of assets before the first interaction; about 8 MB in total):
 
-- Instanced rendering for 600+ belt objects
-- Efficient starfield with 5000+ stars
-- Satellite GLB models load on a short stagger (and immediately when a satellite is selected) to avoid burst network load
-- Hardware-accelerated camera animations
-- Mobile-optimized pixel ratio capping
+- Instanced rendering for the 600 belt objects, and a single point cloud for 5000 stars
+- WebP textures and meshopt-compressed GLBs; the Sun and Earth textures are preloaded
+- Satellite GLBs load when the browser is idle, staggered, and immediately when a satellite is selected
+- Pixel ratio capped at 2
 
-For detailed performance notes and optimizations, see [TECHNICAL.md](docs/TECHNICAL.md).
+Runtime cost is a different story: many bodies update React state every frame and all labels are
+DOM elements, so low-end and mobile devices can struggle with every body visible. Findings, measurements
+and the improvement plan are in
+[docs/PERFORMANCE_AND_VISUALIZATION.md](docs/PERFORMANCE_AND_VISUALIZATION.md).
 
 ## 🤝 Contributing
 
@@ -275,13 +285,16 @@ Quick ways to contribute:
 
 ## 🗺️ Roadmap
 
-For detailed technical roadmap, see [TECHNICAL.md](docs/TECHNICAL.md).
+Performance and visual-quality work (render-loop fixes, label LOD, Sun glow, Earth day/night shader,
+click targets for tiny bodies, mobile layout) is planned in
+[PERFORMANCE_AND_VISUALIZATION.md](docs/PERFORMANCE_AND_VISUALIZATION.md).
 
 Planned features:
 
 - [x] Planet surface textures (WebP maps; Earth uses separate day/night maps)
+- [x] 3D spacecraft models (GLB) with procedural fallbacks
 - [ ] Higher-resolution terrain / normal-mapped surfaces
-- [ ] Day/night cycle with proper lighting
+- [ ] Day/night cycle with proper lighting (Earth terminator, see the visualization plan)
 - [ ] Comet and asteroid tracking
 - [ ] Audio narration and sound effects
 - [ ] Mobile VR/AR support
@@ -298,7 +311,8 @@ Both sizes and distances are scaled for visualization purposes:
 **Sizes**:
 
 - Terrestrial planets (Mercury, Venus, Earth, Mars) use relatively accurate size ratios
-- Gas giants (Jupiter, Saturn, Uranus, Neptune) are significantly compressed - shown at 2.5-4x their actual relative size to prevent them from dominating the view
+- Gas and ice giants (Jupiter, Saturn, Uranus, Neptune) are compressed to roughly 35-65% of their true size relative to Earth (for example Jupiter is drawn at about 4x Earth's radius instead of about 11x) so they don't dominate the view
+- The Sun is drawn at 6x Earth's radius instead of about 109x
 
 **Distances**:
 
@@ -320,7 +334,7 @@ Absolutely! This project is open-source and free to use. It's perfect for classr
 <details>
 <summary><b>Will my device run this smoothly?</b></summary>
 
-The application is optimized for modern browsers. It runs best on desktop computers with WebGL support. Mobile devices are supported but may have reduced performance, especially with all objects visible.
+The application targets modern browsers and runs best on desktop computers with WebGL support. Mobile devices are supported but may have reduced performance, especially with all objects visible. Hiding moons and satellites with the control panel toggles helps; see the [performance review](docs/PERFORMANCE_AND_VISUALIZATION.md) for what is planned.
 
 </details>
 
@@ -353,15 +367,26 @@ This project is open-source and available under the [MIT License](LICENSE).
 - Natural moon data from astronomical databases
 - Built with modern web technologies for education and exploration
 
+## 📚 Documentation
+
+| Document                                                                   | What it covers                                                                  |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                               | How the app works: state, camera, rendering per body, loading strategy          |
+| [docs/TECHNICAL.md](docs/TECHNICAL.md)                                     | Developer guide: setup, scripts, config, asset pipeline, adding data, CI/CD     |
+| [docs/PERFORMANCE_AND_VISUALIZATION.md](docs/PERFORMANCE_AND_VISUALIZATION.md) | Measured baseline, performance and visual findings, prioritized roadmap     |
+| [docs/SATELLITE_3D_MODELS.md](docs/SATELLITE_3D_MODELS.md)                 | GLB status per spacecraft, sourcing, adding and compressing models              |
+| [docs/INACCURACIES.md](docs/INACCURACIES.md)                               | Reporting data errors, reliable sources, known data to verify                   |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)                               | Contribution workflow and checklist                                             |
+| [docs/LOOP-DEV-QA.md](docs/LOOP-DEV-QA.md)                                 | Dev ↔ QA agent-loop playbook for AI-assisted work on this repository            |
+| [RELEASE_NOTES.md](RELEASE_NOTES.md)                                       | Changelog per release tag                                                       |
+
 ## 🔗 Learn More
 
 - [Three.js Documentation](https://threejs.org/docs/)
 - [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/)
 - [Radix UI](https://www.radix-ui.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [NASA Solar System Exploration](https://solarsystem.nasa.gov/)
-- [Technical Documentation](docs/TECHNICAL.md)
-- [Contributing Guide](docs/CONTRIBUTING.md)
+- [NASA Science: Solar System](https://science.nasa.gov/solar-system/)
 - [International Astronomical Union (IAU)](https://www.iau.org/)
 
 ---

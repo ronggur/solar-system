@@ -6,7 +6,7 @@ Thank you for your interest in contributing! We welcome contributions from every
 
 ### Prerequisites
 
-- Node.js 18+ installed
+- Node.js 20.19+ (or 22.12+) installed (required by Vite 7)
 - Git installed and configured
 - Familiarity with React and TypeScript
 - Basic understanding of Three.js concepts (optional but helpful)
@@ -78,7 +78,9 @@ Fixes #15
 
 - **Bug Fixes**: Help squash bugs reported in Issues
 - **Documentation**: Improve guides and add examples
-- **Performance**: Optimize rendering for mobile devices
+- **Performance**: Optimize rendering for mobile devices. See the prioritized findings and plan in
+  [PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md)
+- **Data accuracy**: Fix incorrect facts or figures; see [INACCURACIES.md](INACCURACIES.md)
 
 ### Medium Priority
 
@@ -113,7 +115,7 @@ Create new UI/3D components:
 Improve project documentation:
 - README.md updates
 - Code comments
-- API documentation
+- Architecture and developer guides in `docs/`
 - Tutorials
 
 ### Design
@@ -125,6 +127,9 @@ Improve visual appearance:
 - Responsive design
 
 ## 🧪 Testing
+
+There are no automated tests yet. CI on pull requests runs lint, `npm audit` and a production build
+(see [TECHNICAL.md](TECHNICAL.md#7-cicd)), so verification is manual.
 
 Before submitting a PR:
 
@@ -155,6 +160,8 @@ Before submitting a PR:
 - [ ] Tested thoroughly
 - [ ] No console errors
 - [ ] Updated documentation
+- [ ] Updated counts in README/docs (and `index.html` meta) if bodies were added or removed
+- [ ] `npm run lint` and `npm run build` pass
 - [ ] Added comments where needed
 - [ ] Commit messages are clear
 

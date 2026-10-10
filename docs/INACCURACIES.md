@@ -23,6 +23,31 @@ Information was sourced from general knowledge and may not reflect:
 - Recent discoveries or reclassifications
 - Precise physical constants
 
+## 🔎 Known Candidates to Verify
+
+These were spotted during a documentation review (2026-10-10) and have **not** been corrected in
+the data yet. Please verify against the cited source before changing them.
+
+| Object            | Where                   | Issue                                                                                         |
+| ----------------- | ----------------------- | --------------------------------------------------------------------------------------------- |
+| BepiColombo       | `satellites.ts` facts   | "arrival December 2025" has slipped; check the current Mercury orbit insertion date with ESA  |
+| Voyager 1         | `satellites.ts` facts   | "Still transmitting data after 46+ years" (launched 1977, so about 49 years)                  |
+| Starlink          | `satellites.ts` facts   | "Over 5,000 satellites in orbit" is far below the current constellation size                  |
+| Parker Solar Probe| `satellites.ts` facts   | "24 close passes", "~692,000 km/h" and "~6.2 million km": confirm against NASA mission pages  |
+| Site metadata     | `index.html`            | Descriptions say "23 moons" and "12 satellites"; the data has 26 moons and 24 spacecraft      |
+
+### Visualization scale (intentional, but worth knowing)
+
+- **Sizes are compressed.** The Sun is drawn at radius 6 against Earth's 1 (real ratio ≈ 109).
+  Gas giants are shown at roughly 35-65 % of their true size relative to Earth (Jupiter 4 vs ≈ 11,
+  Saturn 3.5 vs ≈ 9.1, Uranus 2.5 vs ≈ 4.0, Neptune 2.4 vs ≈ 3.9). Terrestrial planets are close to
+  true relative size.
+- **Distances are compressed** non-linearly (Neptune is about 5.6× Earth's distance here, ≈ 30× in
+  reality), and orbits are circular except Pluto's.
+- **Orbital speeds are relative**, not physical. Moons are much slower relative to their planets
+  than in reality (the Moon moves at 2× Earth's rate here versus ≈ 13 orbits per Earth year), chosen
+  for readability.
+
 ## 📝 How to Report
 
 ### Creating an Issue
@@ -88,7 +113,7 @@ Find the object's data block and update the incorrect field:
 When correcting data, please use authoritative sources:
 
 ### Official Space Agencies
-- **NASA**: [solarsystem.nasa.gov](https://solarsystem.nasa.gov/)
+- **NASA Science**: [science.nasa.gov](https://science.nasa.gov/)
 - **ESA**: [esa.int](https://www.esa.int/)
 - **JAXA**: [jaxa.jp](https://www.jaxa.jp/)
 - **ISRO**: [isro.gov.in](https://www.isro.gov.in/)
@@ -96,7 +121,7 @@ When correcting data, please use authoritative sources:
 ### Scientific Organizations
 - **IAU** (International Astronomical Union): [iau.org](https://www.iau.org/)
 - **USGS Astrogeology**: [astrogeology.usgs.gov](https://astrogeology.usgs.gov/)
-- **JPL Solar System**: [solarsystem.jpl.nasa.gov](https://solarsystem.jpl.nasa.gov/)
+- **JPL Solar System Dynamics**: [ssd.jpl.nasa.gov](https://ssd.jpl.nasa.gov/)
 
 ### Scientific Publications
 - **Nature Astronomy**
@@ -115,4 +140,4 @@ Thank you for helping make this project more accurate and educational!
 
 ---
 
-Need help? [Open a Discussion](https://github.com/YOUR_USERNAME/solar-system/discussions)
+Need help? [Open an issue](https://github.com/ronggur/solar-system/issues)
