@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, Suspense } from 'react';
+import { useRef, useState, useMemo, useEffect, Suspense } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
@@ -18,15 +18,19 @@ function HoverGlowMesh({
   color: string;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [pulsePhase, setPulsePhase] = useState(0);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+  // Pulse phase lives in a ref: a state update per frame would re-render this glow 60 times a second
+  const pulsePhaseRef = useRef(0);
 
   useFrame((_, delta) => {
-    if (hovered) {
-      setPulsePhase((prev) => prev + delta * 3);
-      if (meshRef.current) {
-        const scale = 1.3 + Math.sin(pulsePhase) * 0.05;
-        meshRef.current.scale.setScalar(scale);
-      }
+    if (!hovered) return;
+    pulsePhaseRef.current += delta * 3;
+    const wave = Math.sin(pulsePhaseRef.current);
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(1.3 + wave * 0.05);
+    }
+    if (materialRef.current) {
+      materialRef.current.opacity = 0.25 + wave * 0.1;
     }
   });
 
@@ -36,9 +40,10 @@ function HoverGlowMesh({
     <mesh ref={meshRef} scale={1.3}>
       <sphereGeometry args={[radius, 24, 24]} />
       <meshBasicMaterial
+        ref={materialRef}
         color={color}
         transparent
-        opacity={0.25 + Math.sin(pulsePhase) * 0.1}
+        opacity={0.25}
         side={THREE.BackSide}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
@@ -128,21 +133,26 @@ function ProceduralMoonMesh({
   );
 }
 
+// Reused every frame for the parent planet position (module scope: no per-frame allocation)
+const scratchParentPosition = new THREE.Vector3();
+
 export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
   const registry = useSceneRegistry();
   const moonRef = useRef<THREE.Group>(null);
   const moonMeshRef = useRef<THREE.Mesh>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
-  const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
+  // Random start angle is drawn once per mount; the running angle lives in a ref (not React state)
+  const [startAngle] = useState(() => Math.random() * Math.PI * 2);
+  const angleRef = useRef(startAngle);
   const [hovered, setHovered] = useState(false);
   useRegisterObject(`moon-${data.id}`, moonRef);
 
   // Orbit inclination in radians
   const inclination = (data.orbitInclination || 0) * (Math.PI / 180);
 
-  // Orbit path geometry
-  const orbitGeometry = useMemo(() => {
-    const points = [];
+  // Orbit path: built once per moon and disposed on unmount
+  const orbitLine = useMemo(() => {
+    const points: THREE.Vector3[] = [];
     const segments = 64;
     for (let i = 0; i <= segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
@@ -153,26 +163,39 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
       const zInclined = z * Math.cos(inclination);
       points.push(new THREE.Vector3(x, y, zInclined));
     }
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [data.orbitDistance, inclination]);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: data.color,
+      transparent: true,
+      opacity: 0.15,
+    });
+    return { line: new THREE.Line(geometry, material), geometry, material };
+  }, [data.orbitDistance, data.color, inclination]);
+
+  useEffect(
+    () => () => {
+      orbitLine.geometry.dispose();
+      orbitLine.material.dispose();
+    },
+    [orbitLine]
+  );
 
   useFrame((_, delta) => {
     // Get parent planet position from the scene registry (no scene-graph search)
     const planetGroup = registry.get(`planet-${data.parentPlanet}`);
 
     if (planetGroup && moonRef.current && orbitGroupRef.current) {
-      const parentPosition = new THREE.Vector3();
-      planetGroup.getWorldPosition(parentPosition);
+      planetGroup.getWorldPosition(scratchParentPosition);
 
       // Update orbit visualization position
-      orbitGroupRef.current.position.copy(parentPosition);
+      orbitGroupRef.current.position.copy(scratchParentPosition);
 
       // Update moon orbital motion
       if (!isPaused) {
-        const newAngle = angle + data.orbitalSpeed * speedMultiplier * delta * 0.1;
-        setAngle(newAngle);
+        angleRef.current += data.orbitalSpeed * speedMultiplier * delta * 0.1;
       }
 
+      const angle = angleRef.current;
       const x = Math.cos(angle) * data.orbitDistance;
       const z = Math.sin(angle) * data.orbitDistance;
       // Apply inclination
@@ -180,9 +203,9 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
       const zInclined = z * Math.cos(inclination);
 
       moonRef.current.position.set(
-        parentPosition.x + x,
-        parentPosition.y + y,
-        parentPosition.z + zInclined
+        scratchParentPosition.x + x,
+        scratchParentPosition.y + y,
+        scratchParentPosition.z + zInclined
       );
 
       // Rotate moon on its axis
@@ -204,18 +227,7 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
     <group>
       {/* Orbit path around parent planet */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive
-          object={
-            new THREE.Line(
-              orbitGeometry,
-              new THREE.LineBasicMaterial({
-                color: data.color,
-                transparent: true,
-                opacity: 0.15,
-              })
-            )
-          }
-        />
+        <primitive object={orbitLine.line} />
       </group>
 
       {/* Moon group */}
