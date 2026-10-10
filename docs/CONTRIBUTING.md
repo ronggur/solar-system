@@ -91,7 +91,7 @@ Fixes #15
 ### Low Priority
 
 - **Code Cleanup**: Refactor and improve code quality
-- **Tests**: Add unit and integration tests
+- **Tests**: Extend `npm test` beyond data integrity (component and interaction tests)
 
 ## 📦 What to Contribute
 
@@ -128,8 +128,11 @@ Improve visual appearance:
 
 ## 🧪 Testing
 
-There are no automated tests yet. CI on pull requests runs lint, `npm audit` and a production build
-(see [TECHNICAL.md](TECHNICAL.md#7-cicd)), so verification is manual.
+`npm test` runs Vitest data-integrity tests in Node: unique ids, valid `parentPlanet` references,
+asset files that exist under `public/`, orbit distances that clear the parent body, and the moon and
+spacecraft counts quoted in `README.md` and `index.html`. There are no component or rendering tests,
+so UI and 3D changes are still verified manually. CI on pull requests runs lint, `npm audit` and a
+production build but not `npm test` yet (see [TECHNICAL.md](TECHNICAL.md#7-cicd)), so run it yourself.
 
 Before submitting a PR:
 
@@ -138,7 +141,11 @@ Before submitting a PR:
 3. Test on multiple browsers (Chrome, Firefox, Safari)
 4. Check console for errors
 5. Run linter: `npm run lint`
-6. Build production version: `npm run build`
+6. Run tests: `npm test`
+7. Build production version: `npm run build`
+
+To measure performance, see
+[Performance measurement](TECHNICAL.md#performance-measurement).
 
 ## 📤 Submitting Changes
 
@@ -161,7 +168,7 @@ Before submitting a PR:
 - [ ] No console errors
 - [ ] Updated documentation
 - [ ] Updated counts in README/docs (and `index.html` meta) if bodies were added or removed
-- [ ] `npm run lint` and `npm run build` pass
+- [ ] `npm run lint`, `npm test` and `npm run build` pass
 - [ ] Added comments where needed
 - [ ] Commit messages are clear
 
