@@ -47,7 +47,7 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
   if (!isVisible || !moon) return null;
 
   return (
-    <div className="moon-info-panel absolute top-6 right-6 z-[100] w-80">
+    <div className="moon-info-panel absolute top-6 right-6 z-100 w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header with moon color */}
         <div
@@ -133,7 +133,7 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
           {/* Mission Highlights */}
           {moon.missionHighlights && (
             <div className="flex items-start gap-2 rounded-lg p-3 bg-white/5 border border-white/10">
-              <Rocket className="w-4 h-4 flex-shrink-0 mt-0.5 text-white/50" />
+              <Rocket className="w-4 h-4 shrink-0 mt-0.5 text-white/50" />
               <div>
                 <div className="text-white/50 text-xs mb-1">Mission Highlights</div>
                 <p className="text-white/80 text-sm leading-relaxed">{moon.missionHighlights}</p>
@@ -154,7 +154,7 @@ export function MoonInfo({ moon, onClose }: MoonInfoProps) {
                   className="text-white/70 text-xs leading-relaxed flex items-start gap-2"
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                    className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
                     style={{ backgroundColor: moon.color }}
                   />
                   {fact}

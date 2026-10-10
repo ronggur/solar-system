@@ -62,7 +62,7 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
   const isSun = planet.id === 'sun';
 
   return (
-    <div className="planet-info-panel absolute top-6 right-6 z-[100] w-80">
+    <div className="planet-info-panel absolute top-6 right-6 z-100 w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header with planet color */}
         <div
@@ -239,7 +239,7 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
                   className="text-white/70 text-xs leading-relaxed flex items-start gap-2"
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                    className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
                     style={{ backgroundColor: planet.color }}
                   />
                   {fact}
@@ -257,7 +257,7 @@ export function PlanetInfo({ planet, onClose }: PlanetInfoProps) {
                 borderColor: `${planet.color}40`,
               }}
             >
-              <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: planet.color }} />
+              <Sparkles className="w-4 h-4 shrink-0 mt-0.5" style={{ color: planet.color }} />
               <p className="text-white/90 text-sm leading-relaxed">
                 {(planet as PlanetData).interestingNumber}
               </p>
