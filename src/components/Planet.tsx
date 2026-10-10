@@ -5,6 +5,7 @@ import { TextureLoader } from 'three';
 import type { PlanetData } from '@/types';
 import { Html } from '@react-three/drei';
 import { useRegisterObject } from '@/lib/sceneRegistry';
+import { TrailLine } from '@/lib/trailLine';
 
 interface PlanetProps {
   data: PlanetData;
@@ -290,19 +291,20 @@ function ColoredPlanetMesh({
 
 // Reused every frame for the planet position (module scope: no per-frame allocation)
 const scratchOrbitPosition = new THREE.Vector3();
+// Trail length in frames (one sample per frame, as before)
+const TRAIL_LENGTH = 100;
 
 export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }: PlanetProps) {
   const planetRef = useRef<THREE.Mesh>(null);
   const orbitRef = useRef<THREE.Group>(null);
+  // Not attached to any element on purpose: the trail stays hidden, so its update block below is
+  // inactive and the scene is unchanged. See PERFORMANCE_AND_VISUALIZATION.md (P2).
   const trailRef = useRef<THREE.Line>(null);
   const [hovered, setHovered] = useState(false);
   // Random start angle is drawn once per mount; the running angle lives in a ref (not React state)
   const [startAngle] = useState(() => Math.random() * Math.PI * 2);
   const angleRef = useRef(startAngle);
   useRegisterObject(`planet-${data.id}`, orbitRef);
-
-  const trailPoints = useRef<THREE.Vector3[]>([]);
-  const maxTrailPoints = 100;
 
   // Pluto's special orbital parameters
   const isPluto = data.id === 'pluto';
@@ -356,23 +358,15 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
     return { line: new THREE.Line(geometry, material), geometry, material };
   }, [getOrbitalPosition, data.color]);
 
-  // Trail geometry (built once; the trail itself is not attached, see P2)
-  const trailLine = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
-    const material = new THREE.LineBasicMaterial({
-      color: data.color,
-      transparent: true,
-      opacity: 0.4,
-    });
-    return { line: new THREE.Line(geometry, material), geometry, material };
-  }, [data.color]);
+  // Trail: a preallocated ring of TRAIL_LENGTH points, written in place each frame (no geometry or
+  // attribute is created per frame). Drawn oldest to newest, so there is no seam at the wrap-around.
+  const trailLine = useMemo(() => new TrailLine(TRAIL_LENGTH, data.color, 0.4), [data.color]);
 
   useEffect(
     () => () => {
       orbitLine.geometry.dispose();
       orbitLine.material.dispose();
-      trailLine.geometry.dispose();
-      trailLine.material.dispose();
+      trailLine.dispose();
     },
     [orbitLine, trailLine]
   );
@@ -385,11 +379,7 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
       orbitRef.current.position.set(pos.x, pos.y, pos.z);
 
       if (trailRef.current) {
-        trailPoints.current.push(pos.clone());
-        if (trailPoints.current.length > maxTrailPoints) {
-          trailPoints.current.shift();
-        }
-        trailLine.geometry.setFromPoints(trailPoints.current);
+        trailLine.push(pos.x, pos.y, pos.z);
       }
     }
 
