@@ -2,7 +2,7 @@
 
 Dokumen ini adalah instruksi untuk loop dua agent: **Agent 1 (Dev)** membangun, **Agent 2 (QA)** memvalidasi secara independen. Maksimal **2 iterasi**. Semua temuan dan perbaikan dicatat di satu file log `.md`.
 
-Project ini adalah **SPA statis** (React 19 + React Three Fiber + Vite, tanpa backend, tanpa Firebase). Satu repo, satu branch, satu PR per run. Tidak ada test runner saat ini, jadi gerbang objektif = `lint` + `build` + budget ukuran + pengukuran runtime (lihat Bagian 0b dan 4).
+Project ini adalah **SPA statis** (React 19 + React Three Fiber + Vite, tanpa backend, tanpa Firebase). Satu repo, satu branch, satu PR per run. Test runner (Vitest, `npm test`) hanya mencakup integritas data (sejak Run 0); perilaku render/UI belum punya test otomatis, jadi gerbang objektif = `lint` + `build` + `npm test` + budget ukuran + pengukuran runtime (lihat Bagian 0b dan 4).
 
 **Cara pakai:** buka Claude Code di `/Users/ronggur/Works/www/solar-system`. Sesi utama bertindak sebagai **orchestrator**: ia menyiapkan SPEC, meminta konfirmasi, lalu menjalankan iterasi Dev↔QA lewat **Workflow** (Bagian 6). Bagian 2–5 dibaca oleh agent masing-masing (skrip workflow menyertakan path dokumen ini ke prompt mereka).
 
@@ -37,7 +37,7 @@ Tidak ada emulator/perangkat yang wajib. QA menjalankan app di browser Chrome le
 - **Jangan ukur performa di dev server.** `StrictMode` menggandakan render/effect dan plugin `inspectAttr` menambah atribut debug. Dev server hanya untuk validasi fungsional dan perbandingan *pertumbuhan* (mis. jumlah geometri), bukan frame time.
 - **Alternatif bila ekstensi Chrome tidak tersambung:** Playwright (`chromium.launch({ channel: 'chrome' })`, headless memakai GPU sungguhan di macOS) dipasang di direktori scratch di luar repo; viewport 1440×900, `deviceScaleFactor: 1`. Skrip ukur disimpan di `docs/loop/<RUN_ID>/qa/` dan angkanya hanya sebanding dengan angka dari alat yang sama (catat alat + versi di baseline). Run 0 (`20261010-qa-infra`) memakai jalur ini.
 - **Alat QA di browser:** `read_console_messages` (gunakan `pattern`, mis. `error|warn|THREE`), `read_network_requests` (cari 404 / aset ganda), `javascript_tool` (sampling `requestAnimationFrame`, `PerformanceObserver` untuk long task, membaca hook debug), screenshot, `resize_window` untuk 1440×900, 768×1024, 360×800.
-- **Hook debug (prasyarat Run 0):** Dev menambahkan `window.__SOLAR_DEBUG__ = { info: gl.info, … }` yang **hanya aktif bila `import.meta.env.DEV`** (hilang dari build produksi). QA memverifikasi hook ini tidak ada di build `preview`.
+- **Hook debug:** `window.__SOLAR_DEBUG__ = { info, gl, scene, camera }` (`src/lib/debugHook.ts`) **hanya aktif bila `import.meta.env.DEV`** (hilang dari build produksi). QA memverifikasi hook ini tidak ada di build `preview`. Sampler frame time/long task: `scripts/perf-sampler.js`; dokumentasi di TECHNICAL.md ("Performance measurement").
 - **Angka performa** dicatat bersama spesifikasi mesin (CPU/GPU, browser, resolusi, DPR) dan hanya dibandingkan terhadap baseline di **mesin dan viewport yang sama**.
 - Tidak ada perangkat mobile terhubung → semua klaim "ringan di mobile" = `NEEDS-MANUAL`; emulasi viewport hanya menguji layout.
 - Jangan mengubah file besar di `public/` (texture, GLB) secara manual; gunakan skrip di `scripts/` (lihat TECHNICAL.md) dan catat sebelum/sesudah ukurannya.
@@ -173,7 +173,7 @@ sekali sebelum menjalankan Workflow. JANGAN push/PR/merge/tag/release.
 - `npm run lint`
 - `npm run build` (menjalankan `tsc -b` + `vite build`; catat ukuran chunk)
 - `npm audit --audit-level=moderate` bila `package.json`/lockfile berubah
-- `npm test` bila skrip itu sudah ada (setelah Run 0)
+- `npm test`
 
 **Pada iterasi ≥2**
 - Per temuan: ubah status `OPEN → FIXED`, isi *Fix* (apa yang diubah, file, commit) dan *Bukti* (test/metrik sesudah). Jangan menandai `VERIFIED` — itu hak QA.
@@ -344,7 +344,7 @@ Sumber: [PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md). Sa
 ## 8. Batasan yang perlu kamu ketahui
 
 - QA berbasis agent tidak menggantikan uji di perangkat mobile nyata, Safari, Firefox, atau layar 120 Hz (gerakan planet/Sun saat ini belum diskala `delta`, jadi bergantung refresh rate).
-- Tidak ada test runner saat ini; sebelum Run 0, bukti regresi untuk perilaku render berupa langkah reproduksi + metrik, bukan test otomatis.
+- Test runner (Vitest, `npm test`) ada sejak Run 0, tetapi hanya menguji integritas data dan jumlah objek di dokumen. Bukti regresi untuk perilaku render/UI tetap berupa langkah reproduksi + metrik, bukan test otomatis. `npm test` belum dijalankan di `quality.yml` (keputusan pemilik).
 - Angka performa sangat bergantung mesin; hanya bandingkan di mesin/viewport yang sama dengan baseline. Frame time di browser yang dikendalikan automation bisa lebih berisik — gunakan median 3 kali dan toleransi 10%.
 - Validasi "sesuai desain" paling andal bila ada mockup; tanpa mockup, acuannya `design-<fitur>.md` buatan Dev + token yang ada, sehingga lebih lemah — sebaiknya kamu tinjau hasil desain Dev sekali.
 - Run penuh (4+ agent, build berulang, sampling browser) memakan token besar; mulai dengan scope kecil (Run 0 atau Run 1).
