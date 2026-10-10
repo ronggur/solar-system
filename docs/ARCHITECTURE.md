@@ -16,8 +16,10 @@ here.
   events back up through callbacks. There is no Redux/Zustand and no router.
 - **Data-driven scene.** `src/data/{planets,moons,satellites}.ts` define everything; components are
   generic and render one instance per data entry.
-- **Everything is selected by name.** The scene is queried with `scene.getObjectByName(...)` for
-  parent tracking, camera targeting and follow mode (see [§4](#4-scene-model)).
+- **Everything is selected by name.** Orbiting bodies register their group under its scene name in a
+  parent registry (`src/lib/sceneRegistry.ts`); moons, satellites and follow mode read it each frame.
+  Camera targeting from the Object List still uses `scene.getObjectByName(...)`, in effects that run on
+  selection changes only (see [§4](#4-scene-model)).
 - **Progressive loading.** A tiny set of textures blocks first paint; everything else streams in
   behind per-mesh `Suspense` boundaries or idle callbacks (see [§8](#8-loading-strategy)).
 
@@ -104,7 +106,9 @@ Parent tracking and camera targeting rely on these names:
 | Moon               | `moon-<id>`                             | `Moon.tsx`     |
 | Satellite          | `satellite-<id>`                        | `Satellite.tsx`|
 
-- Moons look up `planet-<parentPlanet>` every frame and orbit its world position.
+- Moons look up `planet-<parentPlanet>` in the scene registry every frame and orbit its world position.
+  `Sun`, `Planet`, `Moon` and `Satellite` register their group in a layout effect
+  (`useRegisterObject`) and remove it on unmount, so the entry exists before the first frame.
 - Satellites with `parentPlanet: 'sun'` orbit `planet-sun` (the origin); `'moon'` is hard-coded to
   `moon-moon`, so only Earth's Moon can be a satellite parent.
 - `SolarSystem` wraps each planet in `<group name="planet-group-<id>">`, which is unused for lookups.
@@ -137,8 +141,8 @@ position = parent + (cos(angle), 0, sin(angle)) * distance
   derived from a hash of their id, offset from their parent, with a dashed line back to it.
 - Planet spin increments `rotation.y` by `rotationSpeed` per frame (not `delta`-scaled) and ignores
   `speedMultiplier`; moon spin is `delta * 0.15 * speedMultiplier`. Each of `Planet`, `Moon` and
-  `Satellite` keeps its angle in React state (`setAngle` inside `useFrame`); this is a known
-  performance issue, see the performance doc.
+  `Satellite` keeps its running angle in a ref that `useFrame` advances. React state is read only once,
+  at mount, for the random start angle, so the animation loop causes no React re-renders.
 
 ## 5. Camera and selection
 
@@ -182,7 +186,7 @@ delay first.
 | Earth        | Day map plus night map as `emissiveMap` with white emissive 0.6; a 1.05× back-face sphere (`#4A90E2`, 15 %) as atmosphere |
 | Saturn       | `RingGeometry` 1.2×-2.2× radius, tilted 0.466 rad, radial UVs; inner `Suspense` with a flat translucent ring fallback |
 | Uranus       | Opaque ring 1.8×-2.0× radius, rotated 90°                                                                          |
-| Orbit / trail| 128-segment orbit line (opacity 0.15); trail is the last 100 per-frame positions (opacity 0.4)                     |
+| Orbit / trail| 128-segment orbit line (opacity 0.15), built once per planet. Trail: `TrailLine`, a ring of the last 100 per-frame positions (opacity 0.4) written in place and drawn oldest to newest. The trail is not attached to any element (`trailRef`), so its update block never runs and nothing is drawn |
 | Hover        | Back-face additive sphere at 1.15× pulsing; cursor set to `pointer` through `document.body.style`                  |
 | Label        | drei `<Html>` with `zIndexRange=[90, 0]` so labels sit under info panels                                           |
 
@@ -200,7 +204,8 @@ scene's only real light: `pointLight` intensity 200, `distance 0`, `decay 1`, pl
   `getCachedMoonTexture` in `src/lib/textureGenerator.ts`. Iapetus is two-toned, Charon gets a red
   polar cap, Triton a pink overlay.
 - Each moon has a subtle 1.2× back-face glow, an orbit line around the parent's current world
-  position, and a small label. **Moon orbit lines ignore `showOrbits`.**
+  position (built once per moon and disposed on unmount), and a small label. **Moon orbit lines
+  ignore `showOrbits`.**
 
 ### 6.4 Satellites (`Satellite.tsx`)
 
@@ -295,8 +300,8 @@ No shadows. Bodies add a small emissive term so night sides stay faintly visible
 Tracked, with fixes and a roadmap, in
 [PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md). The main ones:
 
-- Per-frame React state updates and per-render `THREE.Line` allocation in planets/moons/satellites.
-- Trails that are very short for slow planets and probably leak GPU buffers.
+- Trails are not drawn: the ring-buffer path is in place but not attached (`trailRef`). A visible trail
+  is a separate visual change; its sampling is still one point per frame, so it is short for slow planets.
 - 63 always-on DOM labels, and GPU texture memory around 150 MB.
 - Unused code: `scaleFactors`, `getMoonsByPlanet`, the `OrbitTrail` type, most of
   `src/lib/textureGenerator.ts`, and unreachable procedural satellite models.

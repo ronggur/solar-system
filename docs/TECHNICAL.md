@@ -235,10 +235,11 @@ Required secrets: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`; optional `SSH_PORT`
 
 - **Renderer counters:** in dev, read `window.__SOLAR_DEBUG__.info` (see
   [Performance measurement](#performance-measurement)) to watch `memory.geometries`,
-  `memory.textures`, `render.calls` and `render.triangles`. Steadily growing `geometries`
-  indicates the trail leak described in the performance doc.
+  `memory.textures`, `render.calls` and `render.triangles`. Steadily growing `geometries` means a
+  resource is not being disposed (orbit lines and trails are allocated once per body).
 - **React re-renders:** React DevTools Profiler with "Highlight updates"; planets, moons and
-  satellites currently re-render every frame.
+  satellites should not re-render during the animation loop. A steady flicker on every planet means
+  a regression to per-frame state.
 - **GPU memory:** Chrome Task Manager (GPU process) after the initial load.
 - **Element lookup:** every scene object is addressable with `scene.getObjectByName('planet-earth')`,
   `moon-io`, `satellite-iss`; useful from the console via the R3F devtools.
