@@ -7,7 +7,7 @@ how to add content, CI/CD and troubleshooting. For how the app works internally 
 
 ## 1. Setup and commands
 
-**Prerequisites:** Node.js **20.19+** (or 22.12+), required by Vite 7. CI uses Node 20. npm is the
+**Prerequisites:** Node.js **20.19+** (or 22.12+), required by Vite 7. CI and the deploy workflow use Node 24. npm is the
 package manager (a `package-lock.json` is committed).
 
 ```bash
@@ -105,7 +105,7 @@ bundler resolution, `verbatimModuleSyntax`, `erasableSyntaxOnly`, target ES2022)
 A standalone config rather than a merge of `vite.config.ts`, so tests never load the dev-only
 `inspectAttr` plugin or the production chunk rules. Environment is plain Node (no jsdom, no
 browser), tests are `tests/**/*.test.ts`, and `@` resolves to `./src` like in the app. **Vitest is
-pinned to `^4.1`:** Vitest 5 needs Node ≥ 22.12, while CI and the documented minimum use Node 20.
+pinned to `^4.1`:** Vitest 5 needs Node ≥ 22.12, and the pin was chosen while CI still ran Node 20. CI and the deploy workflow now use Node 24, so the pin can be revisited.
 
 ### ESLint (`eslint.config.js`)
 
@@ -198,7 +198,7 @@ When you add or remove bodies, update:
 
 ### `quality.yml`: pull requests to `main`
 
-Node 20. Jobs: **lint**, **audit** (`npm audit --audit-level=moderate`), then **build** (needs both).
+Node 24. Jobs: **lint**, **audit** (`npm audit --omit=dev --audit-level=moderate`), then **build** (needs both). The audit covers production dependencies only; dev-tooling advisories are tracked in the loop log.
 The workflow does **not** run `npm test` yet; run it locally before opening a PR (see
 [§9](#9-debugging-tips)). Adding it as a job is a pending owner decision.
 
