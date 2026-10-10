@@ -34,7 +34,6 @@ the data yet. Please verify against the cited source before changing them.
 | Voyager 1         | `satellites.ts` facts   | "Still transmitting data after 46+ years" (launched 1977, so about 49 years)                  |
 | Starlink          | `satellites.ts` facts   | "Over 5,000 satellites in orbit" is far below the current constellation size                  |
 | Parker Solar Probe| `satellites.ts` facts   | "24 close passes", "~692,000 km/h" and "~6.2 million km": confirm against NASA mission pages  |
-| Site metadata     | `index.html`            | Descriptions say "23 moons" and "12 satellites"; the data has 26 moons and 24 spacecraft      |
 
 ### Visualization scale (intentional, but worth knowing)
 
