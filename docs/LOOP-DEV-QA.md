@@ -332,8 +332,8 @@ Sumber: [PERFORMANCE_AND_VISUALIZATION.md](PERFORMANCE_AND_VISUALIZATION.md). Sa
 
 | Run | RUN_ID contoh | Scope | Catatan |
 |---|---|---|---|
-| **0** | `20261010-qa-infra` | Hook debug dev-only (`__SOLAR_DEBUG__`), Vitest + `npm test` + test integritas data (id unik, `parentPlanet` valid, file aset ada, `orbitDistance` > radius parent+objek, jumlah objek di README/`index.html` = panjang array data), snippet sampling frame time di `scripts/perf-sampler.js`, **baseline performa `main` tercatat** di `docs/loop/baseline-main.md` | Prasyarat agar "bukti regresi" bisa otomatis. Tidak mengubah perilaku runtime produksi. |
-| **1** | `…-perf-render-loop` | Fase A: P1, P2, P3 (ref, memoized lines, trail ring buffer, parent registry) | Dampak performa terbesar; tanpa perubahan visual. |
+| **0** | `20261010-qa-infra` | Hook debug dev-only (`__SOLAR_DEBUG__`), Vitest + `npm test` + test integritas data (id unik, `parentPlanet` valid, file aset ada, `orbitDistance` > radius parent+objek, jumlah objek di README/`index.html` = panjang array data), snippet sampling frame time di `scripts/perf-sampler.js`, **baseline performa `main` tercatat** di `docs/loop/baseline-main.md` | Prasyarat agar "bukti regresi" bisa otomatis. Tidak mengubah perilaku runtime produksi. **Selesai** (PR #16, menunggu merge ke `main`). |
+| **1** | `…-perf-render-loop` | Fase A: P1, P2, P3 (ref, memoized lines, trail ring buffer, parent registry) | Dampak performa terbesar; tanpa perubahan visual. **Berikutnya**: mulai setelah PR #16 di-merge (`BASE=main`); ukur A/B interleaved di mesin idle (lihat caveat `baseline-main.md`). |
 | **2** | `…-perf-idle-labels` | Fase B: P4 label LOD, P5 demand render + DPR adaptif, P6 tekstur bulan prosedural | Ukur ulang CPU/DOM dan memori GPU. |
 | **3** | `…-visual-core` | Fase C: V1 Sun glow, V2 Earth shader + atmosfer, V3 target klik, V4 toggle orbit, V5 follow | Dev boleh mendesain → `design-*.md`; wajib anggaran draw call. |
 | **4** | `…-polish-mobile` | Fase D: P7 texture/KTX2, P8, V6 tilt, V7 reticle, V8 layout mobile | Banyak `NEEDS-MANUAL` (perangkat nyata). |

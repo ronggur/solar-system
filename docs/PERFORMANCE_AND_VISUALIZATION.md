@@ -148,10 +148,15 @@ they have frame-time headroom.
 
 Progress:
 
-- [ ] A. P1, P2, P3
+- [ ] A. P1, P2, P3 — **next** (Run 1 of the [loop playbook](LOOP-DEV-QA.md#7-backlog-run-yang-disarankan))
 - [ ] B. P4, P5, P6
 - [ ] C. V1, V2, V3, V4, V5
 - [ ] D. P7, P8, V6, V7, V8
+
+Run 0 (QA infrastructure: debug hook, `npm test`, frame-time sampler and the runtime baseline in
+[loop/baseline-main.md](loop/baseline-main.md)) is done and changes no runtime behaviour, so none of the
+boxes above are checked yet. Re-measure Phase A against that baseline with an interleaved A/B on an
+idle machine; the baseline was recorded on a busy one.
 
 ## Measuring
 
