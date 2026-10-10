@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useCallback, Suspense } from 'react';
+import { useRef, useMemo, useState, useCallback, useEffect, Suspense } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
@@ -89,15 +89,19 @@ function HoverGlowMesh({
   color: string;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [pulsePhase, setPulsePhase] = useState(0);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+  // Pulse phase lives in a ref: a state update per frame would re-render this glow 60 times a second
+  const pulsePhaseRef = useRef(0);
 
   useFrame((_, delta) => {
-    if (hovered) {
-      setPulsePhase((prev) => prev + delta * 3);
-      if (meshRef.current) {
-        const scale = 1.15 + Math.sin(pulsePhase) * 0.05;
-        meshRef.current.scale.setScalar(scale);
-      }
+    if (!hovered) return;
+    pulsePhaseRef.current += delta * 3;
+    const wave = Math.sin(pulsePhaseRef.current);
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(1.15 + wave * 0.05);
+    }
+    if (materialRef.current) {
+      materialRef.current.opacity = 0.3 + wave * 0.1;
     }
   });
 
@@ -107,9 +111,10 @@ function HoverGlowMesh({
     <mesh ref={meshRef} scale={1.15}>
       <sphereGeometry args={[radius, 32, 32]} />
       <meshBasicMaterial
+        ref={materialRef}
         color={color}
         transparent
-        opacity={0.3 + Math.sin(pulsePhase) * 0.1}
+        opacity={0.3}
         side={THREE.BackSide}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
@@ -283,12 +288,17 @@ function ColoredPlanetMesh({
   );
 }
 
+// Reused every frame for the planet position (module scope: no per-frame allocation)
+const scratchOrbitPosition = new THREE.Vector3();
+
 export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }: PlanetProps) {
   const planetRef = useRef<THREE.Mesh>(null);
   const orbitRef = useRef<THREE.Group>(null);
   const trailRef = useRef<THREE.Line>(null);
   const [hovered, setHovered] = useState(false);
-  const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
+  // Random start angle is drawn once per mount; the running angle lives in a ref (not React state)
+  const [startAngle] = useState(() => Math.random() * Math.PI * 2);
+  const angleRef = useRef(startAngle);
   useRegisterObject(`planet-${data.id}`, orbitRef);
 
   const trailPoints = useRef<THREE.Vector3[]>([]);
@@ -300,9 +310,9 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
   const inclination = isPluto ? 17 * (Math.PI / 180) : 0;
   const semiMajorAxis = data.distance;
 
-  // Calculate position on elliptical orbit
+  // Writes the position on the elliptical orbit at angle theta into `out`
   const getOrbitalPosition = useCallback(
-    (theta: number) => {
+    (theta: number, out: THREE.Vector3) => {
       if (isPluto) {
         const r =
           (semiMajorAxis * (1 - eccentricity * eccentricity)) /
@@ -311,9 +321,9 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
         const z = r * Math.sin(theta);
         const y = z * Math.sin(inclination);
         const zInclined = z * Math.cos(inclination);
-        return new THREE.Vector3(x, y, zInclined);
+        return out.set(x, y, zInclined);
       } else {
-        return new THREE.Vector3(
+        return out.set(
           Math.cos(theta) * data.distance,
           0,
           Math.sin(theta) * data.distance
@@ -323,28 +333,55 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
     [isPluto, semiMajorAxis, eccentricity, inclination, data.distance]
   );
 
-  // Orbit path geometry
-  const orbitGeometry = useMemo(() => {
-    const points = [];
+  // Position at mount, so the first render matches the running angle (the ref drives it after that)
+  const startPosition = useMemo<[number, number, number]>(() => {
+    const p = getOrbitalPosition(startAngle, new THREE.Vector3());
+    return [p.x, p.y, p.z];
+  }, [getOrbitalPosition, startAngle]);
+
+  // Orbit path: built once per planet and disposed on unmount (not re-created per render)
+  const orbitLine = useMemo(() => {
+    const points: THREE.Vector3[] = [];
     const segments = 128;
     for (let i = 0; i <= segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
-      points.push(getOrbitalPosition(theta));
+      points.push(getOrbitalPosition(theta, new THREE.Vector3()));
     }
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [getOrbitalPosition]);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+      color: data.color,
+      transparent: true,
+      opacity: 0.15,
+    });
+    return { line: new THREE.Line(geometry, material), geometry, material };
+  }, [getOrbitalPosition, data.color]);
 
-  // Trail geometry
-  const trailGeometry = useMemo(() => {
-    return new THREE.BufferGeometry();
-  }, []);
+  // Trail geometry (built once; the trail itself is not attached, see P2)
+  const trailLine = useMemo(() => {
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.LineBasicMaterial({
+      color: data.color,
+      transparent: true,
+      opacity: 0.4,
+    });
+    return { line: new THREE.Line(geometry, material), geometry, material };
+  }, [data.color]);
+
+  useEffect(
+    () => () => {
+      orbitLine.geometry.dispose();
+      orbitLine.material.dispose();
+      trailLine.geometry.dispose();
+      trailLine.material.dispose();
+    },
+    [orbitLine, trailLine]
+  );
 
   useFrame((_, delta) => {
     if (!isPaused && orbitRef.current) {
-      const newAngle = angle + data.orbitalSpeed * speedMultiplier * delta * 0.1;
-      setAngle(newAngle);
+      angleRef.current += data.orbitalSpeed * speedMultiplier * delta * 0.1;
 
-      const pos = getOrbitalPosition(newAngle);
+      const pos = getOrbitalPosition(angleRef.current, scratchOrbitPosition);
       orbitRef.current.position.set(pos.x, pos.y, pos.z);
 
       if (trailRef.current) {
@@ -352,7 +389,7 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
         if (trailPoints.current.length > maxTrailPoints) {
           trailPoints.current.shift();
         }
-        trailGeometry.setFromPoints(trailPoints.current);
+        trailLine.geometry.setFromPoints(trailPoints.current);
       }
     }
 
@@ -433,46 +470,13 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
   return (
     <group>
       {/* Orbit path */}
-      {showOrbits && (
-        <primitive
-          object={
-            new THREE.Line(
-              orbitGeometry,
-              new THREE.LineBasicMaterial({
-                color: data.color,
-                transparent: true,
-                opacity: 0.15,
-              })
-            )
-          }
-        />
-      )}
+      {showOrbits && <primitive object={orbitLine.line} />}
 
       {/* Trail */}
-      {showOrbits && (
-        <primitive
-          object={
-            new THREE.Line(
-              trailGeometry,
-              new THREE.LineBasicMaterial({
-                color: data.color,
-                transparent: true,
-                opacity: 0.4,
-              })
-            )
-          }
-        />
-      )}
+      {showOrbits && <primitive object={trailLine.line} />}
 
-      {/* Planet group */}
-      <group
-        ref={orbitRef}
-        name={`planet-${data.id}`}
-        position={(() => {
-          const pos = getOrbitalPosition(angle);
-          return [pos.x, pos.y, pos.z];
-        })()}
-      >
+      {/* Planet group (position is driven by the angle ref after mount) */}
+      <group ref={orbitRef} name={`planet-${data.id}`} position={startPosition}>
         {/* Planet sphere - textured or colored */}
         {renderPlanetMesh()}
 
