@@ -273,7 +273,7 @@ export const moons: MoonData[] = [
     description: "Saturn's second-largest moon, a heavily cratered ice world.",
     facts: [
       'Made mostly of water ice',
-      'May have a faint ring system',
+      'May have a faint ring-3 system',
       'Very thin atmosphere of oxygen and carbon dioxide',
       'One of the most cratered moons',
     ],
@@ -400,7 +400,7 @@ export const moons: MoonData[] = [
     description: "The darkest of Uranus's large moons.",
     facts: [
       'Has the darkest surface of the major Uranian moons',
-      'Features a mysterious bright ring named Wunda',
+      'Features a mysterious bright ring-3 named Wunda',
       'Surface is ancient and heavily cratered',
       "Named after a character in Pope's The Rape of the Lock",
     ],

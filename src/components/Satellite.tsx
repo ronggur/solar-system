@@ -906,7 +906,7 @@ export function Satellite({
         {/* Animated hover glow effect */}
         <HoverGlowMesh hovered={hovered} color={typeColors.glow} baseScale={3} />
 
-        {/* Label - zIndexRange keeps labels behind info panel (z-100) so they get backdrop-blur */}
+        {/* Label - zIndexRange keeps labels behind info panel (z-100) so they get backdrop-blur-sm */}
         <Html zIndexRange={[90, 0]}>
           <div
             className={`text-white text-[10px] font-medium whitespace-nowrap transition-all duration-300 ${

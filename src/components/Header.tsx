@@ -16,7 +16,7 @@ export function Header() {
       <div className="flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center glow-box">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center glow-box">
             <Orbit className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -39,8 +39,8 @@ export function Header() {
               </button>
             </DialogTrigger>
             <DialogContent
-              overlayClassName="z-[9999]"
-              className="z-[9999] bg-black/90 backdrop-blur-xl border-white/10 text-white max-w-md"
+              overlayClassName="z-9999"
+              className="z-9999 bg-black/90 backdrop-blur-xl border-white/10 text-white max-w-md"
             >
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold flex items-center gap-2">
