@@ -118,7 +118,7 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
   };
 
   return (
-    <div className="satellite-info-panel absolute top-6 right-6 z-[100] w-80">
+    <div className="satellite-info-panel absolute top-6 right-6 z-100 w-80">
       <div className="bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden glow-box">
         {/* Header */}
         <div
@@ -223,7 +223,7 @@ export function SatelliteInfo({ satellite, onClose }: SatelliteInfoProps) {
                   className="text-white/70 text-xs leading-relaxed flex items-start gap-2"
                 >
                   <span
-                    className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                    className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
                     style={{ backgroundColor: typeColors.color }}
                   />
                   {fact}
