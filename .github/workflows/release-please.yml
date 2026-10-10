@@ -13,12 +13,24 @@ jobs:
   release-please:
     name: 🏷️ Release PR
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
 
     steps:
-      # Releases created with the default GITHUB_TOKEN do not trigger other workflows,
-      # so deploy.yml (on: release published) only runs when RELEASE_PLEASE_TOKEN is set.
-      - uses: googleapis/release-please-action@v4
+      - id: release
+        uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+          token: ${{ github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # GITHUB_TOKEN events do not start other workflows, so deploy is called directly here.
+  deploy:
+    name: 🚀 Deploy release
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit
