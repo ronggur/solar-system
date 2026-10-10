@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   lint:
@@ -39,7 +39,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm audit --audit-level=moderate
+      # Production dependencies only: dev-tooling advisories are tracked separately (see docs).
+      - run: npm audit --omit=dev --audit-level=moderate
         env:
           CI: true
 
