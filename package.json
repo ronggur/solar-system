@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "vitest run",
     "preview": "vite preview",
     "download-satellite-images": "node scripts/download-satellite-images.mjs",
     "optimize-satellite-images": "node scripts/optimize-satellite-images.mjs",
