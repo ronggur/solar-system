@@ -23,6 +23,7 @@ The dev server honours the `/solar-system/` base path, so open the URL Vite prin
 | `npm run build`                    | `tsc -b` then `vite build` into `dist/`                                                              |
 | `npm run preview`                  | Serve `dist/` locally                                                                                |
 | `npm run lint`                     | ESLint over the repo (`dist` ignored)                                                                |
+| `npm test`                         | Vitest (`vitest run`, Node environment): data-integrity and documentation-count tests in `tests/`    |
 | `npm run download-satellite-images`| Fetch the 11 reference images listed in the script from Wikimedia into `public/satellites/`          |
 | `npm run optimize-satellite-images`| ImageMagick: resize to ≤ 960 px, strip metadata, WebP q85; **deletes the originals**                 |
 | `npm run optimize-planet-textures` | ImageMagick: shrink only the six listed dwarf-planet/Moon/Mercury textures in place                  |
@@ -49,20 +50,22 @@ solar-system/
 │   ├── satellites/           mission images for the info panel (WebP)
 │   ├── 3d-objects/satellites/  GLB models (meshopt-compressed)
 │   └── favicon/
-├── scripts/                  asset pipeline (see §4)
+├── scripts/                  asset pipeline (see §4) and `perf-sampler.js` (see §9)
+├── tests/                    Vitest tests (data integrity, README/index.html counts); not bundled
 ├── src/
 │   ├── components/           Planet, Moon, Satellite, Sun, Starfield, SolarSystem, panels, lists
 │   │   └── ui/               shadcn-style primitives: button, dialog, input, slider, switch
 │   ├── data/                 planets.ts, moons.ts, satellites.ts
-│   ├── lib/                  utils.ts (cn), textureGenerator.ts (procedural moon textures)
+│   ├── lib/                  utils.ts (cn), textureGenerator.ts (procedural moon textures),
+│   │                         debugHook.ts (dev-only `window.__SOLAR_DEBUG__`)
 │   ├── types/index.ts        data interfaces (source of truth)
 │   ├── App.tsx / App.css     root component and app styles
 │   ├── index.css             Tailwind layers, theme variables, glow utilities
 │   ├── main.tsx
-│   └── vite-env.d.ts         env + `window.resetSolarSystemCamera` typing
+│   └── vite-env.d.ts         env + `window.resetSolarSystemCamera` / `__SOLAR_DEBUG__` typing
 ├── index.html                meta tags and texture preloads
-├── vite.config.ts, tailwind.config.js, postcss.config.js, eslint.config.js
-├── tsconfig.json (+ tsconfig.app.json, tsconfig.node.json)
+├── vite.config.ts, vitest.config.ts, tailwind.config.js, postcss.config.js, eslint.config.js
+├── tsconfig.json (+ tsconfig.app.json, tsconfig.node.json, tsconfig.test.json)
 └── components.json           shadcn configuration
 ```
 
@@ -78,7 +81,7 @@ Versions are ranges from `package.json`; the lockfile pins exact versions.
 | 3D        | three ^0.182, @react-three/fiber ^9.5, @react-three/drei ^10.7                                     |
 | Animation | gsap ^3.14 (camera tweens and info-panel slides)                                                   |
 | UI        | Radix (dialog, slider, switch, slot), Tailwind CSS ^3.4 + tailwindcss-animate, lucide-react, cva   |
-| Tooling   | ESLint 9 + typescript-eslint 8 + react-hooks plugin, `@gltf-transform/cli`, `kimi-plugin-inspect-react` |
+| Tooling   | ESLint 9 + typescript-eslint 8 + react-hooks plugin, Vitest ^4.1, `@gltf-transform/cli`, `kimi-plugin-inspect-react` |
 
 ### Vite (`vite.config.ts`)
 
@@ -92,8 +95,17 @@ Versions are ranges from `package.json`; the lockfile pins exact versions.
 ### TypeScript
 
 Project references: `tsconfig.app.json` (the app, `strict`, `noUnusedLocals`/`noUnusedParameters`,
-bundler resolution, `verbatimModuleSyntax`, `erasableSyntaxOnly`, target ES2022) and
-`tsconfig.node.json` (only `vite.config.ts`). `npm run build` type-checks with `tsc -b`.
+bundler resolution, `verbatimModuleSyntax`, `erasableSyntaxOnly`, target ES2022),
+`tsconfig.node.json` (only `vite.config.ts`) and `tsconfig.test.json` (`tests/` and
+`vitest.config.ts`, Node types, same `@` alias). `npm run build` type-checks all three with
+`tsc -b`; tests live outside `src/` so they are never part of the app bundle.
+
+### Vitest (`vitest.config.ts`)
+
+A standalone config rather than a merge of `vite.config.ts`, so tests never load the dev-only
+`inspectAttr` plugin or the production chunk rules. Environment is plain Node (no jsdom, no
+browser), tests are `tests/**/*.test.ts`, and `@` resolves to `./src` like in the app. **Vitest is
+pinned to `^4.1`:** Vitest 5 needs Node ≥ 22.12, while CI and the documented minimum use Node 20.
 
 ### ESLint (`eslint.config.js`)
 
@@ -177,7 +189,7 @@ field lists are in [`src/types/index.ts`](../src/types/index.ts).
 When you add or remove bodies, update:
 
 - [ ] Counts in `README.md` (moons, spacecraft, planets) and `docs/ARCHITECTURE.md`
-- [ ] `index.html` meta description, `og:`/`twitter:` descriptions (currently stale: "23 moons", "12 satellites")
+- [ ] `index.html` meta description and `twitter:` description (currently 26 moons, 24 spacecraft)
 - [ ] `keepNames` in `scripts/prune-unused-textures.mjs` for new textures
 - [ ] The status table in `docs/SATELLITE_3D_MODELS.md` for new GLBs
 - [ ] `RELEASE_NOTES.md`
@@ -187,7 +199,8 @@ When you add or remove bodies, update:
 ### `quality.yml`: pull requests to `main`
 
 Node 20. Jobs: **lint**, **audit** (`npm audit --audit-level=moderate`), then **build** (needs both).
-There are no automated tests.
+The workflow does **not** run `npm test` yet; run it locally before opening a PR (see
+[§9](#9-debugging-tips)). Adding it as a job is a pending owner decision.
 
 ### `deploy.yml`: GitHub Release published
 
@@ -220,11 +233,75 @@ Required secrets: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`; optional `SSH_PORT`
 
 ## 9. Debugging tips
 
-- **Renderer counters:** in dev, log `gl.info` (from `useThree().gl`) to watch
-  `memory.geometries`, `memory.textures`, `render.calls` and `render.triangles`. Steadily growing
-  `geometries` indicates the trail leak described in the performance doc.
+- **Renderer counters:** in dev, read `window.__SOLAR_DEBUG__.info` (see
+  [Performance measurement](#performance-measurement)) to watch `memory.geometries`,
+  `memory.textures`, `render.calls` and `render.triangles`. Steadily growing `geometries`
+  indicates the trail leak described in the performance doc.
 - **React re-renders:** React DevTools Profiler with "Highlight updates"; planets, moons and
   satellites currently re-render every frame.
 - **GPU memory:** Chrome Task Manager (GPU process) after the initial load.
 - **Element lookup:** every scene object is addressable with `scene.getObjectByName('planet-earth')`,
   `moon-io`, `satellite-iss`; useful from the console via the R3F devtools.
+
+### Performance measurement
+
+Three small tools support measuring and regression-proofing. None of them changes runtime behaviour.
+
+**Debug hook: `window.__SOLAR_DEBUG__` (dev only).** Installed from the R3F `Canvas` `onCreated`
+callback by `installDebugHook()` in `src/lib/debugHook.ts`, and typed in `src/vite-env.d.ts`. It
+exists only under `npm run dev` (`import.meta.env.DEV`); production builds and `vite preview`
+contain no trace of it (`grep -r __SOLAR_DEBUG__ dist/` is empty).
+
+| Property | Value                                                                  |
+| -------- | ---------------------------------------------------------------------- |
+| `info`   | the live `WebGLRenderer.info` (`memory`, `render`, `programs`)         |
+| `gl`     | the `WebGLRenderer`                                                    |
+| `scene`  | the R3F scene (objects are named `planet-<id>`, `moon-<id>`, …)        |
+| `camera` | the active `PerspectiveCamera`                                         |
+
+```js
+const { info } = window.__SOLAR_DEBUG__;
+({ geometries: info.memory.geometries, textures: info.memory.textures,
+   calls: info.render.calls, triangles: info.render.triangles });
+```
+
+`info.render` is reset every frame, so read it from the console between frames. The dev server runs
+React `StrictMode` and the `inspectAttr` plugin: use it for **growth** of the counters over time,
+never for absolute frame time.
+
+**Frame-time sampler: `scripts/perf-sampler.js`.** A dependency-free snippet to paste into the
+browser console (or evaluate through Playwright / a browser automation tool). It samples
+`requestAnimationFrame` intervals and `longtask` entries for a configurable time, then cleans up
+after itself and resolves with a JSON-serialisable object:
+
+```js
+window.__PERF_SAMPLER_MS__ = 30000;   // optional, default 30000
+// paste scripts/perf-sampler.js; it evaluates to a Promise
+```
+
+| Field | Meaning |
+| ----- | ------- |
+| `frames`, `durationMs`, `fpsAvg` | measured frame intervals, time they span, average fps |
+| `p50Ms`, `p95Ms`, `maxMs` | frame-interval percentiles and maximum |
+| `over33ms` | `{ count, pct }` intervals longer than 33 ms (dropped 60 Hz frames) |
+| `longTasks` | `{ supported, count, totalMs, maxMs }` main-thread tasks over 50 ms |
+| `visibility`, `visibilityAtStart`, `hiddenDuringRun` | a hidden tab throttles rAF; discard such runs |
+
+Measure the **production build** (`npm run build && npx vite preview --port 4174`, then open
+`http://localhost:4174/solar-system/`) with a fixed viewport and device pixel ratio, one tab, and
+the same machine and browser for every comparison. Run each scenario several times and report the
+median.
+
+**Tests: `npm test`.** Runs Vitest once in Node. The suites in `tests/` check that:
+
+- ids are unique in planets (including the Sun), moons and satellites;
+- every moon's `parentPlanet` is a planet id and every satellite's is a planet id, `'sun'` or
+  `'moon'`;
+- every `texture`, `imageUrl` and `modelPath` resolves to a file under `public/`, `modelPath` and
+  `modelScale` come in pairs, and texture paths hard-coded in components and `index.html` exist;
+- `orbitDistance` exceeds parent radius plus body radius (escape-trajectory probes are exempt);
+- the moon and spacecraft counts quoted in `README.md` and `index.html` equal `moons.length` and
+  `satellites.length`.
+
+Failure messages name the offending id or file. When you add or remove a body, a red count test is
+the reminder to update the docs (see [§6](#6-keep-in-sync)).
