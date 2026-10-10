@@ -44,6 +44,13 @@ tooling.
 
 ---
 
+## [1.7.0](https://github.com/ronggur/solar-system/compare/v1.6.1...v1.7.0) (2026-10-10)
+
+
+### Features
+
+* add Google Analytics (gtag) property G-ELPFBPBN2J ([#18](https://github.com/ronggur/solar-system/issues/18)) ([e07ee18](https://github.com/ronggur/solar-system/commit/e07ee188818d7edb30469c8cc4b9cd03ff9d9326))
+
 ## v1.6.0: Loading performance and spacecraft models (2026-07-13)
 
 ### Startup payload: ~25 MB → ~3.5 MB
