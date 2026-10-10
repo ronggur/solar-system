@@ -167,7 +167,8 @@ solar-system/
 │   ├── types/            # TypeScript definitions
 │   └── App.tsx           # Main application and state
 ├── public/               # Textures, satellite images, GLB models, favicons
-├── scripts/              # Asset optimization scripts
+├── scripts/              # Asset optimization scripts and perf-sampler.js
+├── tests/                # Vitest data-integrity tests
 ├── docs/                 # Architecture, developer guide, performance review, ...
 ├── .github/workflows/    # PR quality checks and release deploy
 └── configuration files
@@ -242,6 +243,7 @@ For how to add a planet, moon, or satellite, see [TECHNICAL.md](docs/TECHNICAL.m
 - `npm run build` - Build for production (runs TypeScript compiler + Vite build)
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint on codebase
+- `npm test` - Run the Vitest data-integrity tests (Node, no browser needed)
 - `npm run download-satellite-images` - Download reference images into `public/satellites/` (see script header)
 - `npm run optimize-satellite-images` - Resize/compress panel images to WebP (requires ImageMagick `magick`)
 - `npm run optimize-planet-textures` - Downsize the heaviest dwarf-planet/Moon/Mercury textures in place (requires ImageMagick)
