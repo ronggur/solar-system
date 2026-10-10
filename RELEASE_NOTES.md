@@ -24,10 +24,23 @@ For what is planned next, see
 - Removed `docs/API.md` (duplicated `src/types` and documented props and guards that do not exist)
   and `GITHUB_DESCRIPTION.md` (an unfilled template with stale counts).
 
+### Tooling
+
+- Added a dev-only `window.__SOLAR_DEBUG__` hook (`src/lib/debugHook.ts`) exposing `gl.info`, the scene
+  and the camera. It is removed from production builds; no runtime behaviour changes.
+- Added Vitest 4 and `npm test`: data-integrity tests (unique ids, valid parents, referenced assets
+  exist, orbit distances clear their parent, moon/spacecraft counts in `README.md` and `index.html`
+  match the data). `npm test` is not yet part of `quality.yml`.
+- Added `scripts/perf-sampler.js`, a paste-in-console frame-time and long-task sampler, and recorded the
+  runtime baseline of `main` in [docs/loop/baseline-main.md](docs/loop/baseline-main.md).
+
 ### Known data issues
 
-See "Known candidates to verify" in [docs/INACCURACIES.md](docs/INACCURACIES.md). In particular the
-`index.html` meta descriptions still say 23 moons and 12 satellites.
+See "Known candidates to verify" in [docs/INACCURACIES.md](docs/INACCURACIES.md). The `index.html`
+meta descriptions were corrected to 26 moons and 24 spacecraft, and `npm test` now fails if they drift.
+Also known and not yet fixed: the `index.html` texture preloads lack `crossorigin`, so three textures
+are downloaded twice (~0.4 MB), and `npm audit` reports 18 pre-existing advisories, mostly in dev
+tooling.
 
 ---
 
