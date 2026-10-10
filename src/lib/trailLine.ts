@@ -7,11 +7,11 @@ import { TrailBuffer } from './trailBuffer';
  * range, so nothing is created per frame. Call `dispose` when the owner unmounts.
  */
 export class TrailLine {
-  readonly line: THREE.Line;
+  /** Render with `<MemoLine geometry={…} material={…} />` (see components/MemoLine.tsx). */
+  readonly geometry: THREE.BufferGeometry;
+  readonly material: THREE.LineBasicMaterial;
 
   private readonly trail: TrailBuffer;
-  private readonly geometry: THREE.BufferGeometry;
-  private readonly material: THREE.LineBasicMaterial;
   private readonly positionAttr: THREE.BufferAttribute;
   private readonly indexAttr: THREE.BufferAttribute;
 
@@ -28,7 +28,6 @@ export class TrailLine {
     this.geometry.setIndex(this.indexAttr);
     this.geometry.setDrawRange(0, 0);
     this.material = new THREE.LineBasicMaterial({ color, transparent: true, opacity });
-    this.line = new THREE.Line(this.geometry, this.material);
   }
 
   /** Adds one point; the oldest point is dropped once the trail is full. */

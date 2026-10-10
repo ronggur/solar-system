@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import type { SatelliteData } from '@/types';
 import { Html, useGLTF } from '@react-three/drei';
 import { satelliteTypeColors } from '@/data/satellites';
+import { MemoLine } from './MemoLine';
 import { useRegisterObject, useSceneRegistry } from '@/lib/sceneRegistry';
 
 // Animated glow mesh component for satellites
@@ -166,9 +167,9 @@ export function Satellite({
         dashSize: 3,
         gapSize: 2,
       });
-      const line = new THREE.Line(geometry, material);
-      line.computeLineDistances();
-      return { line, geometry, material };
+      // Dashed material needs the line-distance attribute on the geometry
+      new THREE.Line(geometry, material).computeLineDistances();
+      return { geometry, material };
     }
     const points: THREE.Vector3[] = [];
     const segments = 64;
@@ -188,7 +189,7 @@ export function Satellite({
       transparent: true,
       opacity: 0.2,
     });
-    return { line: new THREE.Line(geometry, material), geometry, material };
+    return { geometry, material };
   }, [data.orbitDistance, isEscape, typeColors.color, escapeAngle]);
 
   useEffect(
@@ -890,7 +891,7 @@ export function Satellite({
     <group>
       {/* Orbit path (closed circle) or escape trajectory (dashed line) */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive object={orbitLine.line} />
+        <MemoLine geometry={orbitLine.geometry} material={orbitLine.material} />
       </group>
 
       {/* Satellite group */}

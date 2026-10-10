@@ -5,6 +5,7 @@ import { TextureLoader } from 'three';
 import type { MoonData } from '@/types';
 import { Html } from '@react-three/drei';
 import { getCachedMoonTexture } from '@/lib/textureGenerator';
+import { MemoLine } from './MemoLine';
 import { useRegisterObject, useSceneRegistry } from '@/lib/sceneRegistry';
 
 // Animated glow mesh component
@@ -169,7 +170,7 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
       transparent: true,
       opacity: 0.15,
     });
-    return { line: new THREE.Line(geometry, material), geometry, material };
+    return { geometry, material };
   }, [data.orbitDistance, data.color, inclination]);
 
   useEffect(
@@ -227,7 +228,7 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
     <group>
       {/* Orbit path around parent planet */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive object={orbitLine.line} />
+        <MemoLine geometry={orbitLine.geometry} material={orbitLine.material} />
       </group>
 
       {/* Moon group */}

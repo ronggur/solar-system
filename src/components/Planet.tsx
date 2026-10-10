@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { TextureLoader } from 'three';
 import type { PlanetData } from '@/types';
 import { Html } from '@react-three/drei';
+import { MemoLine } from './MemoLine';
 import { useRegisterObject } from '@/lib/sceneRegistry';
 import { TrailLine } from '@/lib/trailLine';
 
@@ -355,7 +356,7 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
       transparent: true,
       opacity: 0.15,
     });
-    return { line: new THREE.Line(geometry, material), geometry, material };
+    return { geometry, material };
   }, [getOrbitalPosition, data.color]);
 
   // Trail: a preallocated ring of TRAIL_LENGTH points, written in place each frame (no geometry or
@@ -460,10 +461,12 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
   return (
     <group>
       {/* Orbit path */}
-      {showOrbits && <primitive object={orbitLine.line} />}
+      {/* Orbit path and trail: MemoLine creates a fresh THREE.Line per mount around the memoized
+          geometry and material (see MemoLine.tsx for why a memoized object is not used directly) */}
+      {showOrbits && <MemoLine geometry={orbitLine.geometry} material={orbitLine.material} />}
 
       {/* Trail */}
-      {showOrbits && <primitive object={trailLine.line} />}
+      {showOrbits && <MemoLine geometry={trailLine.geometry} material={trailLine.material} />}
 
       {/* Planet group (position is driven by the angle ref after mount) */}
       <group ref={orbitRef} name={`planet-${data.id}`} position={startPosition}>
