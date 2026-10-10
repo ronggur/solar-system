@@ -1,10 +1,11 @@
 import { useRef, useState, useMemo, Suspense } from 'react';
-import { useFrame, useThree, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
 import type { MoonData } from '@/types';
 import { Html } from '@react-three/drei';
 import { getCachedMoonTexture } from '@/lib/textureGenerator';
+import { useRegisterObject, useSceneRegistry } from '@/lib/sceneRegistry';
 
 // Animated glow mesh component
 function HoverGlowMesh({
@@ -128,12 +129,13 @@ function ProceduralMoonMesh({
 }
 
 export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
-  const { scene } = useThree();
+  const registry = useSceneRegistry();
   const moonRef = useRef<THREE.Group>(null);
   const moonMeshRef = useRef<THREE.Mesh>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
   const [hovered, setHovered] = useState(false);
+  useRegisterObject(`moon-${data.id}`, moonRef);
 
   // Orbit inclination in radians
   const inclination = (data.orbitInclination || 0) * (Math.PI / 180);
@@ -155,8 +157,8 @@ export function Moon({ data, speedMultiplier, isPaused, onClick }: MoonProps) {
   }, [data.orbitDistance, inclination]);
 
   useFrame((_, delta) => {
-    // Get parent planet position from scene
-    const planetGroup = scene.getObjectByName(`planet-${data.parentPlanet}`);
+    // Get parent planet position from the scene registry (no scene-graph search)
+    const planetGroup = registry.get(`planet-${data.parentPlanet}`);
 
     if (planetGroup && moonRef.current && orbitGroupRef.current) {
       const parentPosition = new THREE.Vector3();

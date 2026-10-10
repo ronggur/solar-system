@@ -1,9 +1,10 @@
 import { useRef, useState, useMemo, Suspense, useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { SatelliteData } from '@/types';
 import { Html, useGLTF } from '@react-three/drei';
 import { satelliteTypeColors } from '@/data/satellites';
+import { useRegisterObject, useSceneRegistry } from '@/lib/sceneRegistry';
 
 // Animated glow mesh component for satellites
 function HoverGlowMesh({
@@ -91,11 +92,12 @@ export function Satellite({
   glbStaggerIndex = 0,
   glbLoadNow = false,
 }: SatelliteProps) {
-  const { scene } = useThree();
+  const registry = useSceneRegistry();
   const satelliteRef = useRef<THREE.Group>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
   const [hovered, setHovered] = useState(false);
+  useRegisterObject(`satellite-${data.id}`, satelliteRef);
 
   const typeColors = satelliteTypeColors[data.type];
   const isEscape = data.escapeTrajectory === true;
@@ -180,7 +182,7 @@ export function Satellite({
   }, [data.orbitDistance, isEscape, typeColors.color, escapeAngle]);
 
   useFrame((_, delta) => {
-    const planetGroup = scene.getObjectByName(
+    const planetGroup = registry.get(
       data.parentPlanet === 'moon' ? 'moon-moon' : `planet-${data.parentPlanet}`
     );
 

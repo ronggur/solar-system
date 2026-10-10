@@ -3,6 +3,7 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
 import { sunData } from '@/data/planets';
+import { useRegisterObject } from '@/lib/sceneRegistry';
 
 interface SunProps {
   onClick?: () => void;
@@ -77,6 +78,8 @@ function ColoredSunMesh({
 
 export function Sun({ onClick }: SunProps) {
   const sunRef = useRef<THREE.Mesh>(null);
+  const sunGroupRef = useRef<THREE.Group>(null);
+  useRegisterObject('planet-sun', sunGroupRef);
 
   useFrame(() => {
     if (sunRef.current) {
@@ -85,7 +88,7 @@ export function Sun({ onClick }: SunProps) {
   });
 
   return (
-    <group name="planet-sun">
+    <group ref={sunGroupRef} name="planet-sun">
       {/* Main sun sphere - textured or colored */}
       {sunData.texture ? (
         <Suspense fallback={<ColoredSunMesh sunRef={sunRef} onClick={onClick} />}>

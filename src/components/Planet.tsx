@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { TextureLoader } from 'three';
 import type { PlanetData } from '@/types';
 import { Html } from '@react-three/drei';
+import { useRegisterObject } from '@/lib/sceneRegistry';
 
 interface PlanetProps {
   data: PlanetData;
@@ -288,6 +289,7 @@ export function Planet({ data, speedMultiplier, isPaused, onClick, showOrbits }:
   const trailRef = useRef<THREE.Line>(null);
   const [hovered, setHovered] = useState(false);
   const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
+  useRegisterObject(`planet-${data.id}`, orbitRef);
 
   const trailPoints = useRef<THREE.Vector3[]>([]);
   const maxTrailPoints = 100;
