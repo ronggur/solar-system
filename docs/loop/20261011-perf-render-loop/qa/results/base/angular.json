@@ -1,0 +1,216 @@
+{
+  "url": "http://localhost:5174/solar-system/",
+  "playbackLabel": "Pause",
+  "tracked": [
+    {
+      "child": "planet-earth",
+      "parent": "planet-sun",
+      "orbitalSpeed": 1
+    },
+    {
+      "child": "moon-io",
+      "parent": "planet-jupiter",
+      "orbitalSpeed": 3.5
+    },
+    {
+      "child": "satellite-iss",
+      "parent": "planet-earth",
+      "orbitalSpeed": 15
+    }
+  ],
+  "speeds": [
+    {
+      "target": 1,
+      "sliderValue": 1,
+      "expectedOmega": {
+        "planet-earth": 0.1,
+        "moon-io": 0.35,
+        "satellite-iss": 1.5
+      },
+      "samples": [
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.0983761318079571
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 0.2721656648647026
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 1.1664242243685399
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.09478077416867221
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 0.32128814282928286
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 1.376949192666123
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.08823036150298115
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 0.2992048819099022
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 1.2823066141718131
+          }
+        ]
+      ]
+    },
+    {
+      "target": 5,
+      "sliderValue": 4.999999999999999,
+      "expectedOmega": {
+        "planet-earth": 0.5,
+        "moon-io": 1.75,
+        "satellite-iss": 7.5
+      },
+      "samples": [
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.49013932497819684
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 1.3951751580758611
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 5.979322024736332
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.45807348321769176
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 1.506979710813997
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 6.458484416628092
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.46732840490669847
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 1.576002990214567
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 6.7542985336168115
+          }
+        ]
+      ]
+    },
+    {
+      "target": 10,
+      "sliderValue": 9.999999999999982,
+      "expectedOmega": {
+        "planet-earth": 1,
+        "moon-io": 3.5,
+        "satellite-iss": 15
+      },
+      "samples": [
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.9675192854228146
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 3.2672788099380954
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 14.002623447610528
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.9107107635505131
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 3.052633315926274
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 13.082714181421377
+          }
+        ],
+        [
+          {
+            "child": "planet-earth",
+            "radius": 25,
+            "omegaRadPerSec": 0.9768394154875225
+          },
+          {
+            "child": "moon-io",
+            "radius": 6,
+            "omegaRadPerSec": 3.2736683620013873
+          },
+          {
+            "child": "satellite-iss",
+            "radius": 1.8,
+            "omegaRadPerSec": 14.030007206547925
+          }
+        ]
+      ]
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com"
+  ]
+}

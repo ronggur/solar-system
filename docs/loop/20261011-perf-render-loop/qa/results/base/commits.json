@@ -1,0 +1,38 @@
+{
+  "url": "http://localhost:5174/solar-system/",
+  "playbackAtRunning": "Pause",
+  "results": [
+    {
+      "label": "running (overview)",
+      "seconds": 10,
+      "commitsPerSecond": {
+        "anonymous": 1006.8,
+        "HoverGlowMesh": 995.4,
+        "Moon": 410.8,
+        "ProceduralMoonMesh": 395,
+        "Satellite": 325.7,
+        "Planet": 205.4,
+        "TexturedPlanetMesh": 189.6,
+        "GLBModel": 164.8,
+        "TexturedMoonMesh": 15.8,
+        "SaturnRings": 15.8,
+        "EarthMesh": 15.8,
+        "KuiperBelt": 15.8
+      },
+      "total": 3891.900000000001
+    },
+    {
+      "label": "paused (idle)",
+      "seconds": 10,
+      "commitsPerSecond": {},
+      "total": 0
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com"
+  ]
+}
