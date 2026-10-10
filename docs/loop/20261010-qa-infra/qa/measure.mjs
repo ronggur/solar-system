@@ -73,11 +73,13 @@ async function openApp(page) {
   await page.waitForSelector('text=Controls', { timeout: 30000 });
 }
 
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /** Clicks the Object List entry whose name is exactly `name`. */
 async function selectFromObjectList(page, name) {
   const btn = page
     .locator('button[data-object-list-index]')
-    .filter({ has: page.locator('div.truncate', { hasText: new RegExp(`^${name}$`) }) })
+    .filter({ has: page.locator('div.truncate', { hasText: new RegExp(`^${escapeRegExp(name)}$`) }) })
     .first();
   await btn.waitFor({ timeout: 10000 });
   await btn.click();
