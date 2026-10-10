@@ -86,7 +86,10 @@ Reset button            → window.resetSolarSystemCamera()   (declared in src/v
 OrbitControls start/end → setIsCameraInteracting → onCameraInteractionChange → App
 ```
 
-`window.resetSolarSystemCamera` is the only global; `SolarSystem` assigns it in an effect.
+`window.resetSolarSystemCamera` is the only global the app itself relies on; `SolarSystem` assigns
+it in an effect. In `npm run dev` only, `Canvas` `onCreated` also installs the read-only inspection
+hook `window.__SOLAR_DEBUG__` (`src/lib/debugHook.ts`; see
+[TECHNICAL.md](TECHNICAL.md#performance-measurement)).
 
 ## 4. Scene model
 
@@ -281,6 +284,7 @@ No shadows. Bodies add a small emissive term so night sides stay faintly visible
 
 - `npm run build` runs `tsc -b` then `vite build` (output in `dist/`).
 - **Pull requests to `main`** run `quality.yml`: lint, `npm audit --audit-level=moderate`, build.
+  `npm test` (Vitest data-integrity tests) is not part of CI yet.
 - **Publishing a GitHub Release** runs `deploy.yml`: lint, build with `VITE_APP_VERSION` taken from
   the tag, upload, then SSH deploy to a Vultr VPS (timestamped release directory, `current`
   symlink swap, last 5 releases and 3 backups kept) and a verification job.
@@ -296,5 +300,6 @@ Tracked, with fixes and a roadmap, in
 - 63 always-on DOM labels, and GPU texture memory around 150 MB.
 - Unused code: `scaleFactors`, `getMoonsByPlanet`, the `OrbitTrail` type, most of
   `src/lib/textureGenerator.ts`, and unreachable procedural satellite models.
-- No error boundaries or WebGL-support fallback, and no automated tests.
-- `index.html` meta descriptions still say "23 moons" and "12 satellites" (actual: 26 and 24).
+- No error boundaries or WebGL-support fallback.
+- Automated tests are limited to data and documentation integrity (`npm test`, Vitest in Node);
+  there are no component, interaction or rendering tests.
