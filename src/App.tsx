@@ -9,6 +9,7 @@ import { PlanetInfo } from '@/components/PlanetInfo';
 import { SatelliteInfo } from '@/components/SatelliteInfo';
 import { MoonInfo } from '@/components/MoonInfo';
 import { Header } from '@/components/Header';
+import { installDebugHook } from '@/lib/debugHook';
 import type { PlanetData, SatelliteData, MoonData } from '@/types';
 import './App.css';
 
@@ -102,9 +103,11 @@ function App() {
           stencil: false,
           depth: true,
         }}
-        onCreated={({ gl }) => {
+        onCreated={(state) => {
+          const { gl } = state;
           gl.setClearColor(new THREE.Color('#000000'));
           gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          installDebugHook(state); // dev-only no-op in production builds
         }}
       >
         <Suspense fallback={null}>
