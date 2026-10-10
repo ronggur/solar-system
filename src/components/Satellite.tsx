@@ -17,15 +17,19 @@ function HoverGlowMesh({
   baseScale: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [pulsePhase, setPulsePhase] = useState(0);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+  // Pulse phase lives in a ref: a state update per frame would re-render this glow 60 times a second
+  const pulsePhaseRef = useRef(0);
 
   useFrame((_, delta) => {
-    if (hovered) {
-      setPulsePhase((prev) => prev + delta * 4);
-      if (meshRef.current) {
-        const scale = baseScale + Math.sin(pulsePhase) * 0.3;
-        meshRef.current.scale.setScalar(scale);
-      }
+    if (!hovered) return;
+    pulsePhaseRef.current += delta * 4;
+    const wave = Math.sin(pulsePhaseRef.current);
+    if (meshRef.current) {
+      meshRef.current.scale.setScalar(baseScale + wave * 0.3);
+    }
+    if (materialRef.current) {
+      materialRef.current.opacity = 0.1 + wave * 0.05;
     }
   });
 
@@ -35,9 +39,10 @@ function HoverGlowMesh({
     <mesh ref={meshRef} scale={baseScale}>
       <sphereGeometry args={[0.05, 16, 16]} />
       <meshBasicMaterial
+        ref={materialRef}
         color={color}
         transparent
-        opacity={0.1 + Math.sin(pulsePhase) * 0.05}
+        opacity={0.1}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
@@ -84,6 +89,9 @@ interface SatelliteProps {
   glbLoadNow?: boolean;
 }
 
+// Reused every frame for the parent position (module scope: no per-frame allocation)
+const scratchParentPosition = new THREE.Vector3();
+
 export function Satellite({
   data,
   speedMultiplier,
@@ -95,7 +103,9 @@ export function Satellite({
   const registry = useSceneRegistry();
   const satelliteRef = useRef<THREE.Group>(null);
   const orbitGroupRef = useRef<THREE.Group>(null);
-  const [angle, setAngle] = useState(() => Math.random() * Math.PI * 2);
+  // Random start angle is drawn once per mount; the running angle lives in a ref (not React state)
+  const [startAngle] = useState(() => Math.random() * Math.PI * 2);
+  const angleRef = useRef(startAngle);
   const [hovered, setHovered] = useState(false);
   useRegisterObject(`satellite-${data.id}`, satelliteRef);
 
@@ -158,9 +168,9 @@ export function Satellite({
       });
       const line = new THREE.Line(geometry, material);
       line.computeLineDistances();
-      return line;
+      return { line, geometry, material };
     }
-    const points = [];
+    const points: THREE.Vector3[] = [];
     const segments = 64;
     for (let i = 0; i <= segments; i++) {
       const theta = (i / segments) * Math.PI * 2;
@@ -178,8 +188,16 @@ export function Satellite({
       transparent: true,
       opacity: 0.2,
     });
-    return new THREE.Line(geometry, material);
+    return { line: new THREE.Line(geometry, material), geometry, material };
   }, [data.orbitDistance, isEscape, typeColors.color, escapeAngle]);
+
+  useEffect(
+    () => () => {
+      orbitLine.geometry.dispose();
+      orbitLine.material.dispose();
+    },
+    [orbitLine]
+  );
 
   useFrame((_, delta) => {
     const planetGroup = registry.get(
@@ -187,35 +205,34 @@ export function Satellite({
     );
 
     if (planetGroup && satelliteRef.current && orbitGroupRef.current) {
-      const parentPosition = new THREE.Vector3();
-      planetGroup.getWorldPosition(parentPosition);
+      planetGroup.getWorldPosition(scratchParentPosition);
 
-      orbitGroupRef.current.position.copy(parentPosition);
+      orbitGroupRef.current.position.copy(scratchParentPosition);
 
       if (isEscape) {
         const x = Math.cos(escapeAngle) * data.orbitDistance;
         const z = Math.sin(escapeAngle) * data.orbitDistance;
         satelliteRef.current.position.set(
-          parentPosition.x + x,
-          parentPosition.y,
-          parentPosition.z + z
+          scratchParentPosition.x + x,
+          scratchParentPosition.y,
+          scratchParentPosition.z + z
         );
       } else {
         if (!isPaused) {
-          const newAngle = angle + data.orbitalSpeed * speedMultiplier * delta * 0.1;
-          setAngle(newAngle);
+          angleRef.current += data.orbitalSpeed * speedMultiplier * delta * 0.1;
         }
+        const angle = angleRef.current;
         const x = Math.cos(angle) * data.orbitDistance;
         const z = Math.sin(angle) * data.orbitDistance;
         satelliteRef.current.position.set(
-          parentPosition.x + x,
-          parentPosition.y,
-          parentPosition.z + z
+          scratchParentPosition.x + x,
+          scratchParentPosition.y,
+          scratchParentPosition.z + z
         );
       }
     } else {
       if (satelliteRef.current) {
-        const a = isEscape ? escapeAngle : angle;
+        const a = isEscape ? escapeAngle : angleRef.current;
         const x = Math.cos(a) * data.orbitDistance;
         const z = Math.sin(a) * data.orbitDistance;
         satelliteRef.current.position.set(x, 0, z);
@@ -873,7 +890,7 @@ export function Satellite({
     <group>
       {/* Orbit path (closed circle) or escape trajectory (dashed line) */}
       <group ref={orbitGroupRef} position={[0, 0, 0]}>
-        <primitive object={orbitLine} />
+        <primitive object={orbitLine.line} />
       </group>
 
       {/* Satellite group */}
