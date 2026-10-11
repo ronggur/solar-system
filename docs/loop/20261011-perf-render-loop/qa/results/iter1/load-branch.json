@@ -1,0 +1,396 @@
+{
+  "url": "http://localhost:4174/solar-system/",
+  "cacheDisabled": true,
+  "snapshots": [
+    {
+      "label": "load + 5 s",
+      "requests": 26,
+      "transferBytes": 2760072,
+      "top10": [
+        {
+          "url": "/solar-system/assets/vendor-three-DUH54iDV.js",
+          "transfer": 267577,
+          "decoded": 976033,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/pluto.webp",
+          "transfer": 247902,
+          "decoded": 247580,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/sun.webp",
+          "transfer": 223026,
+          "decoded": 222704,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/sun.webp",
+          "transfer": 222974,
+          "decoded": 222704,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/mars.webp",
+          "transfer": 202348,
+          "decoded": 202026,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/moon.webp",
+          "transfer": 190350,
+          "decoded": 190028,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/mercury.webp",
+          "transfer": 140306,
+          "decoded": 139984,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/earth_day.webp",
+          "transfer": 131592,
+          "decoded": 131270,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/earth_day.webp",
+          "transfer": 131540,
+          "decoded": 131270,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/jupiter.webp",
+          "transfer": 122234,
+          "decoded": 121912,
+          "status": 200
+        }
+      ],
+      "tSec": 5
+    },
+    {
+      "label": "load + 30 s (idle-deferred assets included)",
+      "requests": 40,
+      "transferBytes": 7255308,
+      "top10": [
+        {
+          "url": "/solar-system/3d-objects/satellites/osiris.glb",
+          "transfer": 1075787,
+          "decoded": 1075508,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/jwst.glb",
+          "transfer": 855609,
+          "decoded": 855332,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/lro.glb",
+          "transfer": 716849,
+          "decoded": 716572,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/voyager1.glb",
+          "transfer": 295749,
+          "decoded": 295472,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/voyager2.glb",
+          "transfer": 295749,
+          "decoded": 295472,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/assets/vendor-three-DUH54iDV.js",
+          "transfer": 267577,
+          "decoded": 976033,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/cassini.glb",
+          "transfer": 261625,
+          "decoded": 261348,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/juno.glb",
+          "transfer": 260181,
+          "decoded": 259904,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/textures/pluto.webp",
+          "transfer": 247902,
+          "decoded": 247580,
+          "status": 200
+        },
+        {
+          "url": "/solar-system/3d-objects/satellites/parker-solar-probe.glb",
+          "transfer": 229357,
+          "decoded": 229080,
+          "status": 200
+        }
+      ],
+      "tSec": 30
+    }
+  ],
+  "byExtensionAt30s": {
+    "html": {
+      "n": 1,
+      "bytes": 1139
+    },
+    "webp": {
+      "n": 19,
+      "bytes": 2306260
+    },
+    "js": {
+      "n": 3,
+      "bytes": 416721
+    },
+    "css": {
+      "n": 1,
+      "bytes": 7079
+    },
+    "ico": {
+      "n": 1,
+      "bytes": 15676
+    },
+    "png": {
+      "n": 1,
+      "bytes": 13197
+    },
+    "glb": {
+      "n": 14,
+      "bytes": 4495236
+    }
+  },
+  "duplicateFetches": [
+    {
+      "url": "/solar-system/textures/sun.webp",
+      "fetches": 2
+    },
+    {
+      "url": "/solar-system/textures/earth_day.webp",
+      "fetches": 2
+    },
+    {
+      "url": "/solar-system/textures/earth_night.webp",
+      "fetches": 2
+    }
+  ],
+  "errors4xx": [],
+  "allRequests": [
+    {
+      "url": "/solar-system/",
+      "transfer": 1139,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/sun.webp",
+      "transfer": 222974,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/earth_day.webp",
+      "transfer": 131540,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/earth_night.webp",
+      "transfer": 64630,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/assets/index-CVhNdwj4.js",
+      "transfer": 88187,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/assets/vendor-react-BGIZwi-L.js",
+      "transfer": 60957,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/assets/vendor-three-DUH54iDV.js",
+      "transfer": 267577,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/assets/index-GlfwjEhK.css",
+      "transfer": 7079,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/favicon/favicon.ico",
+      "transfer": 15676,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/sun.webp",
+      "transfer": 223026,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/earth_day.webp",
+      "transfer": 131592,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/earth_night.webp",
+      "transfer": 64682,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/mercury.webp",
+      "transfer": 140306,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/venus_atmosphere.webp",
+      "transfer": 38954,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/mars.webp",
+      "transfer": 202348,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/ceres.webp",
+      "transfer": 118484,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/jupiter.webp",
+      "transfer": 122234,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/saturn.webp",
+      "transfer": 33812,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/saturn_ring_alpha.png",
+      "transfer": 13197,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/uranus.webp",
+      "transfer": 8418,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/neptune.webp",
+      "transfer": 16672,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/pluto.webp",
+      "transfer": 247902,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/haumea.webp",
+      "transfer": 111802,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/makemake.webp",
+      "transfer": 119142,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/eris.webp",
+      "transfer": 117392,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/textures/moon.webp",
+      "transfer": 190350,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/iss.glb",
+      "transfer": 34423,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/hubble.glb",
+      "transfer": 183861,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/jwst.glb",
+      "transfer": 855609,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/voyager1.glb",
+      "transfer": 295749,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/voyager2.glb",
+      "transfer": 295749,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/cassini.glb",
+      "transfer": 261625,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/juno.glb",
+      "transfer": 260181,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/mars-reconnaissance.glb",
+      "transfer": 12239,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/parker-solar-probe.glb",
+      "transfer": 229357,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/osiris.glb",
+      "transfer": 1075787,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/chandra.glb",
+      "transfer": 188881,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/lro.glb",
+      "transfer": 716849,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/mars-odyssey.glb",
+      "transfer": 44751,
+      "status": 200
+    },
+    {
+      "url": "/solar-system/3d-objects/satellites/maven.glb",
+      "transfer": 40175,
+      "status": 200
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/sun.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_day.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute."
+  ]
+}

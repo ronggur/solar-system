@@ -1,0 +1,22 @@
+[
+ {
+  "step": "selected, follow OFF",
+  "ndcDistFromCenter": 0.0047
+ },
+ {
+  "step": "follow ON +0.3s",
+  "ndcDistFromCenter": 0.0079
+ },
+ {
+  "step": "follow ON +3.3s",
+  "ndcDistFromCenter": 0.01
+ },
+ {
+  "step": "follow ON +6.3s",
+  "ndcDistFromCenter": 0.0094
+ },
+ {
+  "step": "follow OFF again +3s",
+  "ndcDistFromCenter": 0.0404
+ }
+]

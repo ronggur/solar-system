@@ -1,0 +1,25 @@
+{
+  "url": "http://localhost:5174/solar-system/",
+  "playbackAtRunning": "Pause",
+  "results": [
+    {
+      "label": "running (overview)",
+      "seconds": 10,
+      "commitsPerSecond": {},
+      "total": 0
+    },
+    {
+      "label": "paused (idle)",
+      "seconds": 10,
+      "commitsPerSecond": {},
+      "total": 0
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com"
+  ]
+}
