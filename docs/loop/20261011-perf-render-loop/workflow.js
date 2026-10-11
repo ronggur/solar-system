@@ -113,7 +113,7 @@ let reason = ''
 let prevQa = null
 const history = []
 
-for (let n = 1; n <= MAX; n++) {
+for (let n = A.startIteration ?? 1; n <= MAX; n++) {
   const devPhase = `Dev iter ${n}`
   const qaPhase = `QA iter ${n}`
 

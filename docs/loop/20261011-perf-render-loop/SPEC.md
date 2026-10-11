@@ -156,3 +156,15 @@ Not applicable (no UI change). No `design-*.md` is produced.
 - iPhone / Android Safari and Chrome: frame time and touch behaviour.
 - Safari and Firefox: WebGL behaviour of `setDrawRange` and dynamic buffers.
 - 120 Hz display: planet spin is still not delta-scaled (P8, out of scope), so motion speed there is unchanged.
+
+## Decisions made after iteration 1 (delegated to the orchestrator, 2026-10-11)
+
+- **Orbital speed (Q1-04): keep the documented formula** `angle += orbitalSpeed × speed × delta × 0.1`
+  (ARCHITECTURE §4.3). Main measured 5–15 % below it in the dev server under load, which is most likely
+  lost increments from the stale `setAngle` closure. The change is a visible behaviour change of up to
+  +18 % on dev for fast bodies. It must be stated as a behaviour fix in the PR, not hidden. Production speed
+  on main at 60 fps was not measured, so the size of the change there is unknown.
+- **Resume path:** a new Workflow run starts at iteration 2 (`startIteration: 2`). This is still within the
+  two-iteration cap. Open items: Q1-01 (AC-5 pixel diff; use `qa/controlled-shots.mjs` for a frozen clock and
+  separate speed-caused differences from timing noise), Q1-03 (document hover pulse change), Q1-02 and Q1-06
+  (measurements), B-003.

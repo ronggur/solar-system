@@ -93,3 +93,7 @@ Pre-run observations (orchestrator, baseline) and their iteration 1 status:
 
 ## Merge notes
 - Docs updated: `ARCHITECTURE.md` (§1, §4.1, §4.3, §6.1, §6.3, §11), `TECHNICAL.md` (§9)  ·  Counts changed: none  ·  Release/tag: not created (needs owner approval)
+
+## Owner delegation (2026-10-11)
+- Q1-04 disposition: DECIDED. Keep the documented ω formula (theory). Speed change is a behaviour fix, to be stated in the PR. See SPEC "Decisions made after iteration 1".
+- Escalation handled by a new Workflow run starting at iteration 2 (cap of 2 still applies). Pending commit QA scripts: `ddc9c32`.
