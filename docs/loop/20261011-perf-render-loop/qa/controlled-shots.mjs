@@ -4,6 +4,8 @@
  * (overview x2, selected Jupiter x2, production preview, seeded Math.random, paused), but the page
  * clock is virtual, so the two builds reach the same simulated state:
  *
+ *   0. Seeded random ignores three.js-internal draws (UUIDs). Without this, the base's per-frame
+ *      allocations shifted the seeded start angles of later moons and satellites (Q1-01 root cause).
  *   1. performance.now() stays at 0 until the scene is paused. THREE.Clock therefore gives delta 0,
  *      and every orbit stays at its seeded start angle (no dependence on wall-clock time, and no
  *      dependence on the orbital speed, which Q1-04 changed on purpose).
@@ -43,10 +45,20 @@ const VIEWPORT = { width: 1440, height: 900 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const out = (obj) => console.log(JSON.stringify(obj, null, 2));
 
-/** Seeded Math.random (mulberry32), same as probes.mjs, so both builds draw the same start angles. */
+/**
+ * Seeded Math.random (mulberry32). Same generator as probes.mjs, but calls made from three.js code
+ * (stack frame in vendor-three or node_modules) bypass the seed, so app draws (start angles, textures)
+ * are the same sequence in both builds.
+ */
 const SEEDED_RANDOM = `(() => {
   let s = 1234567;
+  const real = Math.random.bind(Math);
   Math.random = () => {
+    // Draws made inside three.js (generateUUID in every constructor) must not advance the seed.
+    // Their count depends on how many objects a build allocates, so counting them moves the start
+    // angles of later bodies between builds (Q1-01). Only app code draws from the seeded stream.
+    const caller = new Error().stack.split('\\n')[2] || '';
+    if (caller.includes('vendor-three') || caller.includes('node_modules')) return real();
     s |= 0; s = (s + 0x6d2b79f5) | 0;
     let t = Math.imul(s ^ (s >>> 15), 1 | s);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
