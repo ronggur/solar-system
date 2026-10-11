@@ -188,7 +188,7 @@ export const planets: PlanetData[] = [
     emissive: '#B8860B',
     emissiveIntensity: 0.1,
     texture: '/textures/saturn.webp',
-    description: 'Famous for its spectacular ring-3 system, the second largest planet.',
+    description: 'Famous for its spectacular ring system, the second largest planet.',
     facts: [
       'Saturn has 274 known moons',
       'Its rings are made of ice, rock, and dust particles',
@@ -217,7 +217,7 @@ export const planets: PlanetData[] = [
     emissive: '#5DADE2',
     emissiveIntensity: 0.15,
     texture: '/textures/uranus.webp',
-    description: 'An ice giant that rotates on its side, with a faint ring-3 system.',
+    description: 'An ice giant that rotates on its side, with a faint ring system.',
     facts: [
       'Uranus rotates on its side at a 98-degree angle',
       'It has 27 known moons',
