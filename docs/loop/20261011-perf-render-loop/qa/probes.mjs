@@ -2,13 +2,14 @@
 /**
  * QA probes for run 20261011-perf-render-loop (Playwright + system Chrome, same protocol as measure.mjs).
  * Covers the SPEC checks that measure.mjs does not:
- *   commits   AC-1  React commits per component name per second (dev server; names are readable there)
+ *   commits   AC-1  React commits per component name per second (dev server; names are readable there).
+ *             --settle ms: wait before measuring (AC-1 steady state: 40000). --hover <id>: also measure with the pointer on that planet
  *   angular   AC-3  orbital angular speed (rad/s) at 1x / 5x / 10x, from world positions (dev server)
  *   buffers   AC-2  live WebGL buffers (createBuffer - deleteBuffer) + renderer.info.memory.geometries over time
  *   shots     AC-5  seeded, paused screenshots of overview and selected Jupiter (production preview)
  *
  * Usage (PW_DIR = scratch dir that holds node_modules/playwright, outside the repo):
- *   PW_DIR=... node probes.mjs commits  --port 5174 [--seconds 10]
+ *   PW_DIR=... node probes.mjs commits  --port 5174 [--seconds 10] [--settle 5000] [--hover jupiter]
  *   PW_DIR=... node probes.mjs angular  --port 5174
  *   PW_DIR=... node probes.mjs buffers  --port 5174 [--minutes 5] [--scenario overview|selected]
  *   PW_DIR=... node probes.mjs shots    --port 4174 --out <dir>
@@ -137,15 +138,31 @@ const speedValue = (page) =>
   });
 
 /* ---------- AC-1: commits ---------- */
+/** Screen position (CSS px) of a planet's centre, from the dev debug hook; null when behind the camera. */
+const PROJECT_PLANET = (id) => {
+  const dbg = window.__SOLAR_DEBUG__;
+  const o = dbg.scene.getObjectByName(`planet-${id}`);
+  if (!o) return null;
+  const v = new dbg.scene.position.constructor();
+  o.getWorldPosition(v);
+  v.project(dbg.camera);
+  if (v.z > 1) return null;
+  const r = document.querySelector('canvas').getBoundingClientRect();
+  return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height };
+};
+
 async function cmdCommits() {
   const seconds = Number(args.seconds ?? 10);
+  const settle = Number(args.settle ?? 5000);
+  const hover = args.hover ? String(args.hover) : null;
   const { browser, page, logs } = await launch([COMMIT_HOOK]);
   await openApp(page);
-  await sleep(5000);
+  await sleep(settle);
   const snap = () => page.evaluate(() => ({ ...(window.__COMMITS__ || {}) }));
-  const measure = async (label) => {
+  // `during` runs for the whole window; by default it only waits.
+  const measure = async (label, during = () => sleep(seconds * 1000)) => {
     const a = await snap();
-    await sleep(seconds * 1000);
+    await during();
     const b = await snap();
     const rates = {};
     for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
@@ -157,10 +174,39 @@ async function cmdCommits() {
   };
   const running = await measure('running (overview)');
   const label1 = await playbackLabel(page);
-  await page.locator('button', { hasText: /^Pause$/ }).first().click();
-  await sleep(1500);
-  const paused = await measure('paused (idle)');
-  out({ url: URL_APP, playbackAtRunning: label1, results: [running, paused], consoleIssues: logs.slice(0, 5) });
+  const results = [running];
+  if (hover) {
+    // Hover is measured while paused: a running planet moves out from under the pointer, and each
+    // enter/leave mounts or unmounts the glow, which would count as commits that are not per frame.
+    await page.locator('button', { hasText: /^Pause$/ }).first().click();
+    await sleep(1500);
+    // Offsets from the projected centre, nearest first (the projection can be a few px off the disc).
+    const OFFSETS = [];
+    for (let dx = -15; dx <= 15; dx += 3) for (let dy = -15; dy <= 15; dy += 3) OFFSETS.push([dx, dy]);
+    OFFSETS.sort((a, b) => Math.hypot(a[0], a[1]) - Math.hypot(b[0], b[1]));
+    const centre = await page.evaluate(PROJECT_PLANET, hover);
+    let hit = null;
+    for (const [dx, dy] of OFFSETS) {
+      await page.mouse.move(centre.x + dx, centre.y + dy);
+      if ((await page.evaluate(() => document.body.style.cursor)) === 'pointer') {
+        hit = [dx, dy];
+        break;
+      }
+    }
+    if (!hit) throw new Error(`pointer did not hover ${hover}`);
+    // The pointer stays still during the window, so only per-frame commits are counted.
+    const h = await measure(`hover ${hover} (paused, pointer steady)`);
+    h.cursorAfter = await page.evaluate(() => document.body.style.cursor);
+    results.push(h);
+    await page.mouse.move(1, 1);
+    await sleep(1000);
+    results.push(await measure('paused (idle)'));
+  } else {
+    await page.locator('button', { hasText: /^Pause$/ }).first().click();
+    await sleep(1500);
+    results.push(await measure('paused (idle)'));
+  }
+  out({ url: URL_APP, settleMs: settle, playbackAtRunning: label1, results, consoleIssues: logs.slice(0, 5) });
   await browser.close();
 }
 
