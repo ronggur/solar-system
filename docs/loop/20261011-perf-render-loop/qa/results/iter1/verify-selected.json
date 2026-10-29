@@ -1,0 +1,99 @@
+{
+  "sceneObjectNames": {
+    "count": 77,
+    "sample": [
+      "planet-sun",
+      "planet-group-mercury",
+      "planet-mercury",
+      "planet-group-venus",
+      "planet-venus",
+      "planet-group-earth"
+    ]
+  },
+  "tracked": [
+    "planet-jupiter",
+    "moon-io"
+  ],
+  "afterSelect": {
+    "label": "Resume",
+    "t1": {
+      "planet-jupiter": [
+        -33.5633,
+        0,
+        43.5719
+      ],
+      "moon-io": [
+        -28.0656,
+        0,
+        41.1686
+      ]
+    },
+    "t2": {
+      "planet-jupiter": [
+        -33.5633,
+        0,
+        43.5719
+      ],
+      "moon-io": [
+        -28.0656,
+        0,
+        41.1686
+      ]
+    },
+    "positionChanged": false
+  },
+  "afterResume": {
+    "label": "Pause",
+    "t1": {
+      "planet-jupiter": [
+        -33.7628,
+        0,
+        43.4175
+      ],
+      "moon-io": [
+        -27.8964,
+        0,
+        42.1581
+      ]
+    },
+    "t2": {
+      "planet-jupiter": [
+        -34.8233,
+        0,
+        42.5716
+      ],
+      "moon-io": [
+        -30.9434,
+        0,
+        47.1484
+      ]
+    },
+    "positionChanged": true
+  },
+  "switchesAriaChecked_Orbits_Sat_Moons_Follow": [
+    "true",
+    "true",
+    "true",
+    "false"
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: A preload for 'http://localhost:5174/solar-system/textures/sun.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:5174/solar-system/textures/earth_day.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:5174/solar-system/textures/earth_night.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: The resource http://localhost:5174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:5174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:5174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: The resource http://localhost:5174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:5174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.",
+    "warning: The resource http://localhost:5174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+  ]
+}

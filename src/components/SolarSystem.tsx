@@ -14,6 +14,7 @@ import { satellites } from '@/data/satellites';
 import { moons } from '@/data/moons';
 import type { PlanetData, SatelliteData, MoonData } from '@/types';
 import type { OrbitControls } from 'three-stdlib';
+import { createSceneRegistry, SceneRegistryProvider, useSceneRegistry } from '@/lib/sceneRegistry';
 
 interface SolarSystemProps {
   speedMultiplier: number;
@@ -31,7 +32,20 @@ interface SolarSystemProps {
   onCameraInteractionChange?: (interacting: boolean) => void;
 }
 
-export function SolarSystem({
+// Reused every frame by follow mode (module scope, so no per-frame allocation)
+const followWorldPosition = new THREE.Vector3();
+
+/** Owns the parent registry shared by every body in the scene (see `lib/sceneRegistry.ts`). */
+export function SolarSystem(props: SolarSystemProps) {
+  const [sceneRegistry] = useState(createSceneRegistry);
+  return (
+    <SceneRegistryProvider value={sceneRegistry}>
+      <SolarSystemContents {...props} />
+    </SceneRegistryProvider>
+  );
+}
+
+function SolarSystemContents({
   speedMultiplier,
   isPaused,
   showOrbits,
@@ -47,6 +61,7 @@ export function SolarSystem({
   onCameraInteractionChange,
 }: SolarSystemProps) {
   const { camera, scene } = useThree();
+  const sceneRegistry = useSceneRegistry();
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
   const controlsRef = useRef<OrbitControls>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -374,26 +389,25 @@ export function SolarSystem({
   // Intentionally omit selectedMoon (use id only) to avoid redundant camera animations
   }, [selectedMoon?.id, scene, handleMoonClick]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Scene name of the followed object, resolved on render so the frame loop builds no strings
+  let followTargetName: string | null = null;
+  if (selectedPlanet) {
+    followTargetName = selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`;
+  } else if (selectedSatellite) {
+    followTargetName = `satellite-${selectedSatellite.id}`;
+  } else if (selectedMoon) {
+    followTargetName = `moon-${selectedMoon.id}`;
+  }
+
   // Follow selected object (planet, satellite, or moon)
   useFrame(() => {
-    if (cameraMode !== 'follow' || isTransitioning || !controlsRef.current) return;
-
-    let targetObject: THREE.Object3D | null = null;
-    if (selectedPlanet) {
-      targetObject =
-        scene.getObjectByName(
-          selectedPlanet.id === 'sun' ? 'planet-sun' : `planet-${selectedPlanet.id}`
-        ) ?? null;
-    } else if (selectedSatellite) {
-      targetObject = scene.getObjectByName(`satellite-${selectedSatellite.id}`) ?? null;
-    } else if (selectedMoon) {
-      targetObject = scene.getObjectByName(`moon-${selectedMoon.id}`) ?? null;
+    if (cameraMode !== 'follow' || isTransitioning || !controlsRef.current || !followTargetName) {
+      return;
     }
-
+    const targetObject = sceneRegistry.get(followTargetName);
     if (targetObject) {
-      const worldPos = new THREE.Vector3();
-      targetObject.getWorldPosition(worldPos);
-      controlsRef.current.target.lerp(worldPos, 0.05);
+      targetObject.getWorldPosition(followWorldPosition);
+      controlsRef.current.target.lerp(followWorldPosition, 0.05);
     }
   });
 

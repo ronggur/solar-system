@@ -1,0 +1,113 @@
+{
+  "port": 4174,
+  "debug": false,
+  "results": [
+    {
+      "name": "select Jupiter from Object List",
+      "ok": true,
+      "detail": "info panel with Continue Exploring visible"
+    },
+    {
+      "name": "Continue Exploring closes the planet info panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "select Io (Jupiter moon) from Object List",
+      "ok": true,
+      "detail": "clicked without error"
+    },
+    {
+      "name": "select a satellite from Object List",
+      "ok": true,
+      "detail": "clicked without error (ISS or full name)"
+    },
+    {
+      "name": "Reset View button clicks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "switch count >= 3 (Orbits, Satellites, Moons, Follow)",
+      "ok": true,
+      "detail": "count=4"
+    },
+    {
+      "name": "toggle switch #1 twice restores state",
+      "ok": true,
+      "detail": "true -> true"
+    },
+    {
+      "name": "toggle switch #2 twice restores state",
+      "ok": true,
+      "detail": "true -> true"
+    },
+    {
+      "name": "toggle switch #3 twice restores state",
+      "ok": true,
+      "detail": "true -> true"
+    },
+    {
+      "name": "Follow Object switch toggles",
+      "ok": true,
+      "detail": "false -> true"
+    },
+    {
+      "name": "pause/resume label flips",
+      "ok": true,
+      "detail": "Resume / Pause"
+    },
+    {
+      "name": "help dialog opens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "help dialog closes with Escape",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors (pageerror events)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrorCount": 0,
+  "consoleWarnCount": 32,
+  "consoleMsgs": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/sun.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_day.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_night.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded",
+    "warning: The resource http://localhost:4174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intenti",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded i",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded",
+    "warning: The resource http://localhost:4174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intenti",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded i",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: GSAP target  not found. https://gsap.com",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_night.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded",
+    "warning: The resource http://localhost:4174/solar-system/textures/sun.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intenti",
+    "warning: The resource http://localhost:4174/solar-system/textures/earth_day.webp was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded i",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."
+  ]
+}

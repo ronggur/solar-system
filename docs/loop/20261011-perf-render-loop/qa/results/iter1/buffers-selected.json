@@ -1,0 +1,64 @@
+{
+  "url": "http://localhost:5174/solar-system/",
+  "scenario": "selected",
+  "note": "dev server (StrictMode): growth only",
+  "samples": [
+    {
+      "minute": 1,
+      "tSec": 60,
+      "geometries": 264,
+      "textures": 61,
+      "liveBuffers": 842,
+      "createdBuffers": 1002,
+      "deletedBuffers": 160,
+      "calls": 219
+    },
+    {
+      "minute": 2,
+      "tSec": 120,
+      "geometries": 264,
+      "textures": 61,
+      "liveBuffers": 842,
+      "createdBuffers": 1002,
+      "deletedBuffers": 160,
+      "calls": 202
+    },
+    {
+      "minute": 3,
+      "tSec": 180,
+      "geometries": 264,
+      "textures": 61,
+      "liveBuffers": 842,
+      "createdBuffers": 1002,
+      "deletedBuffers": 160,
+      "calls": 218
+    },
+    {
+      "minute": 4,
+      "tSec": 240,
+      "geometries": 264,
+      "textures": 61,
+      "liveBuffers": 842,
+      "createdBuffers": 1002,
+      "deletedBuffers": 160,
+      "calls": 207
+    },
+    {
+      "minute": 5,
+      "tSec": 300,
+      "geometries": 264,
+      "textures": 61,
+      "liveBuffers": 842,
+      "createdBuffers": 1002,
+      "deletedBuffers": 160,
+      "calls": 206
+    }
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com"
+  ]
+}

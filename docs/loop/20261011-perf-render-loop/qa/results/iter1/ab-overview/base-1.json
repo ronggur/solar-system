@@ -1,0 +1,55 @@
+{
+  "url": "http://localhost:4174/solar-system/",
+  "scenario": "overview",
+  "setup": [
+    "playback label=Pause (Pause = running)"
+  ],
+  "warmupMs": 30000,
+  "sampleMs": 30000,
+  "runs": [
+    {
+      "run": 1,
+      "frames": 515,
+      "durationMs": 30032.1,
+      "fpsAvg": 17.15,
+      "p50Ms": 50.1,
+      "p95Ms": 66.8,
+      "maxMs": 83.4,
+      "over33ms": {
+        "count": 515,
+        "pct": 100
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 225,
+        "totalMs": 12951,
+        "maxMs": 78
+      },
+      "visibility": "visible",
+      "visibilityAtStart": "visible",
+      "hiddenDuringRun": false,
+      "requestedMs": 30000,
+      "endedBy": "complete",
+      "startedAt": "2026-10-11T00:19:14.874Z",
+      "consoleIssues": 12,
+      "firstIssues": [
+        "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+        "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+        "warning: GSAP target .moon-info-panel not found. https://gsap.com"
+      ]
+    }
+  ],
+  "median": {
+    "p50Ms": 50.1,
+    "p95Ms": 66.8,
+    "maxMs": 83.4,
+    "fpsAvg": 17.15,
+    "over33msCount": 515,
+    "over33msPct": 100,
+    "longTaskCount": 225,
+    "longTaskTotalMs": 12951,
+    "frames": 515
+  },
+  "anyHidden": false,
+  "allCompleted": true
+}

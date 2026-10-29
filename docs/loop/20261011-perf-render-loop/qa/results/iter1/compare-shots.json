@@ -1,0 +1,45 @@
+{
+  "baseDir": "docs/loop/20261011-perf-render-loop/shots/base",
+  "branchDir": "docs/loop/20261011-perf-render-loop/shots/iter1/branch",
+  "noiseByScene": {
+    "overview": 2900,
+    "selected-jupiter": 1505
+  },
+  "maxNoise": 2900,
+  "rows": [
+    {
+      "pair": "base overview-1 vs base overview-2 (noise)",
+      "differentPixels": 2900,
+      "totalPixels": 1296000
+    },
+    {
+      "pair": "base selected-jupiter-1 vs base selected-jupiter-2 (noise)",
+      "differentPixels": 1505,
+      "totalPixels": 1296000
+    },
+    {
+      "pair": "branch overview-1.png vs base overview-1.png",
+      "differentPixels": 15415,
+      "totalPixels": 1296000,
+      "aboveNoise": true
+    },
+    {
+      "pair": "branch overview-2.png vs base overview-2.png",
+      "differentPixels": 15397,
+      "totalPixels": 1296000,
+      "aboveNoise": true
+    },
+    {
+      "pair": "branch selected-jupiter-1.png vs base selected-jupiter-1.png",
+      "differentPixels": 11988,
+      "totalPixels": 1296000,
+      "aboveNoise": true
+    },
+    {
+      "pair": "branch selected-jupiter-2.png vs base selected-jupiter-2.png",
+      "differentPixels": 12006,
+      "totalPixels": 1296000,
+      "aboveNoise": true
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "url": "http://localhost:4174/solar-system/",
+  "dir": "/Users/ronggur/Works/www/solar-system/docs/loop/20261011-perf-render-loop/shots/base",
+  "files": [
+    "overview-1.png",
+    "overview-2.png",
+    "selected-jupiter-1.png",
+    "selected-jupiter-2.png"
+  ],
+  "consoleIssues": [
+    "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+    "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+    "warning: GSAP target .moon-info-panel not found. https://gsap.com",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/sun.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute.",
+    "warning: A preload for 'http://localhost:4174/solar-system/textures/earth_day.webp' is found, but is not used because the request credentials mode does not match. Consider taking a look at crossorigin attribute."
+  ]
+}
