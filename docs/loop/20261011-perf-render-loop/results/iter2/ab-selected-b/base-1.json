@@ -1,0 +1,57 @@
+{
+  "url": "http://localhost:4174/solar-system/",
+  "scenario": "selected",
+  "setup": [
+    "label after selecting Jupiter=Resume (selection pauses motion)",
+    "label after Resume=Pause",
+    "switches aria-checked (Orbits, Satellites, Moons, Follow)=[\"true\",\"true\",\"true\",\"false\"]"
+  ],
+  "warmupMs": 30000,
+  "sampleMs": 30000,
+  "runs": [
+    {
+      "run": 1,
+      "frames": 305,
+      "durationMs": 30082.1,
+      "fpsAvg": 10.14,
+      "p50Ms": 100,
+      "p95Ms": 116.8,
+      "maxMs": 199.9,
+      "over33ms": {
+        "count": 300,
+        "pct": 98.36
+      },
+      "longTasks": {
+        "supported": true,
+        "count": 297,
+        "totalMs": 27067,
+        "maxMs": 189
+      },
+      "visibility": "visible",
+      "visibilityAtStart": "visible",
+      "hiddenDuringRun": false,
+      "requestedMs": 30000,
+      "endedBy": "complete",
+      "startedAt": "2026-10-29T13:41:07.055Z",
+      "consoleIssues": 12,
+      "firstIssues": [
+        "warning: GSAP target .planet-info-panel not found. https://gsap.com",
+        "warning: GSAP target .satellite-info-panel not found. https://gsap.com",
+        "warning: GSAP target .moon-info-panel not found. https://gsap.com"
+      ]
+    }
+  ],
+  "median": {
+    "p50Ms": 100,
+    "p95Ms": 116.8,
+    "maxMs": 199.9,
+    "fpsAvg": 10.14,
+    "over33msCount": 300,
+    "over33msPct": 98.36,
+    "longTaskCount": 297,
+    "longTaskTotalMs": 27067,
+    "frames": 305
+  },
+  "anyHidden": false,
+  "allCompleted": true
+}

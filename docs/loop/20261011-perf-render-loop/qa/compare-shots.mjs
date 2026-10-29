@@ -21,7 +21,8 @@ if (!PW_DIR) {
 }
 const req = createRequire(PW_DIR + '/');
 const { PNG } = req('pngjs');
-const pixelmatch = req('pixelmatch');
+const pm = req('pixelmatch');
+const pixelmatch = pm.default ?? pm;
 
 const [baseDir, branchDir, diffOut] = process.argv.slice(2);
 if (!baseDir || !branchDir) {
