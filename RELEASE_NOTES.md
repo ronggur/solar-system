@@ -44,6 +44,13 @@ tooling.
 
 ---
 
+## [1.7.1](https://github.com/ronggur/solar-system/compare/v1.7.0...v1.7.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **data:** restore "ring" wording mangled to "ring-3" ([#24](https://github.com/ronggur/solar-system/issues/24)) ([a33b7e6](https://github.com/ronggur/solar-system/commit/a33b7e676bcbb4eafa8c072f9faa246c03b63f28))
+
 ## [1.7.0](https://github.com/ronggur/solar-system/compare/v1.6.1...v1.7.0) (2026-10-10)
 
 
