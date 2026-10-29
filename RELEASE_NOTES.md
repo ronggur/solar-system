@@ -44,6 +44,13 @@ tooling.
 
 ---
 
+## [1.7.2](https://github.com/ronggur/solar-system/compare/v1.7.1...v1.7.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* **scene:** remove per-frame re-renders and trail geometry leak ([#29](https://github.com/ronggur/solar-system/issues/29)) ([26c7de5](https://github.com/ronggur/solar-system/commit/26c7de515d12c1d637d997a9f602612672d19eb8))
+
 ## [1.7.1](https://github.com/ronggur/solar-system/compare/v1.7.0...v1.7.1) (2026-10-29)
 
 
